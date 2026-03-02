@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Afiliados - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item active">Panel Principal</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-users me-3"></i>
+            Panel de Afiliados
+        </h1>
+        <p class="lead mb-0">Gestión completa de afiliados y cálculo de sueldos</p>
+    </div>
+</div>
+
+<!-- Statistics Row -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-3"></i>
+                <div class="stats-number" style="font-size: 2.5rem; font-weight: bold;">{{ total_afiliados|default:0 }}</div>
+                <div class="text-light">Total Afiliados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+            <div class="card-body text-center">
+                <i class="fas fa-user-check fa-2x mb-3"></i>
+                <div class="stats-number">{{ afiliados_activos|default:0 }}</div>
+                <div class="text-light">Activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-2x mb-3"></i>
+                <div class="stats-number">{{ con_sueldo|default:0 }}</div>
+                <div class="text-light">Con Sueldo</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card-body text-center">
+                <i class="fas fa-user-times fa-2x mb-3"></i>
+                <div class="stats-number">{{ afiliados_inactivos|default:0 }}</div>
+                <div class="text-light">Inactivos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'afiliados:afiliado_create' %}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
+                            Nuevo Afiliado
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-list fa-2x d-block mb-2"></i>
+                            Ver Lista
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-file-excel fa-2x d-block mb-2"></i>
+                            Importar Excel
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <button class="btn btn-warning btn-lg w-100" onclick="alert('Comando: python manage.py recalcular_sueldos')">
+                            <i class="fas fa-calculator fa-2x d-block mb-2"></i>
+                            Recalcular Sueldos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Features -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-database me-2"></i>
+                    Gestión de Datos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Administre la información completa de los afiliados incluyendo:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Datos personales y contacto</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Información académica</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Historial laboral</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Grado de escalafón</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Cargo actual</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>Ver Todos los Afiliados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calculator me-2"></i>
+                    Cálculo de Sueldos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Sistema automatizado que calcula sueldos basado en:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-star text-warning me-2"></i>Grado de escalafón (base)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Cargo desempeñado (% adicional)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Años de servicio (2-12%)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Nivel educativo (5-15%)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Bonificaciones especiales</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-success">
+                        <i class="fas fa-money-bill-wave me-2"></i>Ver Sueldos Calculados
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Afiliados Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if afiliados_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Cédula</th>
+                                <th>Nombre Completo</th>
+                                <th>Grado</th>
+                                <th>Cargo</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for afiliado in afiliados_recientes %}
+                            <tr>
+                                <td>{{ afiliado.cedula }}</td>
+                                <td>{{ afiliado.nombre_completo }}</td>
+                                <td>{{ afiliado.grado_escalafon|default:"-" }}</td>
+                                <td>{{ afiliado.cargo_desempenado|default:"-" }}</td>
+                                <td>
+                                    {% if afiliado.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'afiliados:afiliado_detail' afiliado.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'afiliados:afiliado_update' afiliado.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay afiliados registrados aún.</p>
+                    <a href="{% url 'afiliados:afiliado_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Primer Afiliado
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

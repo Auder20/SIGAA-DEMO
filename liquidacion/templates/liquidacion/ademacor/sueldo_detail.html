@@ -1,0 +1,164 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Detalle Sueldo
+ADEMACOR{% endblock %} {% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 text-gray-800">Detalle de Liquidación - ADEMACOR</h1>
+    <div>
+      <a
+        href="{% url 'liquidacion:sueldo_ademacor_recalcular' sueldo.pk %}"
+        class="btn btn-warning"
+      >
+        <i class="fas fa-sync-alt"></i> Recalcular
+      </a>
+      <a
+        href="{% url 'liquidacion:sueldo_ademacor_list' %}"
+        class="btn btn-secondary"
+      >
+        <i class="fas fa-arrow-left"></i> Volver
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Información del Afiliado y Período -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Información General</h6>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <th style="width: 40%">Afiliado:</th>
+              <td>{{ sueldo.afiliado_ademacor.nombre_completo }}</td>
+            </tr>
+            <tr>
+              <th>Cédula:</th>
+              <td>{{ sueldo.afiliado_ademacor.cedula }}</td>
+            </tr>
+            <tr>
+              <th>Cargo:</th>
+              <td>{{ sueldo.afiliado_ademacor.cargo_desempenado }}</td>
+            </tr>
+            <tr>
+              <th>Período:</th>
+              <td>{{ sueldo.anio }}</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen Financiero -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-success">Resumen Financiero</h6>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <th style="width: 40%">Sueldo Básico:</th>
+              <td>${{ sueldo.sueldo_basico|floatformat:2 }}</td>
+            </tr>
+            <tr>
+              <th>Total Bonificaciones:</th>
+              <td class="text-success">
+                + ${{ sueldo.total_bonificaciones|floatformat:2 }}
+              </td>
+            </tr>
+            <tr>
+              <th>Total Descuentos:</th>
+              <td class="text-danger">
+                - ${{ sueldo.total_descuentos|floatformat:2 }}
+              </td>
+            </tr>
+            <tr class="border-top">
+              <th class="h5 pt-3">Sueldo Neto:</th>
+              <td class="h5 pt-3 text-primary">
+                ${{ sueldo.sueldo_neto|floatformat:2 }}
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Bonificaciones -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-info">Bonificaciones</h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for bonif in bonificaciones %}
+                <tr>
+                  <td>{{ bonif.bonificacion.concepto }}</td>
+                  <td class="text-right">${{ bonif.valor|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="2" class="text-center">
+                    No hay bonificaciones registradas
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aportes -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-warning">
+            Aportes y Descuentos
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+              <thead>
+                <tr>
+                  <th>Concepto</th>
+                  <th>Porcentaje</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for aporte in aportes %}
+                <tr>
+                  <td>{{ aporte.nombre }}</td>
+                  <td class="text-center">{{ aporte.porcentaje }}%</td>
+                  <td class="text-right">${{ aporte.valor|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center">
+                    No hay aportes registrados
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sueldos ADEMACOR{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Liquidación de Sueldos ADEMACOR</h1>
+        <a href="{% url 'liquidacion:calcular_sueldos_ademacor_masivo' %}" class="btn btn-success">
+            <i class="fas fa-calculator"></i> Calcular Sueldos Masivamente
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <input type="text" name="search" class="form-control mr-2 mb-2" placeholder="Buscar por cédula o nombre..." value="{{ search_query }}">
+
+                <select name="anio" class="form-control mr-2 mb-2">
+                    <option value="">Año</option>
+                    {% for a in anios %}
+                    <option value="{{ a }}" {% if anio_actual == a|stringformat:"s" %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="mes" class="form-control mr-2 mb-2">
+                    <option value="">Mes</option>
+                    <option value="1" {% if mes_actual == '1' %}selected{% endif %}>Enero</option>
+                    <option value="2" {% if mes_actual == '2' %}selected{% endif %}>Febrero</option>
+                    <option value="3" {% if mes_actual == '3' %}selected{% endif %}>Marzo</option>
+                    <option value="4" {% if mes_actual == '4' %}selected{% endif %}>Abril</option>
+                    <option value="5" {% if mes_actual == '5' %}selected{% endif %}>Mayo</option>
+                    <option value="6" {% if mes_actual == '6' %}selected{% endif %}>Junio</option>
+                    <option value="7" {% if mes_actual == '7' %}selected{% endif %}>Julio</option>
+                    <option value="8" {% if mes_actual == '8' %}selected{% endif %}>Agosto</option>
+                    <option value="9" {% if mes_actual == '9' %}selected{% endif %}>Septiembre</option>
+                    <option value="10" {% if mes_actual == '10' %}selected{% endif %}>Octubre</option>
+                    <option value="11" {% if mes_actual == '11' %}selected{% endif %}>Noviembre</option>
+                    <option value="12" {% if mes_actual == '12' %}selected{% endif %}>Diciembre</option>
+                </select>
+
+                <button type="submit" class="btn btn-primary mb-2">Buscar</button>
+                <a href="{% url 'liquidacion:sueldo_ademacor_list' %}" class="btn btn-secondary mb-2 ml-2">Limpiar</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Sueldos -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Afiliado</th>
+                            <th>Año</th>
+                            <th>Mes</th>
+                            <th>Sueldo Básico</th>
+                            <th>Sueldo Neto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sueldo in sueldos %}
+                        <tr>
+                            <td>
+                                <strong>{{ sueldo.afiliado_ademacor.nombre_completo }}</strong><br>
+                                <small class="text-muted">{{ sueldo.afiliado_ademacor.cedula }}</small>
+                            </td>
+                            <td>{{ sueldo.anio }}</td>
+                            <td>Anual</td>
+                            <td>${{ sueldo.sueldo_neto|floatformat:2 }}</td>
+                            <td class="font-weight-bold text-success">${{ sueldo.sueldo_neto|floatformat:2 }}</td>
+                            <td>
+                                <a href="{% url 'liquidacion:sueldo_ademacor_detail' sueldo.pk %}" class="btn btn-info btn-sm" title="Ver Detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'liquidacion:sueldo_ademacor_recalcular' sueldo.pk %}" class="btn btn-warning btn-sm" title="Recalcular">
+                                    <i class="fas fa-sync-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No se encontraron registros de sueldos.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            {% if sueldos.has_other_pages %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if sueldos.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sueldos.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if anio_actual %}&anio={{ anio_actual }}{% endif %}{% if mes_actual %}&mes={{ mes_actual }}{% endif %}">&laquo;</a>
+                    </li>
+                    {% endif %}
+
+                    {% for i in sueldos.paginator.page_range %}
+                    {% if sueldos.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% if search_query %}&search={{ search_query }}{% endif %}{% if anio_actual %}&anio={{ anio_actual }}{% endif %}{% if mes_actual %}&mes={{ mes_actual }}{% endif %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if sueldos.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ sueldos.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if anio_actual %}&anio={{ anio_actual }}{% endif %}{% if mes_actual %}&mes={{ mes_actual }}{% endif %}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

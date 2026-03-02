@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user.username }} - Detalle Usuario - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'users:users_main' %}">Usuarios</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'users:user_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item active">{{ user.username }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-user me-2"></i>
+            {{ user.get_full_name|default:user.username }}
+        </h1>
+        <p class="text-muted mb-0">
+            <span class="badge bg-{% if user.is_active %}success{% else %}danger{% endif %} me-2">
+                {% if user.is_active %}Activo{% else %}Inactivo{% endif %}
+            </span>
+            {% if user.is_superuser %}
+            <span class="badge bg-warning text-dark me-2">Super Usuario</span>
+            {% elif user.is_staff %}
+            <span class="badge bg-info me-2">Staff</span>
+            {% endif %}
+            Último acceso: {% if user.last_login %}{{ user.last_login|date:"d/m/Y H:i" }}{% else %}Nunca{% endif %}
+        </p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        <a href="{% url 'users:user_update' user.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Editar
+        </a>
+        <a href="{% url 'users:user_delete' user.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash me-2"></i>Eliminar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Information -->
+    <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información Personal
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nombre de Usuario</label>
+                        <p class="fw-bold">{{ user.username }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Email</label>
+                        <p class="fw-bold">
+                            {% if user.email %}
+                                <a href="mailto:{{ user.email }}">{{ user.email }}</a>
+                            {% else %}
+                                <span class="text-muted">No especificado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nombres</label>
+                        <p class="fw-bold">{{ user.first_name|default:"No especificado" }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Apellidos</label>
+                        <p class="fw-bold">{{ user.last_name|default:"No especificado" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Status -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Estado de Cuenta
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if user.is_active %}check-circle text-success{% else %}times-circle text-danger{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Estado</h6>
+                                <span class="badge bg-{% if user.is_active %}success{% else %}danger{% endif %}">
+                                    {% if user.is_active %}Activo{% else %}Inactivo{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if user.is_staff %}user-tie text-info{% else %}user text-muted{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Staff</h6>
+                                <span class="badge bg-{% if user.is_staff %}info{% else %}secondary{% endif %}">
+                                    {% if user.is_staff %}Sí{% else %}No{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if user.is_superuser %}crown text-warning{% else %}user text-muted{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Super Usuario</h6>
+                                <span class="badge bg-{% if user.is_superuser %}warning text-dark{% else %}secondary{% endif %}">
+                                    {% if user.is_superuser %}Sí{% else %}No{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Actividad Reciente
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-primary"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Cuenta creada</h6>
+                            <p class="timeline-text text-muted">{{ user.date_joined|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% if user.last_login %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Último acceso</h6>
+                            <p class="timeline-text text-muted">{{ user.last_login|date:"d/m/Y H:i" }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'users:user_update' user.pk %}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit me-2"></i>Editar Usuario
+                    </a>
+                    {% if user.is_active %}
+                    <button class="btn btn-outline-secondary user-status-toggle" 
+                            data-user-id="{{ user.pk }}" 
+                            data-action="deactivate">
+                        <i class="fas fa-user-slash me-2"></i>Desactivar Usuario
+                    </button>
+                    {% else %}
+                    <button class="btn btn-outline-success user-status-toggle" 
+                            data-user-id="{{ user.pk }}" 
+                            data-action="activate">
+                        <i class="fas fa-user-check me-2"></i>Activar Usuario
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-outline-info reset-password" 
+                            data-user-id="{{ user.pk }}">
+                        <i class="fas fa-key me-2"></i>Restablecer Contraseña
+                    </button>
+                    <hr>
+                    <a href="{% url 'users:user_delete' user.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Eliminar Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-0">{{ user.date_joined|timesince }}</h4>
+                            <small class="text-muted">En el sistema</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-success mb-0">
+                            {% if user.last_login %}{{ user.last_login|timesince }}{% else %}Nunca{% endif %}
+                        </h4>
+                        <small class="text-muted">Último acceso</small>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Nivel de acceso</span>
+                        <span class="badge bg-{% if user.is_superuser %}warning text-dark{% elif user.is_staff %}info{% else %}secondary{% endif %}">
+                            {% if user.is_superuser %}Administrador{% elif user.is_staff %}Staff{% else %}Usuario{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 17px;
+    width: 2px;
+    height: calc(100% + 5px);
+    background-color: #dee2e6;
+}
+
+.timeline-title {
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
+
+.timeline-text {
+    font-size: 0.8rem;
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle user status toggle
+    document.querySelectorAll('.user-status-toggle').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            const isActivating = this.dataset.action === 'activate';
+            const actionText = isActivating ? 'activar' : 'desactivar';
+            
+            if (confirm(`¿Está seguro que desea ${actionText} este usuario?`)) {
+                fetch(`/api/users/${userId}/toggle-status/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ is_active: isActivating })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(`Usuario ${actionText}do correctamente`, 'success');
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast('Error al actualizar el estado del usuario', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error al procesar la solicitud', 'error');
+                });
+            }
+        });
+    });
+
+    // Handle password reset
+    document.querySelectorAll('.reset-password').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.dataset.userId;
+            
+            if (confirm('¿Está seguro que desea restablecer la contraseña de este usuario?')) {
+                fetch(`/api/users/${userId}/reset-password/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Contraseña restablecida. Se ha enviado un email al usuario.', 'success');
+                    } else {
+                        showToast('Error al restablecer la contraseña', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Error al procesar la solicitud', 'error');
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

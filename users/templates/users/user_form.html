@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if user %}Editar{% else %}Nuevo{% endif %} Usuario - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'users:users_main' %}">Usuarios</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'users:user_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if user %}Editar{% else %}Nuevo{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-{% if user %}edit{% else %}user-plus{% endif %} me-2"></i>
+            {% if user %}Editar Usuario{% else %}Nuevo Usuario{% endif %}
+        </h1>
+        {% if user %}
+        <p class="text-muted mb-0">Modificando información de {{ user.username }}</p>
+        {% else %}
+        <p class="text-muted mb-0">Complete la información del nuevo usuario</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        {% if user %}
+        <a href="{% url 'users:user_detail' user.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" id="userForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-user me-2"></i>
+                Información Básica
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="username" class="form-label">
+                        Nombre de Usuario <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           value="{{ user.username|default:'' }}" required
+                           placeholder="Ej: jperez">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el nombre de usuario.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ user.email|default:'' }}" required
+                           placeholder="usuario@ejemplo.com">
+                    <div class="invalid-feedback">
+                        Por favor ingrese un email válido.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="first_name" class="form-label">Nombres</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" 
+                           value="{{ user.first_name|default:'' }}"
+                           placeholder="Nombres del usuario">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="last_name" class="form-label">Apellidos</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" 
+                           value="{{ user.last_name|default:'' }}"
+                           placeholder="Apellidos del usuario">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-shield-alt me-2"></i>
+                Información de Seguridad
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="password" class="form-label">
+                        {% if user %}Nueva Contraseña{% else %}Contraseña <span class="text-danger">*</span>{% endif %}
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           {% if not user %}required{% endif %}
+                           placeholder="{% if user %}Dejar en blanco para mantener actual{% else %}Contraseña segura{% endif %}">
+                    {% if not user %}
+                    <div class="invalid-feedback">
+                        Por favor ingrese una contraseña.
+                    </div>
+                    {% endif %}
+                    <small class="form-text text-muted">
+                        La contraseña debe tener al menos 8 caracteres.
+                    </small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="password_confirm" class="form-label">
+                        {% if user %}Confirmar Nueva Contraseña{% else %}Confirmar Contraseña <span class="text-danger">*</span>{% endif %}
+                    </label>
+                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" 
+                           {% if not user %}required{% endif %}
+                           placeholder="Repetir contraseña">
+                    {% if not user %}
+                    <div class="invalid-feedback">
+                        Por favor confirme la contraseña.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Permissions -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-key me-2"></i>
+                Permisos y Roles
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
+                               {% if user.is_active or not user %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            <strong>Usuario Activo</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Solo los usuarios activos pueden acceder al sistema
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_staff" name="is_staff" 
+                               {% if user.is_staff %}checked{% endif %}>
+                        <label class="form-check-label" for="is_staff">
+                            <strong>Staff</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Puede acceder al panel de administración
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_superuser" name="is_superuser" 
+                               {% if user.is_superuser %}checked{% endif %}>
+                        <label class="form-check-label" for="is_superuser">
+                            <strong>Super Usuario</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Tiene todos los permisos del sistema
+                    </small>
+                </div>
+            </div>
+            
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Importante:</strong> Los cambios en permisos afectan inmediatamente el acceso del usuario al sistema.
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'users:user_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {% if user %}Actualizar{% else %}Crear{% endif %} Usuario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize form validation
+    validateForm('userForm');
+    
+    // Password confirmation validation
+    document.getElementById('password_confirm').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirm = this.value;
+        
+        if (password !== confirm) {
+            this.setCustomValidity('Las contraseñas no coinciden');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Username validation
+    document.getElementById('username').addEventListener('input', function() {
+        const username = this.value;
+        const regex = /^[a-zA-Z0-9_]+$/;
+        
+        if (!regex.test(username)) {
+            this.setCustomValidity('Solo se permiten letras, números y guiones bajos');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+{% endblock %}

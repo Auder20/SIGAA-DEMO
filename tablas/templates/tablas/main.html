@@ -1,0 +1,301 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Tablas - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item active">Panel Principal</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-table me-3"></i>
+            Panel de Tablas
+        </h1>
+        <p class="lead mb-0">Gestión de tablas salariales y sistema de bonificaciones</p>
+    </div>
+</div>
+
+<!-- Statistics Row -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);">
+            <div class="card-body text-center">
+                <i class="fas fa-table fa-2x mb-3"></i>
+                <div class="stats-number" style="font-size: 2.5rem; font-weight: bold;">{{ total_tablas|default:0 }}</div>
+                <div class="text-light">Tablas Salariales</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+            <div class="card-body text-center">
+                <i class="fas fa-coins fa-2x mb-3"></i>
+                <div class="stats-number">{{ total_bonificaciones|default:0 }}</div>
+                <div class="text-light">Bonificaciones</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+            <div class="card-body text-center">
+                <i class="fas fa-layer-group fa-2x mb-3"></i>
+                <div class="stats-number">{{ grados_configurados|default:14 }}</div>
+                <div class="text-light">Grados Configurados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                <div class="stats-number">{{ año_actual|default:"2024" }}</div>
+                <div class="text-light">Año Vigente</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'tablas:tabla_create' %}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-plus fa-2x d-block mb-2"></i>
+                            Nueva Tabla Salarial
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'tablas:tabla_list' %}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-list fa-2x d-block mb-2"></i>
+                            Ver Tablas
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'tablas:bonificacion_create' %}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-gift fa-2x d-block mb-2"></i>
+                            Nueva Bonificación
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-warning btn-lg w-100">
+                            <i class="fas fa-coins fa-2x d-block mb-2"></i>
+                            Ver Bonificaciones
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Features -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Tablas Salariales
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Configure y gestione las escalas salariales por grado de escalafón:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Grados del 1 al 14 de escalafón</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Sueldos base por cada grado</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Vigencia por año fiscal</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Histórico de cambios salariales</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Integración con cálculo automático</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'tablas:tabla_list' %}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>Ver Todas las Tablas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-gift me-2"></i>
+                    Sistema de Bonificaciones
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Administre bonificaciones adicionales y descuentos especiales:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-star text-warning me-2"></i>Bonificaciones por cargo (Rector, Decano, Director)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Bonificaciones por antigüedad (2-12%)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Bonificaciones por nivel educativo</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Bonificaciones especiales personalizadas</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Descuentos y deducciones</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-success">
+                        <i class="fas fa-coins me-2"></i>Ver Todas las Bonificaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Salary Calculation Integration -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Integración con Sistema de Cálculo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calculator text-primary me-2"></i>Cálculo Automático de Sueldos:</h6>
+                        <ul class="list-unstyled ms-3">
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Sueldo Base:</strong> Determinado por grado de escalafón</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Bonificaciones por Cargo:</strong> Rector 25%, Decano 15%, Director 10%</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Bonificación por Antigüedad:</strong> 2% a 12% según años de servicio</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Bonificación Educativa:</strong> Doctorado 15%, Maestría 10%, Especialización 5%</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-sync text-info me-2"></i>Actualización y Mantenimiento:</h6>
+                        <ul class="list-unstyled ms-3">
+                            <li><i class="fas fa-calendar text-info me-2"></i>Tablas salariales actualizables por año</li>
+                            <li><i class="fas fa-history text-info me-2"></i>Historial de cambios y versiones</li>
+                            <li><i class="fas fa-chart-line text-info me-2"></i>Impacto automático en cálculos existentes</li>
+                            <li><i class="fas fa-database text-info me-2"></i>Respaldo y recuperación de configuraciones</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Importante:</strong> 
+                    Los cambios en las tablas salariales afectan automáticamente el cálculo de sueldos. Use el comando 
+                    <code>python manage.py recalcular_sueldos</code> después de actualizar las tablas.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Configuraciones Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if configuraciones_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Descripción</th>
+                                <th>Valor/Porcentaje</th>
+                                <th>Fecha Modificación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for config in configuraciones_recientes %}
+                            <tr>
+                                <td>
+                                    {% if config.tipo == 'tabla' %}
+                                        <span class="badge bg-primary">Tabla Salarial</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Bonificación</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <strong>{{ config.nombre }}</strong>
+                                    <br><small class="text-muted">{{ config.descripcion|truncatechars:50 }}</small>
+                                </td>
+                                <td>
+                                    {% if config.tipo == 'tabla' %}
+                                        <span class="text-primary fw-bold">${{ config.valor|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="text-success fw-bold">{{ config.porcentaje }}%</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ config.fecha_modificacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if config.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if config.tipo == 'tabla' %}
+                                        <a href="{% url 'tablas:tabla_detail' config.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'tablas:tabla_update' config.pk %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'tablas:bonificacion_detail' config.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'tablas:bonificacion_update' config.pk %}" class="btn btn-sm btn-outline-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-table fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay tablas salariales configuradas aún.</p>
+                    <div>
+                        <a href="{% url 'tablas:tabla_create' %}" class="btn btn-primary me-2">
+                            <i class="fas fa-plus me-2"></i>Crear Primera Tabla
+                        </a>
+                        <a href="{% url 'tablas:bonificacion_create' %}" class="btn btn-success">
+                            <i class="fas fa-gift me-2"></i>Crear Primera Bonificación
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

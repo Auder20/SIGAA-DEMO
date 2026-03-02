@@ -1,0 +1,168 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('SIGAA - Administración') }}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    :root {
+        --primary-color: #FF6B35;
+        --primary-dark: #E55A2B;
+        --primary-light: #FF8A5B;
+        --secondary-color: #6c757d;
+        --light-color: #f8f9fa;
+        --dark-color: #212529;
+        --orange-gradient: linear-gradient(135deg, #FF6B35, #FF8A5B);
+        --orange-light: #FFF4F0;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
+        --shadow-md: 0 4px 8px rgba(0,0,0,.1);
+    }
+
+    #header {
+        background: var(--orange-gradient) !important;
+        color: white !important;
+        height: 60px;
+    }
+
+    #header a:link, #header a:visited {
+        color: white !important;
+    }
+
+    #branding h1 {
+        font-weight: 700;
+    }
+
+    .module h2, .module caption, .inline-group h2 {
+        background: var(--orange-gradient) !important;
+        color: white !important;
+    }
+
+    .button, input[type=submit], input[type=button], .submit-row input, a.button {
+        background: var(--primary-color);
+        border: none;
+        border-radius: 6px;
+        color: white !important;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+    }
+
+    .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
+        background: var(--primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    }
+
+    .button.default, input[type=submit].default, .submit-row input.default {
+        background: var(--primary-dark) !important;
+    }
+
+    .button.default:hover, input[type=submit].default:hover, .submit-row input.default:hover {
+        background: #c94d24 !important;
+    }
+
+    .dashboard #content {
+        width: 100%;
+    }
+
+    .dashboard .module table th {
+        width: 100%;
+    }
+
+    .dashboard .module table td {
+        white-space: nowrap;
+    }
+
+    .dashboard .module table td a {
+        display: block;
+        padding: 8px;
+        color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .dashboard .module table td a:hover {
+        background: var(--orange-light);
+        text-decoration: none;
+        padding-left: 15px;
+    }
+
+    .module {
+        border: none;
+        border-radius: 8px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+
+    .module caption {
+        padding: 12px 15px;
+        font-weight: 600;
+    }
+
+    #changelist table thead th {
+        background: #f5f5f5;
+    }
+
+    #changelist table tbody tr:hover {
+        background-color: var(--orange-light);
+    }
+
+    .paginator {
+        background: #f8f9fa !important;
+        border-top: 1px solid #eee;
+    }
+
+    .object-tools a:link, .object-tools a:visited {
+        background: var(--primary-color);
+        border-radius: 6px;
+        color: white !important;
+        padding: 6px 12px;
+        transition: all 0.3s ease;
+    }
+
+    .object-tools a:hover {
+        background: var(--primary-dark) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+    }
+
+    .selector-changelist .selector-available h2,
+    .selector-changelist .selector-chosen h2 {
+        background: var(--orange-gradient) !important;
+        color: white !important;
+    }
+
+    .selector .selector-available, .selector .selector-chosen {
+        width: 48%;
+    }
+
+    /* Estilos para el formulario de login */
+    .login .form-row {
+        padding: 10px 0;
+    }
+
+    .login .form-row label {
+        padding-right: 10px;
+        width: 150px;
+    }
+
+    .login .submit-row {
+        padding: 15px 0 0 0;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <img src="{% static 'img/logotipo1.png' %}" height="40" style="margin-right: 10px; vertical-align: middle;" />
+        SIGAA - Administración
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<a href="/" class="button" style="margin-left: 20px; color: white !important; text-decoration: none;">
+    <i class="fas fa-home"></i> Ir al sitio
+</a>
+{% endblock %}

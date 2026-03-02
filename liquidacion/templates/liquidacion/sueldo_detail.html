@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block title %}Detalle de Sueldo - {{ sueldo.afiliado.nombre_completo }} - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+  <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'liquidacion:sueldo_list' %}">Sueldos</a>
+</li>
+<li class="breadcrumb-item active">{{ sueldo.afiliado.nombre_completo }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">
+      <i class="fas fa-money-bill-wave me-2"></i>
+      Detalle de Sueldo
+    </h1>
+    <p class="text-muted mb-0">
+      {{ sueldo.afiliado.nombre_completo }} - {{ sueldo.afiliado.cedula }}
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user me-2"></i>
+          Información del Afiliado
+        </h5>
+      </div>
+      <div class="card-body">
+        <table class="table table-borderless">
+          <tr>
+            <td class="fw-bold">Nombre Completo:</td>
+            <td>{{ sueldo.afiliado.nombre_completo }}</td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Cédula:</td>
+            <td>{{ sueldo.afiliado.cedula }}</td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Grado:</td>
+            <td><span class="badge bg-primary">{{ sueldo.afiliado.grado_escalafon }}</span></td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Sueldo Base:</td>
+            <td class="text-info fw-bold">${{ sueldo.sueldo_base|floatformat:0 }}</td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Bonificaciones:</td>
+            <td class="text-success">${{ sueldo.bonificaciones|floatformat:0 }}</td>
+          </tr>
+          <tr>
+            <td class="fw-bold">Sueldo Neto:</td>
+            <td class="text-primary fw-bold h4">${{ sueldo.sueldo_neto|floatformat:0 }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

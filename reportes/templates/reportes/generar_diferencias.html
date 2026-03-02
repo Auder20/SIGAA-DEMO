@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Generar Reporte de Diferencias - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reportes_main' %}">Reportes</a>
+</li>
+<li class="breadcrumb-item active">Diferencias Secretaría vs ADEMACOR</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Reporte de Diferencias: Secretaría vs ADEMACOR
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Este reporte compara los datos entre los sistemas de Secretaría y ADEMACOR,
+                    mostrando afiliados que están en un sistema pero no en el otro, así como
+                    aquellos que aparecen en ambos sistemas.
+                </p>
+
+                <p class="text-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Nota:</strong> Se generará un reporte consolidado con todos los municipios.
+                    Podrás aplicar filtros por municipio directamente en el reporte generado.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Generar Reporte Consolidado
+                        </button>
+                        <a href="{% url 'reportes:reportes_main' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

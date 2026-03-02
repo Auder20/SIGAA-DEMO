@@ -1,0 +1,128 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_modify %}
+
+{% block extrahead %}
+{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+<style>
+    .form-row {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .form-row:last-child {
+        border-bottom: none;
+    }
+    .help {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+    .submit-row {
+        padding: 20px 0;
+        text-align: right;
+    }
+    .submit-row input[type="submit"] {
+        margin-left: 10px;
+    }
+    .parametros-seleccionados {
+        margin: 15px 0;
+        padding: 10px;
+        background: #f8f8f8;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    .parametro-item {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .parametro-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label='liquidacion' %}">Liquidación</a>
+&rsaquo; <a href="{% url 'admin:liquidacion_parametroliquidacion_changelist' %}">Parámetros de Liquidación</a>
+&rsaquo; Aplicar Aumento a Múltiples Parámetros
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Aplicar Aumento Porcentual a Múltiples Parámetros</h1>
+    
+    <div class="parametros-seleccionados">
+        <h3>Parámetros seleccionados ({{ parametros|length }}):</h3>
+        {% for param in parametros %}
+        <div class="parametro-item">
+            <strong>{{ param.nombre }}</strong> ({{ param.codigo }}) - 
+            Valor actual: {% if param.valor_numerico is not None %}{{ param.valor_numerico }}{% else %}{{ param.valor_texto }}{% endif %}
+            {% if param.anio_vigencia %}(Vigencia: {{ param.anio_vigencia }}){% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <form method="post" id="aumento_form" novalidate>
+        {% csrf_token %}
+        
+        <!-- Incluimos los IDs de los parámetros seleccionados -->
+        {% for param in parametros %}
+        <input type="hidden" name="{{ action_checkbox_name }}" value="{{ param.id }}" />
+        {% endfor %}
+        
+        <input type="hidden" name="action" value="aplicar_aumento" />
+        <input type="hidden" name="post" value="yes" />
+        
+        <div class="form-row">
+            {{ form.porcentaje.label_tag }}
+            <div class="field-box">
+                {{ form.porcentaje }}
+                {% if form.porcentaje.help_text %}
+                <div class="help">{{ form.porcentaje.help_text|safe }}</div>
+                {% endif %}
+                {{ form.porcentaje.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            {{ form.anio.label_tag }}
+            <div class="field-box">
+                {{ form.anio }}
+                {% if form.anio.help_text %}
+                <div class="help">{{ form.anio.help_text|safe }}</div>
+                {% endif %}
+                {{ form.anio.errors }}
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="field-box">
+                {{ form.crear_nuevo }}
+                <label for="{{ form.crear_nuevo.id_for_label }}" style="display: inline;">
+                    {{ form.crear_nuevo.label }}
+                </label>
+                {% if form.crear_nuevo.help_text %}
+                <div class="help">{{ form.crear_nuevo.help_text|safe }}</div>
+                {% endif %}
+                {{ form.crear_nuevo.errors }}
+            </div>
+        </div>
+        
+        <div class="submit-row">
+            <a href="{% url 'admin:liquidacion_parametroliquidacion_changelist' %}" class="button cancel-link">{% trans 'Cancel' %}</a>
+            <input type="submit" value="Aplicar Aumento" class="default" name="aplicar">
+        </div>
+    </form>
+</div>
+{% endblock %}

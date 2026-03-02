@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block title %}Eliminar Aporte - {{ object.nombre }} - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:aporte_list' %}">Aportes</a>
+</li>
+<li class="breadcrumb-item active">Eliminar Aporte</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1 text-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Eliminar Aporte
+        </h1>
+        <p class="text-muted mb-0">Confirmar eliminación del aporte {{ object.nombre }}</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+    </div>
+</div>
+
+<!-- Warning Alert -->
+<div class="alert alert-danger border-danger" role="alert">
+    <div class="d-flex align-items-center mb-3">
+        <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+        <div>
+            <h5 class="alert-heading mb-1">¡Atención! Esta acción es irreversible</h5>
+            <p class="mb-0">Está a punto de eliminar permanentemente este aporte del sistema.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Aporte Details -->
+<div class="row mb-4">
+    <div class="col-lg-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Detalles del Aporte a Eliminar
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Tipo de Aporte:</td>
+                                <td>
+                                    {% if object.nombre == 'ADEMACOR' %}
+                                        <span class="badge bg-danger"><i class="fas fa-heart me-1"></i>{{ object.nombre }}</span>
+                                    {% elif object.nombre == 'FAMECOR' %}
+                                        <span class="badge bg-primary"><i class="fas fa-users me-1"></i>{{ object.nombre }}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="fas fa-percentage me-1"></i>{{ object.nombre }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Valor:</td>
+                                <td class="text-success fw-bold h5">{{ object.valor|cop }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Porcentaje:</td>
+                                <td><span class="badge bg-info">{{ object.porcentaje }}%</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td class="fw-bold">Afiliado:</td>
+                                <td>{{ object.sueldo.afiliado.nombre_completo }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Cédula:</td>
+                                <td>{{ object.sueldo.afiliado.cedula }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Año:</td>
+                                <td>
+                                    {% if object.sueldo.anio %}
+                                        <span class="badge bg-primary">{{ object.sueldo.anio }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Consequences Card -->
+    <div class="col-lg-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Consecuencias
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        <small>Se eliminará el registro del aporte</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-chart-bar text-warning me-2"></i>
+                        <small>Se afectarán los totales de aportes</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-history text-info me-2"></i>
+                        <small>No se podrá recuperar la información</small>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-file-alt text-secondary me-2"></i>
+                        <small>Puede afectar reportes históricos</small>
+                    </li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <small>
+                        <strong>Sugerencia:</strong> Considere editar en lugar de eliminar.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alternative Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Acciones Alternativas
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">
+                    Antes de eliminar este aporte, considere estas alternativas:
+                </p>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                            <h6>Editar Aporte</h6>
+                            <p class="small text-muted">Modifique el porcentaje o tipo de aporte</p>
+                            <a href="{% url 'liquidacion:aporte_update' object.pk %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Editar
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-eye fa-2x text-primary mb-2"></i>
+                            <h6>Ver Detalles</h6>
+                            <p class="small text-muted">Revise toda la información del aporte</p>
+                            <a href="{% url 'liquidacion:aporte_detail' object.pk %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Ver
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-center">
+                            <i class="fas fa-calculator fa-2x text-success mb-2"></i>
+                            <h6>Recalcular</h6>
+                            <p class="small text-muted">Actualice el valor basado en el sueldo actual</p>
+                            <button class="btn btn-success btn-sm" onclick="recalcularAporte()">
+                                <i class="fas fa-sync-alt me-1"></i>Recalcular
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Form -->
+<div class="row">
+    <div class="col-12">
+        <div class="card border-danger">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0 text-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Confirmación de Eliminación
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="deleteForm">
+                    {% csrf_token %}
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="confirmDelete" required>
+                        <label class="form-check-label fw-bold text-danger" for="confirmDelete">
+                            Confirmo que deseo eliminar permanentemente este aporte
+                        </label>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        
+                        <button type="submit" class="btn btn-danger" id="confirmButton" disabled>
+                            <i class="fas fa-trash me-2"></i>
+                            Eliminar Aporte Definitivamente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enable/disable confirm button based on checkbox
+document.getElementById('confirmDelete').addEventListener('change', function() {
+    document.getElementById('confirmButton').disabled = !this.checked;
+});
+
+// Form submission confirmation
+document.getElementById('deleteForm').addEventListener('submit', function(e) {
+    if (!document.getElementById('confirmDelete').checked) {
+        e.preventDefault();
+        alert('Debe confirmar la eliminación marcando la casilla');
+        return;
+    }
+    
+    if (!confirm('¿Está completamente seguro de eliminar este aporte? Esta acción NO se puede deshacer.')) {
+        e.preventDefault();
+    }
+});
+
+function recalcularAporte() {
+    alert('Funcionalidad de recálculo - implementar en el backend');
+}
+</script>
+{% endblock %}

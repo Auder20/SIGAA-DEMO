@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Afiliados - SIGAA{% endblock %}
+
+{% block extra_css %}
+<style>
+.table th {
+    border-top: none;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    border-top: 1px solid rgba(0,0,0,.05);
+}
+
+    .table tbody tr:hover {
+        background-color: rgba(0,123,255,.05);
+    }
+
+    .badge {
+        font-size: 0.75rem;
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .pagination-lg .page-link {
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    /* Estilos mejorados para botones de acciones en lote */
+    .bulk-action-btn {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bulk-action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+
+    .bulk-action-btn:hover::before {
+        left: 100%;
+    }
+
+    .bulk-action-btn:hover {
+        transform: scale(1.02);
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        border-color: #adb5bd;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    .bulk-action-btn .fas {
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .bulk-action-btn:hover .fas {
+        transform: scale(1.1);
+        color: inherit !important;
+    }
+
+    .bulk-action-btn .fw-bold {
+        color: #495057;
+        transition: color 0.3s ease;
+        font-weight: 700;
+    }
+
+    .bulk-action-btn:hover .fw-bold {
+        color: #343a40;
+        font-weight: 800;
+    }
+
+    .bulk-action-btn small {
+        color: #6c757d;
+        transition: color 0.3s ease;
+        font-size: 0.75rem;
+    }
+
+    .bulk-action-btn:hover small {
+        color: #495057;
+    }
+
+    /* Responsividad para acciones en lote */
+    @media (max-width: 1200px) {
+        .bulk-action-btn {
+            width: 180px !important;
+            height: 90px !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .d-flex.gap-3 {
+            flex-wrap: wrap;
+        }
+        .bulk-action-btn {
+            width: 160px !important;
+            height: 85px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Enfocar automáticamente el campo de búsqueda al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search');
+        if (searchInput) {
+            searchInput.focus();
+            searchInput.select();
+
+            // Mover el cursor al final del texto
+            const len = searchInput.value.length;
+            searchInput.setSelectionRange(len, len);
+        }
+
+        // Manejar el envío del formulario para mantener los parámetros de búsqueda
+        const searchForm = document.getElementById('searchForm');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                const searchValue = searchInput.value.trim();
+                if (!searchValue) {
+                    // Si el campo de búsqueda está vacío, redirigir a la lista sin parámetros de búsqueda
+                    e.preventDefault();
+                    window.location.href = '{% url "afiliados:afiliado_list" %}';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item active">Lista</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-users me-2"></i>
+            Lista de Afiliados
+        </h1>
+        <p class="text-muted mb-0">{{ total_afiliados|default:0 }} afiliado{{ total_afiliados|pluralize }} registrado{{ total_afiliados|pluralize }}</p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'afiliados:afiliado_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nuevo Afiliado
+        </a>
+        <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-success">
+            <i class="fas fa-file-excel me-2"></i>Importar Excel
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3" id="searchForm">
+            <div class="col-md-10">
+                <label for="search" class="form-label">Buscar</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Nombre, cédula o municipio..." value="{{ search_query|default:'' }}"
+                           aria-label="Buscar afiliados">
+                    {% if search_query %}
+                    <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-secondary" type="button" title="Limpiar búsqueda">
+                        <i class="fas fa-times"></i>
+                    </a>
+                    {% endif %}
+                    <button class="btn btn-outline-primary" type="submit" title="Buscar">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Afiliados Table -->
+<div class="card">
+    <div class="card-body">
+        {% if afiliados %}
+        {% if search_query %}
+        <div class="alert alert-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            Se encontraron {{ afiliados.paginator.count }} resultado{{ afiliados.paginator.count|pluralize }} para "{{ search_query }}"
+            <a href="{% url 'afiliados:afiliado_list' %}" class="float-end">
+                <small>Limpiar búsqueda</small>
+            </a>
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+            <table class="table table-hover table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="px-4 py-3 fw-bold">Cédula</th>
+                        <th class="px-4 py-3 fw-bold">Nombre Completo</th>
+                        <th class="px-4 py-3 fw-bold">Municipio</th>
+                        <th class="px-4 py-3 fw-bold text-center">Estado</th>
+                        <th class="px-4 py-3 fw-bold text-center" width="150">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for afiliado in afiliados %}
+                    <tr class="align-middle">
+                        <td class="px-4 py-3">
+                            <strong class="text-primary">{{ afiliado.cedula|default:"-" }}</strong>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div>
+                                <strong class="d-block mb-1">{{ afiliado.nombre_completo }}</strong>
+                                {% if afiliado.email %}
+                                <small class="text-muted">{{ afiliado.email }}</small>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if afiliado.municipio %}
+                                <span class="badge bg-light text-dark px-2 py-1">{{ afiliado.municipio }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            {% if afiliado.activo %}
+                                <span class="badge bg-success px-3 py-2">
+                                    <i class="fas fa-check me-1"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger px-3 py-2">
+                                    <i class="fas fa-times me-1"></i>Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'afiliados:afiliado_detail' afiliado.pk %}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   data-bs-toggle="tooltip" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'afiliados:afiliado_update' afiliado.pk %}"
+                                   class="btn btn-sm btn-outline-warning"
+                                   data-bs-toggle="tooltip" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'afiliados:afiliado_delete' afiliado.pk %}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   data-bs-toggle="tooltip" title="Eliminar"
+                                   onclick="return confirmDelete('¿Eliminar a {{ afiliado.nombre_completo }}?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Paginación de afiliados" class="mt-4">
+            <div class="d-flex justify-content-center">
+                <ul class="pagination pagination-lg">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link fw-bold">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No hay afiliados registrados</h4>
+                <p class="text-muted">
+                    {% if request.GET.search or request.GET.estado %}
+                        No se encontraron afiliados que coincidan con los filtros aplicados.
+                        <br><a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-link">Limpiar filtros</a>
+                    {% else %}
+                        Comience agregando su primer afiliado al sistema.
+                    {% endif %}
+                </p>
+            </div>
+            <div class="d-flex justify-content-center gap-2">
+                <a href="{% url 'afiliados:afiliado_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nuevo Afiliado
+                </a>
+                <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-success">
+                    <i class="fas fa-file-excel me-2"></i>Importar desde Excel
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bulk Actions (if needed) -->
+{% if afiliados %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h6 class="card-title mb-0">
+            <i class="fas fa-tasks me-2"></i>
+            Acciones en Lote
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <button class="btn btn-outline-success bulk-action-btn text-center"
+                    style="width: 200px; height: 100px;"
+                    onclick="alert('Comando: python manage.py recalcular_sueldos')">
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-calculator fa-2x mb-2 text-success"></i>
+                    <span class="fw-bold">Recalcular</span>
+                    <small class="text-muted">Todos los Sueldos</small>
+                </div>
+            </button>
+            <button class="btn btn-outline-info bulk-action-btn text-center"
+                    style="width: 200px; height: 100px;"
+                    onclick="window.location.href='/afiliados/exportar/';">
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-download fa-2x mb-2 text-info"></i>
+                    <span class="fw-bold">Exportar</span>
+                    <small class="text-muted">a Excel</small>
+                </div>
+            </button>
+            <button class="btn btn-outline-primary bulk-action-btn text-center"
+                    style="width: 200px; height: 100px;"
+                    onclick="window.location.href='/afiliados/exportar-pdf/';">
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-file-pdf fa-2x mb-2 text-primary"></i>
+                    <span class="fw-bold">Exportar</span>
+                    <small class="text-muted">a PDF</small>
+                </div>
+            </button>
+            <button class="btn btn-outline-warning bulk-action-btn text-center"
+                    style="width: 200px; height: 100px;"
+                    onclick="alert('Funcionalidad de activación masiva próximamente')">
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-user-check fa-2x mb-2 text-warning"></i>
+                    <span class="fw-bold">Activar</span>
+                    <small class="text-muted">Seleccionados</small>
+                </div>
+            </button>
+            <button class="btn btn-outline-secondary bulk-action-btn text-center"
+                    style="width: 200px; height: 100px;"
+                    onclick="alert('Funcionalidad de desactivación masiva próximamente')">
+                <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="fas fa-user-times fa-2x mb-2 text-secondary"></i>
+                    <span class="fw-bold">Desactivar</span>
+                    <small class="text-muted">Seleccionados</small>
+                </div>
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

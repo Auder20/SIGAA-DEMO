@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle del Reporte - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reportes_main' %}">Reportes</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reporte_list' %}">Lista de Reportes</a>
+</li>
+<li class="breadcrumb-item active">Reporte #{{ reporte.id }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">
+                <i class="fas fa-file-alt me-2"></i>
+                Reporte #{{ reporte.id }}
+            </h1>
+            <p class="text-muted mb-0">
+                <span class="badge bg-info me-2">{{ reporte.get_tipo_display|default:reporte.tipo|capfirst }}</span>
+                Generado el: {{ reporte.fecha_generado|date:"d/m/Y H:i"|default:"Fecha no disponible" }}
+                {% if reporte.generado_por %}
+                    por {{ reporte.generado_por.get_full_name|default:reporte.generado_por.username }}
+                {% endif %}
+            </p>
+        </div>
+        <div class="action-buttons">
+            <a href="{% url 'reportes:reporte_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+            {% if reporte.archivo %}
+            <a href="{{ reporte.archivo.url }}" class="btn btn-primary" download>
+                <i class="fas fa-download me-2"></i>Descargar
+            </a>
+            {% endif %}
+            <a href="{% url 'reportes:reporte_delete' reporte.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash me-2"></i>Eliminar
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Report Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Información del Reporte
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Tipo de Reporte</label>
+                            <p class="fw-bold">{{ reporte.get_tipo_display|default:reporte.tipo|capfirst }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Fecha de Generación</label>
+                            <p class="fw-bold">{{ reporte.fecha_generado|date:"d/m/Y H:i"|default:"No especificada" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if reporte.generado_por %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Generado por</label>
+                        <p class="fw-bold">
+                            {{ reporte.generado_por.get_full_name|default:reporte.generado_por.username }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if reporte.descripcion %}
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Descripción</label>
+                        <p class="fw-bold">{{ reporte.descripcion }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">
+                            <i class="fas fa-file me-2"></i>Archivos del Reporte
+                        </h6>
+
+                        {% if reporte.archivo_excel %}
+                        <div class="d-flex align-items-center p-3 border rounded mb-2">
+                            <i class="fas fa-file-excel fa-3x text-success me-3"></i>
+                            <div>
+                                <p class="mb-1 fw-bold">
+                                    <a href="{{ reporte.archivo_excel.url }}" class="text-decoration-none" download>
+                                        {{ reporte.get_nombre_archivo_excel|default:reporte.archivo_excel.name|slice:"-50:" }}
+                                    </a>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <i class="far fa-clock me-1"></i> {{ reporte.fecha_generado|timesince }} atrás
+                                </p>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ reporte.archivo_excel.url }}" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="fas fa-download me-1"></i> Descargar Excel
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if reporte.archivo_pdf %}
+                        <div class="d-flex align-items-center p-3 border rounded mb-2">
+                            <i class="fas fa-file-pdf fa-3x text-danger me-3"></i>
+                            <div>
+                                <p class="mb-1 fw-bold">
+                                    <a href="{{ reporte.archivo_pdf.url }}" class="text-decoration-none" download>
+                                        {{ reporte.get_nombre_archivo_pdf|default:reporte.archivo_pdf.name|slice:"-50:" }}
+                                    </a>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <i class="far fa-clock me-1"></i> {{ reporte.fecha_generado|timesince }} atrás
+                                </p>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ reporte.archivo_pdf.url }}" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="fas fa-download me-1"></i> Descargar PDF
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if not reporte.archivo_excel and not reporte.archivo_pdf and reporte.archivo %}
+                        <div class="d-flex align-items-center p-3 border rounded">
+                            <i class="fas fa-file fa-3x text-primary me-3"></i>
+                            <div>
+                                <p class="mb-1 fw-bold">
+                                    <a href="{{ reporte.archivo.url }}" class="text-decoration-none" download>
+                                        {{ reporte.archivo.name|slice:"-50:" }}
+                                    </a>
+                                </p>
+                                <p class="text-muted small mb-0">
+                                    <i class="far fa-clock me-1"></i> {{ reporte.fecha_generado|timesince }} atrás
+                                </p>
+                            </div>
+                            <div class="ms-auto">
+                                <a href="{{ reporte.archivo.url }}" class="btn btn-sm btn-outline-primary" download>
+                                    <i class="fas fa-download me-1"></i> Descargar
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if not reporte.archivo_excel and not reporte.archivo_pdf and not reporte.archivo %}
+                        <div class="alert alert-warning mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            No hay archivos adjuntos para este reporte.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    /* General Styles */
+    .action-buttons .btn {
+        margin-left: 0.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .action-buttons .btn {
+            margin-top: 0.5rem;
+            margin-left: 0;
+            width: 100%;
+        }
+    }
+    
+    /* Card Styles */
+    .card {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        border: none;
+        margin-bottom: 1.5rem;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.25rem;
+    }
+    
+    .card-title {
+        color: #2c3e50;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
+    }
+    
+    /* Text Styles */
+    .text-muted {
+        color: #6c757d !important;
+    }
+    
+    .fw-bold {
+        color: #2c3e50;
+        font-weight: 500;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+    }
+    
+    /* Button Styles */
+    .btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.9rem;
+        border-radius: 0.375rem;
+        transition: all 0.2s;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-primary {
+        background-color: #FF6B35;
+        border-color: #FF6B35;
+    }
+    
+    .btn-primary:hover, .btn-primary:focus {
+        background-color: #e65a2b;
+        border-color: #e65a2b;
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+    }
+    
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #dee2e6;
+    }
+    
+    .btn-outline-secondary:hover, .btn-outline-secondary:focus {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: #6c757d;
+        box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.1);
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .btn-danger:hover, .btn-danger:focus {
+        background-color: #bb2d3b;
+        border-color: #b02a37;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    /* List Group */
+    .list-group-item {
+        padding: 0.75rem 1.25rem;
+        border-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .list-group-item-action:hover {
+        background-color: #f8f9fa;
+    }
+    
+    /* Alert */
+    .alert {
+        border: none;
+        border-radius: 0.5rem;
+        padding: 1rem 1.25rem;
+    }
+    
+    /* File Preview */
+    .file-preview {
+        border: 1px dashed #dee2e6;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    
+    .file-preview i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 576px) {
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            margin: 0;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Add any necessary JavaScript here
+        showToast('Reporte duplicado correctamente', 'success');
+    
+</script>
+{% endblock %}

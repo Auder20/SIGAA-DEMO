@@ -1,0 +1,198 @@
+"""
+Django settings for sigaa project.
+
+Configurado para MySQL + DRF + apps SIGAA.
+"""
+
+from pathlib import Path
+import os
+from decouple import config
+
+# Paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Seguridad
+SECRET_KEY = config("SECRET_KEY", default="unsafe-secret-key")
+DEBUG = config("DEBUG", default=True, cast=bool)
+ALLOWED_HOSTS = ["*"]
+
+# Aplicaciones instaladas
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+
+    # Terceros
+    'rest_framework',
+    'django.contrib.humanize',
+
+    # Apps locales
+    'core',
+    'users',
+    'afiliados',
+    'tablas',
+    'liquidacion',
+    'reportes',
+    'custom_admin',
+]
+
+MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+ROOT_URLCONF = 'sigaa.urls'
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',
+            ],
+            'builtins': [
+                'django.templatetags.static',
+            ],
+        },
+    },
+]
+
+WSGI_APPLICATION = 'sigaa.wsgi.application'
+
+# Base de datos (MySQL)
+DATABASES = {
+    'default': {
+        'ENGINE': 'core.backends.mysql',
+        'NAME': config("DB_NAME"),
+        'USER': config("DB_USER"),
+        'PASSWORD': config("DB_PASSWORD"),
+        'HOST': config("DB_HOST", default="108.167.133.18"),
+        'PORT': config("DB_PORT", default=3306),
+        "CONN_MAX_AGE": 300, # Conexiones más largas para evitar timeouts
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+            "charset": "utf8mb4",
+            "connect_timeout": 60,
+        },
+    }
+}
+
+# Para producción, descomenta y configura las siguientes líneas:
+# import os
+# if os.getenv('DJANGO_SETTINGS_MODULE') == 'sigaa.settings_production':
+#     DATABASES['default'].update({
+#         'HOST': os.getenv('DB_HOST', 'localhost'),
+#         'NAME': os.getenv('DB_NAME'),
+#         'USER': os.getenv('DB_USER'),
+#         'PASSWORD': os.getenv('DB_PASSWORD'),
+#     })
+
+# Modelo de usuario personalizado
+AUTH_USER_MODEL = 'users.User'
+
+# Validadores de contraseñas
+AUTH_PASSWORD_VALIDATORS = [
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
+]
+
+# Internacionalización
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Bogota'
+USE_I18N = True
+USE_TZ = True
+
+# Configuración de autenticación
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'users:login'
+
+# Configuración de correo electrónico (para restablecimiento de contraseña)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo
+# Descomenta y configura para producción:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.tudominio.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'tu@email.com'
+# EMAIL_HOST_PASSWORD = 'tu_contraseña'
+# DEFAULT_FROM_EMAIL = 'SIGAA <noreply@tudominio.com>'
+
+# Configuración de sesión
+SESSION_COOKIE_AGE = 1209600  # 2 semanas en segundos
+SESSION_SAVE_EVERY_REQUEST = True
+
+# Configuración de autenticación
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Archivos estáticos
+
+# URL base para los archivos estáticos
+STATIC_HOST = os.environ.get('RAILWAY_STATIC_URL', '')
+
+STATIC_URL = STATIC_HOST + '/static/'
+
+
+# Directorio donde se recopilarán los archivos estáticos para producción
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Directorios adicionales de archivos estáticos
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'img'),
+]
+
+# Almacenamiento comprimido y con manifest para WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Configuración para archivos de medios (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Configuración de búsqueda de archivos estáticos
+STATICFILES_FINDERS = [
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+]
+
+# Clave primaria por defecto
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Caché por defecto (Local Memory para desarrollo). Configura Redis en producción.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'sigaa-cache'
+    }
+}
+
+# Configuración básica de DRF
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
+    ],
+}

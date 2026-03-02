@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block title %}Totales de Aportes - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:aporte_list' %}">Aportes</a>
+</li>
+<li class="breadcrumb-item active">Totales</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="fas fa-chart-bar me-2"></i>
+            Totales de Aportes
+        </h1>
+        <p class="text-muted mb-0">Resumen consolidado de todos los aportes registrados</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'liquidacion:liquidacion_main' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver al Menú
+        </a>
+        <button class="btn btn-outline-secondary" onclick="exportarReporte()">
+            <i class="fas fa-download me-2"></i>Exportar
+        </button>
+        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-primary">
+            <i class="fas fa-list me-2"></i>Ver Lista
+        </a>
+    </div>
+</div>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-heart fa-3x mb-3"></i>
+                <h2 class="mb-1">{{ resumen.ADEMACOR|default:0|cop }}</h2>
+                <h5 class="mb-0">ADEMACOR</h5>
+                <small>Aportes de Salud</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h2 class="mb-1">{{ resumen.FAMECOR|default:0|cop }}</h2>
+                <h5 class="mb-0">FAMECOR</h5>
+                <small>Aportes Familiares</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-plus fa-3x mb-3"></i>
+                <h2 class="mb-1">{{ resumen.OTROS|default:0|cop }}</h2>
+                <h5 class="mb-0">OTROS</h5>
+                <small>Aportes Adicionales</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calculator fa-3x mb-3"></i>
+                <h2 class="mb-1">{{ total_general|cop }}</h2>
+                <h5 class="mb-0">TOTAL</h5>
+                <small>Todos los Aportes</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Breakdown -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-table me-2"></i>
+                    Desglose Detallado
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tipo de Aporte</th>
+                                <th>Descripción</th>
+                                <th class="text-end">Total</th>
+                                <th class="text-center">Porcentaje</th>
+                                <th class="text-center">Afiliados</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-heart text-danger me-2"></i>
+                                        <strong>ADEMACOR</strong>
+                                    </div>
+                                </td>
+                                <td>Aportes para servicios de salud</td>
+                                <td class="text-end fw-bold text-primary">{{ resumen.ADEMACOR|default:0|cop }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-primary">{{ porcentaje_ademacor|floatformat:1|default:"0" }}%</span>
+                                </td>
+                                <td class="text-center">{{ count_ademacor|default:0 }}</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-users text-success me-2"></i>
+                                        <strong>FAMECOR</strong>
+                                    </div>
+                                </td>
+                                <td>Aportes para beneficios familiares</td>
+                                <td class="text-end fw-bold text-success">{{ resumen.FAMECOR|default:0|cop }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-success">{{ porcentaje_FAMECOR|floatformat:1|default:"0" }}%</span>
+                                </td>
+                                <td class="text-center">{{ count_FAMECOR|default:0 }}</td>
+                            </tr>
+                            {% if resumen.OTROS > 0 %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-plus text-warning me-2"></i>
+                                        <strong>OTROS</strong>
+                                    </div>
+                                </td>
+                                <td>Aportes adicionales y especiales</td>
+                                <td class="text-end fw-bold text-warning">{{ resumen.OTROS|default:0|cop }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning text-dark">{{ porcentaje_otros|floatformat:1|default:"0" }}%</span>
+                                </td>
+                                <td class="text-center">{{ count_otros|default:0 }}</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                        <tfoot class="table-primary">
+                            <tr>
+                                <th colspan="2">
+                                    <i class="fas fa-calculator me-2"></i>
+                                    <strong>TOTAL GENERAL</strong>
+                                </th>
+                                <th class="text-end">
+                                    <h5 class="mb-0 text-primary">{{ total_general|cop }}</h5>
+                                </th>
+                                <th class="text-center">
+                                    <span class="badge bg-primary">100%</span>
+                                </th>
+                                <th class="text-center">{{ total_afiliados|default:0 }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Panel -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h6 class="text-muted">Promedio por Afiliado</h6>
+                    <h4 class="text-primary">{{ promedio_por_afiliado|cop|default:"$0" }}</h4>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted">Aporte Más Alto</h6>
+                    <h4 class="text-success">{{ aporte_mas_alto|cop|default:"$0" }}</h4>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted">Total de Registros</h6>
+                    <h4 class="text-info">{{ total_registros|default:0 }}</h4>
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="text-muted">Última Actualización</h6>
+                    <p class="text-muted">{{ ultima_actualizacion|date:"d/m/Y H:i"|default:"No disponible" }}</p>
+                </div>
+
+                <hr>
+
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="actualizarTotales()">
+                        <i class="fas fa-sync me-2"></i>Actualizar Totales
+                    </button>
+                    <button class="btn btn-outline-success" onclick="generarReporte()">
+                        <i class="fas fa-file-alt me-2"></i>Generar Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Period Filter -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-filter me-2"></i>
+                    Filtrar por Período
+                </h6>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <div class="mb-3">
+                        <label for="anio" class="form-label">Año</label>
+                        <select class="form-select" id="anio" name="anio">
+                            <option value="">Todos los años</option>
+                            {% for year in years_available %}
+                                <option value="{{ year }}" {% if request.GET.anio == year|stringformat:"s" %}selected{% endif %}>
+                                    {{ year }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mes" class="form-label">Mes</label>
+                        <select class="form-select" id="mes" name="mes">
+                            <option value="">Todos los meses</option>
+                            {% for month in months_available %}
+                                <option value="{{ month.0 }}" {% if request.GET.mes == month.0|stringformat:"s" %}selected{% endif %}>
+                                    {{ month.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-2"></i>Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historical Trend (if data available) -->
+{% if tendencia_historica %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Tendencia Histórica
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Período</th>
+                                <th>ADEMACOR</th>
+                                <th>FAMECOR</th>
+                                <th>Total</th>
+                                <th>Variación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for periodo in tendencia_historica %}
+                            <tr>
+                                <td>{{ periodo.periodo }}</td>
+                                <td>{{ periodo.ademacor|cop }}</td>
+                                <td>{{ periodo.FAMECOR|cop }}</td>
+                                <td class="fw-bold">{{ periodo.total|cop }}</td>
+                                <td>
+                                    {% if periodo.variacion > 0 %}
+                                        <span class="text-success">
+                                            <i class="fas fa-arrow-up"></i> +{{ periodo.variacion|floatformat:1 }}%
+                                        </span>
+                                    {% elif periodo.variacion < 0 %}
+                                        <span class="text-danger">
+                                            <i class="fas fa-arrow-down"></i> {{ periodo.variacion|floatformat:1 }}%
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function exportarReporte() {
+    alert('Funcionalidad de exportación - implementar en el backend');
+}
+
+function actualizarTotales() {
+    if (confirm('¿Recalcular todos los totales de aportes?')) {
+        alert('Funcionalidad de actualización - implementar en el backend');
+        // Aquí se implementaría la lógica para recalcular totales
+    }
+}
+
+function generarReporte() {
+    alert('Funcionalidad de generación de reportes - implementar en el backend');
+}
+</script>
+{% endblock %}

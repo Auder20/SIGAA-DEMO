@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Aportes - {{ reporte.get_nombre_mes }} {{ reporte.anio }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+            @bottom-center {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 10px;
+                color: #666;
+            }
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #FF6B35;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            color: #FF6B35;
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .header h2 {
+            color: #666;
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            font-weight: normal;
+        }
+        
+        .resumen-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .resumen-table th,
+        .resumen-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .resumen-table th {
+            background-color: #FF6B35;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .resumen-table .total-row {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        .resumen-table .text-right {
+            text-align: right;
+        }
+        
+        .resumen-table .text-center {
+            text-align: center;
+        }
+        
+        .section-title {
+            color: #FF6B35;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 30px 0 15px 0;
+            border-bottom: 1px solid #FF6B35;
+            padding-bottom: 5px;
+        }
+        
+        .detalles-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 10px;
+        }
+        
+        .detalles-table th,
+        .detalles-table td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+        
+        .detalles-table th {
+            background-color: #FF6B35;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .metadatos {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+        
+        .metadatos p {
+            margin: 5px 0;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .no-break {
+            page-break-inside: avoid;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>SIGAA - Sistema de Gestión y Análisis de Aportes</h1>
+        <h2>Reporte de Totales de Aportes - {{ reporte.get_nombre_mes }} {{ reporte.anio }}</h2>
+    </div>
+
+    <!-- Resumen -->
+    <table class="resumen-table">
+        <thead>
+            <tr>
+                <th>Concepto</th>
+                <th class="text-right">Valor Total</th>
+                <th class="text-center">Cantidad</th>
+                <th class="text-right">Porcentaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ADEMACOR</td>
+                <td class="text-right">${{ reporte.total_ademacor|floatformat:2 }}</td>
+                <td class="text-center">{{ reporte.cantidad_aportes_ademacor }}</td>
+                <td class="text-right">{{ reporte.get_porcentaje_ademacor|floatformat:1 }}%</td>
+            </tr>
+            <tr>
+                <td>FAMECOR</td>
+                <td class="text-right">${{ reporte.total_famecor|floatformat:2 }}</td>
+                <td class="text-center">{{ reporte.cantidad_aportes_famecor }}</td>
+                <td class="text-right">{{ reporte.get_porcentaje_famecor|floatformat:1 }}%</td>
+            </tr>
+            <tr class="total-row">
+                <td>TOTAL GENERAL</td>
+                <td class="text-right">${{ reporte.total_general|floatformat:2 }}</td>
+                <td class="text-center">{{ reporte.cantidad_aportes_ademacor|add:reporte.cantidad_aportes_famecor }}</td>
+                <td class="text-right">100.0%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Detalles ADEMACOR -->
+    {% if detalles_ademacor %}
+        <div class="no-break">
+            <h3 class="section-title">Detalles de Aportes ADEMACOR</h3>
+            <table class="detalles-table">
+                <thead>
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Nombre Completo</th>
+                        <th>Cargo</th>
+                        <th class="text-right">Sueldo Neto</th>
+                        <th class="text-right">Valor Aporte</th>
+                        <th class="text-center">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in detalles_ademacor %}
+                        <tr>
+                            <td>{{ detalle.cedula }}</td>
+                            <td>{{ detalle.nombre_completo }}</td>
+                            <td>{{ detalle.cargo|default:'-' }}</td>
+                            <td class="text-right">${{ detalle.sueldo_neto|floatformat:2 }}</td>
+                            <td class="text-right">${{ detalle.aporte_valor|floatformat:2 }}</td>
+                            <td class="text-center">{{ detalle.aporte_porcentaje|floatformat:2 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #f8f9fa;">
+                        <td colspan="4">TOTAL ADEMACOR</td>
+                        <td class="text-right">${{ reporte.total_ademacor|floatformat:2 }}</td>
+                        <td class="text-center">{{ reporte.cantidad_aportes_ademacor }} aportes</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    {% endif %}
+
+    <!-- Detalles FAMECOR -->
+    {% if detalles_famecor %}
+        {% if detalles_ademacor %}
+            <div class="page-break">
+        {% endif %}
+        <div class="no-break">
+            <h3 class="section-title">Detalles de Aportes FAMECOR</h3>
+            <table class="detalles-table">
+                <thead>
+                    <tr>
+                        <th>Cédula</th>
+                        <th>Nombre Completo</th>
+                        <th>Cargo</th>
+                        <th class="text-right">Sueldo Neto</th>
+                        <th class="text-right">Valor Aporte</th>
+                        <th class="text-center">Porcentaje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detalle in detalles_famecor %}
+                        <tr>
+                            <td>{{ detalle.cedula }}</td>
+                            <td>{{ detalle.nombre_completo }}</td>
+                            <td>{{ detalle.cargo|default:'-' }}</td>
+                            <td class="text-right">${{ detalle.sueldo_neto|floatformat:2 }}</td>
+                            <td class="text-right">${{ detalle.aporte_valor|floatformat:2 }}</td>
+                            <td class="text-center">{{ detalle.aporte_porcentaje|floatformat:2 }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #f8f9fa;">
+                        <td colspan="4">TOTAL FAMECOR</td>
+                        <td class="text-right">${{ reporte.total_famecor|floatformat:2 }}</td>
+                        <td class="text-center">{{ reporte.cantidad_aportes_famecor }} aportes</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        {% if detalles_ademacor %}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    <!-- Metadatos -->
+    <div class="metadatos">
+        <p><strong>Período:</strong> {{ reporte.get_nombre_mes }} {{ reporte.anio }}</p>
+        <p><strong>Fecha de Generación:</strong> {{ reporte.fecha_calculo|date:"d/m/Y H:i:s" }}</p>
+        <p><strong>Generado por:</strong> {{ reporte.calculado_por|default:'Sistema' }}</p>
+        <p><strong>Cantidad de Afiliados:</strong> {{ reporte.cantidad_afiliados }}</p>
+        <p><strong>Total ADEMACOR:</strong> ${{ reporte.total_ademacor|floatformat:2 }}</p>
+        <p><strong>Total FAMECOR:</strong> ${{ reporte.total_famecor|floatformat:2 }}</p>
+        <p><strong>Total General:</strong> ${{ reporte.total_general|floatformat:2 }}</p>
+    </div>
+</body>
+</html>

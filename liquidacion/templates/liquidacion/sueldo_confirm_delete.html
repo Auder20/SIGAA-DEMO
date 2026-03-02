@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Sueldo - {{ object.afiliado.nombre_completo }} - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:sueldo_list' %}">Sueldos</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:sueldo_detail' object.pk %}">{{ object.afiliado.nombre_completo }}</a>
+</li>
+<li class="breadcrumb-item active">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<!-- Warning Header -->
+<div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+    <div>
+        <h4 class="alert-heading mb-1">¡Confirmar Eliminación!</h4>
+        <p class="mb-0">Esta acción no se puede deshacer. El sueldo será eliminado permanentemente.</p>
+    </div>
+</div>
+
+<!-- Sueldo Information Card -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-trash me-2"></i>
+                    Eliminar Sueldo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-money-bill-wave fa-4x text-muted mb-3"></i>
+                    <h4>¿Está seguro de eliminar este sueldo?</h4>
+                    <p class="text-muted">Esta acción eliminará permanentemente el registro de sueldo.</p>
+                </div>
+
+                <!-- Sueldo Details -->
+                <div class="card bg-light mb-4">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información del Sueldo a Eliminar
+                        </h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-bold">Afiliado:</td>
+                                        <td>{{ object.afiliado.nombre_completo }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Cédula:</td>
+                                        <td>{{ object.afiliado.cedula }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Grado:</td>
+                                        <td>
+                                            {% if object.afiliado.grado_escalafon %}
+                                                <span class="badge bg-primary">{{ object.afiliado.grado_escalafon }}</span>
+                                            {% else %}
+                                                <span class="text-muted">No especificado</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-bold">Sueldo Base:</td>
+                                        <td class="text-info">${{ object.sueldo_base|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Bonificaciones:</td>
+                                        <td class="text-success">${{ object.bonificaciones|floatformat:0 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold">Sueldo Neto:</td>
+                                        <td class="text-primary fw-bold">${{ object.sueldo_neto|floatformat:0 }}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <table class="table table-borderless table-sm">
+                                    <tr>
+                                        <td class="fw-bold">Fecha de Cálculo:</td>
+                                        <td>{{ object.fecha_calculo|date:"d/m/Y H:i" }}</td>
+                                    </tr>
+                                    {% if object.descuentos > 0 %}
+                                    <tr>
+                                        <td class="fw-bold">Descuentos:</td>
+                                        <td class="text-danger">${{ object.descuentos|floatformat:0 }}</td>
+                                    </tr>
+                                    {% endif %}
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Consequences Warning -->
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Consecuencias de la eliminación:
+                    </h6>
+                    <ul class="mb-0">
+                        <li>Se perderá el registro completo del sueldo calculado</li>
+                        <li>Se eliminará el historial de bonificaciones y descuentos</li>
+                        <li>Los aportes asociados pueden verse afectados</li>
+                        <li>Esta acción no se puede deshacer</li>
+                    </ul>
+                </div>
+
+                <!-- Confirmation Form -->
+                <form method="post" class="text-center">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'liquidacion:sueldo_detail' object.pk %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger btn-lg" 
+                                onclick="return confirm('¿Está completamente seguro? Esta acción NO se puede deshacer.')">
+                            <i class="fas fa-trash me-2"></i>
+                            Sí, Eliminar Sueldo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alternative Actions -->
+<div class="row justify-content-center mt-4">
+    <div class="col-lg-8">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    ¿Busca otra opción?
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">En lugar de eliminar, considere estas alternativas:</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'liquidacion:sueldo_update' object.pk %}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit me-2"></i>Editar Sueldo
+                    </a>
+                    <button class="btn btn-outline-success" onclick="recalcularSueldo()">
+                        <i class="fas fa-sync me-2"></i>Recalcular
+                    </button>
+                    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-list me-2"></i>Ver Todos los Sueldos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function recalcularSueldo() {
+    if (confirm('¿Recalcular este sueldo en lugar de eliminarlo?')) {
+        alert('Funcionalidad de recálculo - implementar en el backend');
+        // Aquí se implementaría la lógica de recálculo
+    }
+}
+</script>
+{% endblock %}

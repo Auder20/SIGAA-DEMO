@@ -1,0 +1,1358 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static humanize %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* ============================================
+       VARIABLES GLOBALES - Paleta ADEMACOR
+       ============================================ */
+    :root {
+        --primary-color: #FF6B35;
+        --primary-hover: #E55A2B;
+        --primary-light: #FF8A5B;
+        --primary-ultralight: #FFF4F0;
+        --success-color: #2ecc71;
+        --success-light: #d5f4e6;
+        --danger-color: #e74c3c;
+        --danger-light: #fadbd8;
+        --warning-color: #f39c12;
+        --info-color: #3498db;
+        --light-gray: #f8f9fa;
+        --medium-gray: #e0e0e0;
+        --dark-gray: #6c757d;
+        --border-color: #dee2e6;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --orange-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8A5B 100%);
+        --transition-fast: all 0.2s ease;
+        --transition-medium: all 0.3s ease;
+    }
+
+    body {
+        background-color: var(--light-gray);
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #content-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* BREADCRUMBS */
+    .breadcrumbs {
+        background: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .breadcrumbs a {
+        color: var(--dark-gray);
+        text-decoration: none;
+        transition: var(--transition-fast);
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--primary-color);
+    }
+
+    .breadcrumbs a::before {
+        content: '›';
+        margin: 0 0.5rem;
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .breadcrumbs a:first-child::before {
+        content: '';
+        margin: 0;
+    }
+
+    /* MODULE CONTAINER */
+    .module {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    /* PAGE HEADER */
+    .page-header {
+        background: var(--orange-gradient);
+        padding: 2rem;
+        margin: 0;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-title i {
+        font-size: 1.3em;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0.5rem 0 0 2.5rem;
+        font-size: 0.95rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* WIZARD STEPS */
+    .wizard-steps {
+        display: flex;
+        justify-content: space-between;
+        padding: 2rem 2rem 1rem;
+        background: linear-gradient(to bottom, var(--primary-ultralight), white);
+        border-bottom: 1px solid var(--border-color);
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .wizard-step {
+        flex: 1;
+        min-width: 150px;
+        text-align: center;
+        position: relative;
+        padding: 1rem;
+        border-radius: 10px;
+        transition: var(--transition-fast);
+    }
+
+    .wizard-step.active {
+        background: white;
+        box-shadow: var(--shadow-sm);
+        transform: scale(1.05);
+    }
+
+    .wizard-step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--medium-gray);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: var(--transition-fast);
+    }
+
+    .wizard-step.active .wizard-step-number {
+        background: var(--orange-gradient);
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    .wizard-step.completed .wizard-step-number {
+        background: var(--success-color);
+    }
+
+    .wizard-step.completed .wizard-step-number::after {
+        content: '\f00c';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    .wizard-step-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--dark-gray);
+    }
+
+    .wizard-step.active .wizard-step-label {
+        color: var(--primary-color);
+    }
+
+    /* FORM CONTAINER */
+    .form-container {
+        padding: 2rem;
+    }
+
+    /* STEP SECTIONS */
+    .step-section {
+        display: none;
+        animation: fadeIn 0.4s ease-out;
+    }
+
+    .step-section.active {
+        display: block;
+    }
+
+    /* FORM GROUPS */
+    .form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+    .form-label i {
+        color: var(--primary-color);
+    }
+
+    .form-label .required {
+        color: var(--danger-color);
+        margin-left: 0.25rem;
+    }
+
+    .form-control {
+        display: block;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        transition: var(--transition-fast);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15);
+        outline: none;
+        transform: translateY(-2px);
+    }
+
+    .form-control.is-valid {
+        border-color: var(--success-color);
+        background: var(--success-light);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger-color);
+        background: var(--danger-light);
+        animation: shake 0.4s ease;
+    }
+
+    /* HELP TEXT */
+    .help {
+        color: var(--dark-gray);
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .help i {
+        color: var(--info-color);
+    }
+
+    /* SALARY TABLE */
+    .salary-table-container {
+        background: linear-gradient(to bottom, white, #fafafa);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .salary-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1rem;
+        box-shadow: var(--shadow-sm);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .salary-table thead th {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.8px;
+        position: relative;
+    }
+
+    .salary-table thead th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--orange-gradient);
+    }
+
+    .salary-table tbody tr {
+        transition: var(--transition-fast);
+        background: white;
+    }
+
+    .salary-table tbody tr:hover {
+        background: linear-gradient(90deg, 
+            rgba(255, 107, 53, 0.03), 
+            rgba(255, 138, 91, 0.05), 
+            rgba(255, 107, 53, 0.03));
+        transform: scale(1.005);
+    }
+
+    .salary-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+
+    .salary-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .salary-table td:first-child {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.05rem;
+    }
+
+    .salary-table input {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        border: 2px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: var(--transition-fast);
+    }
+
+    .salary-table input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+        outline: none;
+    }
+
+    .salary-table .calculated-cell {
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-left: 3px solid var(--info-color);
+        font-weight: 600;
+    }
+
+    .salary-table .total-cell {
+        color: var(--primary-color);
+        font-size: 1.05rem;
+    }
+
+    /* STATISTICS CARDS */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem;
+        margin: 1.5rem 0;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.25rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        border-left: 4px solid;
+        transition: var(--transition-fast);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--success-color); }
+    .stat-card.info { border-left-color: var(--info-color); }
+
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--dark-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: var(--orange-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* ALERTS */
+    .alert {
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: slideDown 0.4s ease-out;
+    }
+
+    .alert-danger {
+        background: var(--danger-light);
+        border-left-color: var(--danger-color);
+        color: #721c24;
+    }
+
+    .alert-success {
+        background: var(--success-light);
+        border-left-color: var(--success-color);
+        color: #155724;
+    }
+
+    .alert-info {
+        background: #d6eaf8;
+        border-left-color: var(--info-color);
+        color: #0c5460;
+    }
+
+    .alert i {
+        font-size: 1.5rem;
+    }
+
+    /* BUTTONS */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-fast);
+        border: 2px solid transparent;
+        font-size: 0.95rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn i {
+        font-size: 1em;
+    }
+
+    .btn-primary {
+        background: var(--orange-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(46, 204, 113, 0.4);
+    }
+
+    .btn-outline-secondary {
+        background: white;
+        color: var(--dark-gray);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--light-gray);
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    /* FORM ACTIONS */
+    .form-actions {
+        background: linear-gradient(to right, #f8f9fa, #e9ecef);
+        padding: 1.75rem 2rem;
+        margin: 2rem -2rem -2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        border-top: 3px solid var(--border-color);
+    }
+
+    .form-actions-left, .form-actions-right {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    /* ERROR LIST */
+    .errorlist {
+        color: var(--danger-color);
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        font-size: 0.85rem;
+    }
+
+    .errorlist li {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .errorlist li::before {
+        content: '\f071';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+    }
+
+    /* LOADING OVERLAY */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 2.5rem 3.5rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid var(--light-gray);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        #content-main { padding: 1rem; }
+        .page-header { padding: 1.5rem; }
+        .page-title { font-size: 1.4rem; }
+        .wizard-steps { padding: 1rem; }
+        .wizard-step { min-width: 100%; }
+        .form-container { padding: 1.5rem; }
+        .form-actions { flex-direction: column; align-items: stretch; }
+        .form-actions-left, .form-actions-right { width: 100%; flex-direction: column; }
+        .btn { width: 100%; }
+        .salary-table { font-size: 0.85rem; }
+        .salary-table th, .salary-table td { padding: 0.75rem 0.5rem; }
+    }
+
+    /* DARK MODE */
+    @media (prefers-color-scheme: dark) {
+        body { background-color: #1a1a1a; color: #e0e0e0; }
+        .module, .breadcrumbs { background: #2a2a2a; }
+        .form-control { background: #333; color: #e0e0e0; border-color: #404040; }
+        .salary-table tbody tr { background: #2a2a2a; }
+        .salary-table td { color: #e0e0e0; border-bottom-color: #404040; }
+        .btn-outline-secondary { background: #2a2a2a; color: #e0e0e0; }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}"><i class="fas fa-home"></i> {% trans 'Inicio' %}</a>
+    <a href="{% url 'admin:app_list' app_label='liquidacion' %}"><i class="fas fa-calculator"></i> Liquidación</a>
+    <a href="{% url 'liquidacion:tablasalarial_list' %}"><i class="fas fa-table"></i> Tablas Salariales</a>
+    <span style="color: var(--primary-color); font-weight: 600;"><i class="fas fa-plus-circle"></i> {{ title }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-plus-circle"></i>
+                {{ title }}
+            </h1>
+            <p class="page-subtitle">Complete los datos para crear una nueva tabla salarial anual</p>
+        </div>
+
+        <!-- Wizard Steps -->
+        <div class="wizard-steps">
+            <div class="wizard-step active" data-step="1">
+                <div class="wizard-step-number">1</div>
+                <div class="wizard-step-label">Año y Config</div>
+            </div>
+            <div class="wizard-step" data-step="2">
+                <div class="wizard-step-number">2</div>
+                <div class="wizard-step-label">Salarios</div>
+            </div>
+            <div class="wizard-step" data-step="3">
+                <div class="wizard-step-number">3</div>
+                <div class="wizard-step-label">Revisión</div>
+            </div>
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger" style="margin: 2rem;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                {% if form.errors|length == 1 %}
+                    <strong>Por favor, corrija el error a continuación.</strong>
+                {% else %}
+                    <strong>Por favor, corrija los {{ form.errors|length }} errores a continuación.</strong>
+                {% endif %}
+                {{ form.non_field_errors }}
+            </div>
+        </div>
+        {% endif %}
+
+        <form method="post" id="tablasalarial_form" novalidate>
+            {% csrf_token %}
+            
+            <div class="form-container">
+                <!-- Step 1: Configuración Básica -->
+                <div class="step-section active" data-step="1">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-cog"></i> Configuración Básica
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="id_anio">
+                            <i class="fas fa-calendar-alt"></i>
+                            Año de la Tabla Salarial
+                            <span class="required">*</span>
+                        </label>
+                        <input type="number" 
+                               name="anio" 
+                               id="id_anio" 
+                               class="form-control" 
+                               min="2020" 
+                               max="2100" 
+                               placeholder="Ej: 2025" 
+                               required>
+                        <div class="help">
+                            <i class="fas fa-info-circle"></i>
+                            Ingrese el año para el cual se aplicará esta tabla salarial
+                        </div>
+                        {% if form.anio.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.anio.errors %}<li>{{ error }}</li>{% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="id_num_grados">
+                            <i class="fas fa-list-ol"></i>
+                            Número de Grados
+                            <span class="required">*</span>
+                        </label>
+                        <input type="number" 
+                               name="num_grados" 
+                               id="id_num_grados" 
+                               class="form-control" 
+                               min="1" 
+                               max="20" 
+                               value="10" 
+                               placeholder="Ej: 10">
+                        <div class="help">
+                            <i class="fas fa-info-circle"></i>
+                            ¿Cuántos grados salariales desea crear? (Rango: 1-20)
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-lightbulb"></i>
+                        <div>
+                            <strong>Consejo:</strong> La mayoría de organizaciones utilizan entre 8 y 12 grados salariales.
+                            Puede ajustar este número según la estructura de su organización.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Salarios por Grado -->
+                <div class="step-section" data-step="2">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-money-bill-wave"></i> Salarios por Grado
+                    </h3>
+
+                    <div class="stats-grid">
+                        <div class="stat-card primary">
+                            <div class="stat-label"><i class="fas fa-hashtag"></i> Total Grados</div>
+                            <div class="stat-value" id="totalGrados">0</div>
+                        </div>
+                        <div class="stat-card success">
+                            <div class="stat-label"><i class="fas fa-coins"></i> Promedio</div>
+                            <div class="stat-value" id="avgSalary">Gs. 0</div>
+                        </div>
+                        <div class="stat-card info">
+                            <div class="stat-label"><i class="fas fa-chart-line"></i> Máximo</div>
+                            <div class="stat-value" id="maxSalary">Gs. 0</div>
+                        </div>
+                    </div>
+
+                    <div class="salary-table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h4 style="margin: 0; color: #2c3e50;">
+                                <i class="fas fa-table"></i> Tabla de Salarios
+                            </h4>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="autoFillBtn">
+                                <i class="fas fa-magic"></i> Auto-completar
+                            </button>
+                        </div>
+
+                        <table class="salary-table" id="salaryTable">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-graduation-cap"></i> Grado</th>
+                                    <th><i class="fas fa-money-bill-wave"></i> Salario Base</th>
+                                    <th><i class="fas fa-chart-bar"></i> Aumento (5%/grado)</th>
+                                    <th><i class="fas fa-coins"></i> Sueldo Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salaryTableBody">
+                                <!-- Se llenará dinámicamente con JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Step 3: Revisión Final -->
+                <div class="step-section" data-step="3">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-check-circle"></i> Revisión y Confirmación
+                    </h3>
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-thumbs-up"></i>
+                        <div>
+                            <strong>¡Casi listo!</strong> Revise los datos antes de guardar. Puede volver atrás para hacer cambios si es necesario.
+                        </div>
+                    </div>
+
+                    <div id="reviewSummary" style="background: white; padding: 1.5rem; border-radius: 10px; box-shadow: var(--shadow-sm);">
+                        <!-- Se llenará dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <div class="form-actions-left">
+                    <button type="button" class="btn btn-outline-secondary" id="prevBtn" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> Anterior
+                    </button>
+                </div>
+                <div class="form-actions-right">
+                    <a href="{% url 'liquidacion:tablasalarial_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="button" class="btn btn-primary" id="nextBtn">
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;">
+                        <i class="fas fa-save"></i> Guardar Tabla
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p style="font-size: 1.1rem; font-weight: 600; margin: 0;">Creando tabla salarial...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+// ============================================
+// CONFIGURACIÓN GLOBAL
+// ============================================
+const CONFIG = {
+    AUMENTO_POR_GRADO: 0.05, // 5% por grado (CONFIGURABLE)
+    CURRENCY_SYMBOL: 'Gs.',
+    MIN_SALARY: 0,
+    MAX_SALARY: 99999999,
+    MIN_GRADOS: 1,
+    MAX_GRADOS: 20,
+    DEFAULT_GRADOS: 10,
+    CURRENT_YEAR: new Date().getFullYear()
+};
+
+// ============================================
+// ESTADO DE LA APLICACIÓN
+// ============================================
+const AppState = {
+    currentStep: 1,
+    totalSteps: 3,
+    anio: null,
+    numGrados: CONFIG.DEFAULT_GRADOS,
+    salarios: [],
+    
+    canProceed() {
+        switch(this.currentStep) {
+            case 1:
+                return this.anio && this.numGrados >= CONFIG.MIN_GRADOS && this.numGrados <= CONFIG.MAX_GRADOS;
+            case 2:
+                return this.salarios.length === this.numGrados && this.salarios.every(s => s > 0);
+            case 3:
+                return true;
+            default:
+                return false;
+        }
+    }
+};
+
+// ============================================
+// UTILIDADES
+// ============================================
+function formatCurrency(value) {
+    if (isNaN(value) || !value) return `${CONFIG.CURRENCY_SYMBOL} 0`;
+    const rounded = Math.round(value);
+    return `${CONFIG.CURRENCY_SYMBOL} ${rounded.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`;
+}
+
+function parseCurrency(value) {
+    if (typeof value === 'number') return value;
+    return parseFloat(value.replace(/[^\d]/g, '')) || 0;
+}
+
+function showMessage(text, type = 'success') {
+    const colors = { success: '#2ecc71', error: '#e74c3c', warning: '#f39c12', info: '#3498db' };
+    const message = document.createElement('div');
+    message.textContent = text;
+    message.style.cssText = `
+        position: fixed; bottom: 20px; right: 20px; padding: 1rem 1.5rem;
+        background: ${colors[type]}; color: white; border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 10001; font-weight: 600;
+        animation: slideInRight 0.3s ease;
+    `;
+    document.body.appendChild(message);
+    setTimeout(() => {
+        message.style.animation = 'slideOutRight 0.3s ease';
+        setTimeout(() => message.remove(), 300);
+    }, 3000);
+}
+
+// ============================================
+// WIZARD NAVIGATION
+// ============================================
+function goToStep(step) {
+    if (step < 1 || step > AppState.totalSteps) return;
+    
+    // Ocultar todas las secciones
+    document.querySelectorAll('.step-section').forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Mostrar sección actual
+    const currentSection = document.querySelector(`.step-section[data-step="${step}"]`);
+    if (currentSection) currentSection.classList.add('active');
+    
+    // Actualizar wizard steps
+    document.querySelectorAll('.wizard-step').forEach(wizardStep => {
+        const stepNum = parseInt(wizardStep.dataset.step);
+        wizardStep.classList.remove('active', 'completed');
+        
+        if (stepNum === step) {
+            wizardStep.classList.add('active');
+        } else if (stepNum < step) {
+            wizardStep.classList.add('completed');
+        }
+    });
+    
+    // Actualizar botones
+    document.getElementById('prevBtn').style.display = step > 1 ? 'inline-flex' : 'none';
+    document.getElementById('nextBtn').style.display = step < AppState.totalSteps ? 'inline-flex' : 'none';
+    document.getElementById('submitBtn').style.display = step === AppState.totalSteps ? 'inline-flex' : 'none';
+    
+    // Acciones específicas por paso
+    if (step === 2) {
+        generateSalaryTable();
+    } else if (step === 3) {
+        generateReviewSummary();
+    }
+    
+    AppState.currentStep = step;
+    
+    // Scroll al inicio
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ============================================
+// PASO 1: CONFIGURACIÓN
+// ============================================
+function validateStep1() {
+    const anioInput = document.getElementById('id_anio');
+    const numGradosInput = document.getElementById('id_num_grados');
+    
+    const anio = parseInt(anioInput.value);
+    const numGrados = parseInt(numGradosInput.value);
+    
+    let isValid = true;
+    
+    // Validar año
+    if (!anio || anio < 2020 || anio > 2100) {
+        anioInput.classList.add('is-invalid');
+        anioInput.classList.remove('is-valid');
+        isValid = false;
+        showMessage('El año debe estar entre 2020 y 2100', 'error');
+    } else {
+        anioInput.classList.remove('is-invalid');
+        anioInput.classList.add('is-valid');
+        AppState.anio = anio;
+    }
+    
+    // Validar número de grados
+    if (!numGrados || numGrados < CONFIG.MIN_GRADOS || numGrados > CONFIG.MAX_GRADOS) {
+        numGradosInput.classList.add('is-invalid');
+        numGradosInput.classList.remove('is-valid');
+        isValid = false;
+        showMessage(`El número de grados debe estar entre ${CONFIG.MIN_GRADOS} y ${CONFIG.MAX_GRADOS}`, 'error');
+    } else {
+        numGradosInput.classList.remove('is-invalid');
+        numGradosInput.classList.add('is-valid');
+        AppState.numGrados = numGrados;
+    }
+    
+    return isValid;
+}
+
+// ============================================
+// PASO 2: TABLA DE SALARIOS
+// ============================================
+function generateSalaryTable() {
+    const tbody = document.getElementById('salaryTableBody');
+    tbody.innerHTML = '';
+    
+    for (let i = 1; i <= AppState.numGrados; i++) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${i}</td>
+            <td>
+                <input type="number" 
+                       class="salary-input" 
+                       data-grado="${i}" 
+                       placeholder="Ej: 3000000" 
+                       min="0" 
+                       max="${CONFIG.MAX_SALARY}">
+            </td>
+            <td class="calculated-cell aumento-cell" data-grado="${i}">Gs. 0</td>
+            <td class="calculated-cell total-cell" data-grado="${i}">Gs. 0</td>
+        `;
+        tbody.appendChild(row);
+    }
+    
+    // Agregar event listeners
+    document.querySelectorAll('.salary-input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^\d]/g, '');
+            updateCalculations();
+            updateStatistics();
+        });
+        
+        input.addEventListener('blur', function() {
+            const value = parseFloat(this.value) || 0;
+            if (value > CONFIG.MAX_SALARY) {
+                this.value = CONFIG.MAX_SALARY;
+                showMessage('Salario ajustado al máximo permitido', 'warning');
+            }
+            updateCalculations();
+        });
+    });
+    
+    updateStatistics();
+}
+
+function updateCalculations() {
+    const inputs = document.querySelectorAll('.salary-input');
+    
+    inputs.forEach(input => {
+        const grado = parseInt(input.dataset.grado);
+        const salarioBase = parseFloat(input.value) || 0;
+        
+        // Calcular aumento por grado
+        const aumento = salarioBase * CONFIG.AUMENTO_POR_GRADO * (grado - 1);
+        const total = salarioBase + aumento;
+        
+        // Actualizar celdas
+        const aumentoCell = document.querySelector(`.aumento-cell[data-grado="${grado}"]`);
+        const totalCell = document.querySelector(`.total-cell[data-grado="${grado}"]`);
+        
+        if (aumentoCell) aumentoCell.textContent = formatCurrency(aumento);
+        if (totalCell) totalCell.textContent = formatCurrency(total);
+        
+        // Validación visual
+        if (salarioBase > 0) {
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    });
+}
+
+function updateStatistics() {
+    const inputs = document.querySelectorAll('.salary-input');
+    let total = 0, max = 0, count = 0;
+    
+    AppState.salarios = [];
+    
+    inputs.forEach(input => {
+        const grado = parseInt(input.dataset.grado);
+        const salarioBase = parseFloat(input.value) || 0;
+        
+        if (salarioBase > 0) {
+            const aumento = salarioBase * CONFIG.AUMENTO_POR_GRADO * (grado - 1);
+            const salarioTotal = salarioBase + aumento;
+            
+            AppState.salarios[grado - 1] = salarioBase;
+            
+            total += salarioTotal;
+            if (salarioTotal > max) max = salarioTotal;
+            count++;
+        }
+    });
+    
+    const avg = count > 0 ? total / count : 0;
+    
+    document.getElementById('totalGrados').textContent = count;
+    document.getElementById('avgSalary').textContent = formatCurrency(avg);
+    document.getElementById('maxSalary').textContent = formatCurrency(max);
+}
+
+function autoFillSalaries() {
+    const baseSalary = prompt('Ingrese el salario base para el Grado 1:', '3000000');
+    if (!baseSalary) return;
+    
+    const base = parseFloat(baseSalary);
+    if (isNaN(base) || base <= 0) {
+        showMessage('Valor inválido', 'error');
+        return;
+    }
+    
+    const incrementPercent = prompt('Ingrese el % de incremento entre grados (ej: 10 para 10%):', '10');
+    if (!incrementPercent) return;
+    
+    const increment = parseFloat(incrementPercent) / 100;
+    if (isNaN(increment)) {
+        showMessage('Porcentaje inválido', 'error');
+        return;
+    }
+    
+    const inputs = document.querySelectorAll('.salary-input');
+    inputs.forEach((input, index) => {
+        const salario = Math.round(base * Math.pow(1 + increment, index));
+        input.value = salario;
+    });
+    
+    updateCalculations();
+    updateStatistics();
+    showMessage('Salarios auto-completados exitosamente', 'success');
+}
+
+// ============================================
+// PASO 3: REVISIÓN
+// ============================================
+function generateReviewSummary() {
+    const reviewDiv = document.getElementById('reviewSummary');
+    
+    let html = `
+        <h4 style="color: #2c3e50; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-clipboard-check"></i> Resumen de la Tabla Salarial
+        </h4>
+        
+        <div style="display: grid; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: var(--primary-ultralight); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--primary-color);">
+                <strong>Año:</strong> ${AppState.anio}
+            </div>
+            <div style="background: var(--primary-ultralight); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success-color);">
+                <strong>Total de Grados:</strong> ${AppState.numGrados}
+            </div>
+        </div>
+        
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+            <thead>
+                <tr style="background: #f8f9fa; border-bottom: 2px solid var(--primary-color);">
+                    <th style="padding: 0.75rem; text-align: left;">Grado</th>
+                    <th style="padding: 0.75rem; text-align: right;">Salario Base</th>
+                    <th style="padding: 0.75rem; text-align: right;">Aumento</th>
+                    <th style="padding: 0.75rem; text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    AppState.salarios.forEach((salarioBase, index) => {
+        const grado = index + 1;
+        const aumento = salarioBase * CONFIG.AUMENTO_POR_GRADO * (grado - 1);
+        const total = salarioBase + aumento;
+        
+        html += `
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.75rem; font-weight: 600;">${grado}</td>
+                <td style="padding: 0.75rem; text-align: right;">${formatCurrency(salarioBase)}</td>
+                <td style="padding: 0.75rem; text-align: right; color: var(--info-color);">${formatCurrency(aumento)}</td>
+                <td style="padding: 0.75rem; text-align: right; font-weight: 700; color: var(--primary-color);">${formatCurrency(total)}</td>
+            </tr>
+        `;
+    });
+    
+    html += `
+            </tbody>
+        </table>
+    `;
+    
+    reviewDiv.innerHTML = html;
+}
+
+// ============================================
+// EVENTOS
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar
+    goToStep(1);
+    
+    // Botón siguiente
+    document.getElementById('nextBtn').addEventListener('click', function() {
+        if (AppState.currentStep === 1) {
+            if (validateStep1()) {
+                goToStep(2);
+            }
+        } else if (AppState.currentStep === 2) {
+            // Validar que todos los salarios estén llenos
+            const allFilled = AppState.salarios.length === AppState.numGrados && 
+                             AppState.salarios.every(s => s > 0);
+            
+            if (!allFilled) {
+                showMessage('Complete todos los salarios antes de continuar', 'warning');
+                return;
+            }
+            
+            goToStep(3);
+        }
+    });
+    
+    // Botón anterior
+    document.getElementById('prevBtn').addEventListener('click', function() {
+        goToStep(AppState.currentStep - 1);
+    });
+    
+    // Auto-fill button
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'autoFillBtn' || e.target.closest('#autoFillBtn')) {
+            autoFillSalaries();
+        }
+    });
+    
+    // Submit form
+    document.getElementById('tablasalarial_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!confirm(`¿Crear tabla salarial para el año ${AppState.anio}?\n\nSe crearán ${AppState.numGrados} registros.`)) {
+            return;
+        }
+        
+        // Mostrar loading
+        document.getElementById('loadingOverlay').classList.add('active');
+        
+        // Crear inputs ocultos para enviar los datos
+        const form = this;
+        
+        // Limpiar inputs ocultos anteriores
+        form.querySelectorAll('.hidden-input').forEach(input => input.remove());
+        
+        // Agregar año
+        const anioInput = document.createElement('input');
+        anioInput.type = 'hidden';
+        anioInput.name = 'anio';
+        anioInput.value = AppState.anio;
+        anioInput.className = 'hidden-input';
+        form.appendChild(anioInput);
+        
+        // Agregar salarios
+        AppState.salarios.forEach((salario, index) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = `grado_${index + 1}_salario`;
+            input.value = salario;
+            input.className = 'hidden-input';
+            form.appendChild(input);
+        });
+        
+        // Enviar formulario
+        setTimeout(() => {
+            form.submit();
+        }, 500);
+    });
+    
+    // Validación en tiempo real del año
+    const anioInput = document.getElementById('id_anio');
+    if (anioInput) {
+        anioInput.value = CONFIG.CURRENT_YEAR;
+        anioInput.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value >= 2020 && value <= 2100) {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            } else {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            }
+        });
+    }
+    
+    // Atajos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (confirm('¿Cancelar y volver a la lista?')) {
+                window.location.href = "{% url 'liquidacion:tablasalarial_list' %}";
+            }
+        }
+    });
+});
+
+// Animaciones CSS adicionales
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(100px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    
+    @keyframes slideOutRight {
+        from { opacity: 1; transform: translateX(0); }
+        to { opacity: 0; transform: translateX(100px); }
+    }
+    
+    .btn-sm {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

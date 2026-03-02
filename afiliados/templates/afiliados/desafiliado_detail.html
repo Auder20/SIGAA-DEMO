@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Detalle de Desafiliado - SIGAA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Detalle de Desafiliado</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'afiliados:afiliados_main' %}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'afiliados:desafiliado_list' %}">Desafiliados</a></li>
+        <li class="breadcrumb-item active">{{ desafiliado.nombre_completo }}</li>
+    </ol>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-minus me-1"></i>
+                    Información del Desafiliado
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="mb-0">{{ desafiliado.nombre_completo }}</h4>
+                                <span class="badge bg-danger">DESAFILIADO</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="border-bottom pb-2">Datos Personales</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Cédula:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.cedula }}</dd>
+                                    
+                                    <dt class="col-sm-4">Fecha de Nacimiento:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.fecha_nacimiento|date:"d/m/Y"|default:"No especificada" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Edad:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.edad|default:"No especificada" }} años</dd>
+                                    
+                                    <dt class="col-sm-4">Estado Civil:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.estado_civil|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Cónyuge:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.nombre_conyuge|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Hijos:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.nombre_hijos|default:"No especificados" }}</dd>
+                                </dl>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="border-bottom pb-2">Información de Contacto</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Dirección:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.direccion|default:"No especificada" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Municipio:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.municipio|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Ciudad de Nacimiento:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.ciudad_de_nacimiento|default:"No especificada" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Teléfono:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.telefono|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Email:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.email|default:"No especificado" }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <h5 class="border-bottom pb-2">Información Laboral</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Grado de Escalafón:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.grado_escalafon|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Cargo Desempeñado:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.cargo_desempenado|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Fecha de Ingreso:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.fecha_ingreso|date:"d/m/Y"|default:"No especificada" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Años de Servicio:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.anos_servicio|default:"No especificados" }} años</dd>
+                                </dl>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="border-bottom pb-2">Información Académica</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Título de Pregrado:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.titulo_pregrado|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Título de Posgrado:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.titulo_posgrado|default:"No especificado" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Estudios de Posgrado:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.estudios_posgrado|default:"No especificados" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Otros Títulos:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.otros_titulos|default:"No especificados" }}</dd>
+                                </dl>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5 class="border-bottom pb-2">Información de Desafiliación</h5>
+                                <dl class="row">
+                                    <dt class="col-sm-4">Fecha de Desafiliación:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.fecha_desafiliacion|date:"d/m/Y" }}</dd>
+                                    
+                                    <dt class="col-sm-4">Motivo de Desafiliación:</dt>
+                                    <dd class="col-sm-8">{{ desafiliado.motivo_desafiliacion|linebreaksbr }}</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'afiliados:desafiliado_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Volver al listado
+                        </a>
+                        <div>
+                            <a href="{% url 'afiliados:reafiliar_desafiliado' desafiliado.pk %}" 
+                               class="btn btn-success">
+                                <i class="fas fa-user-plus me-1"></i> Reafiliar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Script para confirmar reafiliación
+        const reafiliarBtn = document.getElementById('reafiliarBtn');
+        if (reafiliarBtn) {
+            reafiliarBtn.addEventListener('click', function(e) {
+                if (!confirm('¿Está seguro de que desea reafiliar a este desafiliado? \n\n' +
+                    'Esta acción moverá al desafiliado de vuelta a la lista de afiliados activos.')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

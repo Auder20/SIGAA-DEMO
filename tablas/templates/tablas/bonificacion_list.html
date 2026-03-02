@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block title %}Bonificaciones - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item active">Bonificaciones</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-gift me-2"></i>
+            Bonificaciones
+        </h1>
+        <p class="text-muted mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            Total: <span class="fw-bold">{{ bonificaciones|length }}</span> bonificaciones configuradas
+        </p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'tablas:bonificacion_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nueva Bonificación
+        </a>
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            <i class="fas fa-download me-2"></i>Exportar
+        </button>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i>Excel</a></li>
+            <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i>PDF</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Buscar</label>
+                <input type="text" class="form-control" id="search" name="search" 
+                       value="{{ request.GET.search }}" placeholder="Nombre, descripción...">
+            </div>
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <select class="form-select" id="tipo" name="tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="porcentaje" {% if request.GET.tipo == 'porcentaje' %}selected{% endif %}>Porcentaje</option>
+                    <option value="fijo" {% if request.GET.tipo == 'fijo' %}selected{% endif %}>Monto Fijo</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="activo" class="form-label">Estado</label>
+                <select class="form-select" id="activo" name="activo">
+                    <option value="">Todos</option>
+                    <option value="true" {% if request.GET.activo == 'true' %}selected{% endif %}>Activos</option>
+                    <option value="false" {% if request.GET.activo == 'false' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary me-2">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bonifications Table -->
+<div class="card">
+    <div class="card-body">
+        {% if bonificaciones %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th>Descripción</th>
+                        <th>Estado</th>
+                        <th>Fecha Creación</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bonificacion in bonificaciones %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-gift text-primary me-2"></i>
+                                <div>
+                                    <div class="fw-bold">{{ bonificacion.nombre }}</div>
+                                    <small class="text-muted">ID: {{ bonificacion.pk }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if bonificacion.tipo == 'porcentaje' %}info{% else %}success{% endif %}">
+                                {{ bonificacion.get_tipo_display|default:bonificacion.tipo|capfirst }}
+                            </span>
+                        </td>
+                        <td>
+                            <strong>
+                                {% if bonificacion.tipo == 'porcentaje' %}
+                                    {{ bonificacion.valor }}%
+                                {% else %}
+                                    ${{ bonificacion.valor|floatformat:0 }}
+                                {% endif %}
+                            </strong>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ bonificacion.descripcion|default:"Sin descripción"|truncatechars:50 }}</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if bonificacion.activo %}success{% else %}danger{% endif %}">
+                                {% if bonificacion.activo %}Activo{% else %}Inactivo{% endif %}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ bonificacion.fecha_creacion|date:"d/m/Y"|default:"N/A" }}</small>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'tablas:bonificacion_detail' bonificacion.pk %}" 
+                                   class="btn btn-outline-info" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'tablas:bonificacion_edit' bonificacion.pk %}" 
+                                   class="btn btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'tablas:bonificacion_delete' bonificacion.pk %}" 
+                                   class="btn btn-outline-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Paginación de bonificaciones">
+            <ul class="pagination justify-content-center mt-4">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-gift text-muted mb-3" style="font-size: 4rem;"></i>
+            <h4 class="text-muted">No hay bonificaciones configuradas</h4>
+            <p class="text-muted mb-4">Comience creando su primera bonificación para el sistema de liquidación.</p>
+            <a href="{% url 'tablas:bonificacion_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Nueva Bonificación
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-submit search form on select change
+document.querySelectorAll('#tipo, #activo').forEach(function(select) {
+    select.addEventListener('change', function() {
+        this.form.submit();
+    });
+});
+
+// Confirm delete actions
+document.querySelectorAll('a[href*="eliminar"]').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+        if (!confirm('¿Está seguro que desea eliminar esta bonificación?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

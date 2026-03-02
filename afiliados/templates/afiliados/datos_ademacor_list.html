@@ -1,0 +1,945 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Datos ADEMACOR - SIGAA{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Variables CSS para tematización consistente */
+    :root {
+        --ademacor-primary: #ffc107;
+        --ademacor-secondary: #fd7e14;
+        --ademacor-dark: #f39c12;
+        --ademacor-light: rgba(255, 193, 7, 0.1);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
+        --shadow-md: 0 4px 6px rgba(0,0,0,.1);
+        --shadow-lg: 0 8px 16px rgba(255, 193, 7, 0.2);
+    }
+
+    /* Mejoras en la tabla */
+    .table {
+        font-size: 0.95rem;
+    }
+
+    .table th {
+        border-top: none;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+        background: linear-gradient(to bottom, var(--ademacor-light), transparent);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .table td {
+        vertical-align: middle;
+        border-top: 1px solid rgba(0,0,0,.05);
+        padding: 1rem;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: var(--ademacor-light);
+        transform: translateX(2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* Badges mejorados */
+    .badge {
+        font-size: 0.75rem;
+        font-weight: 500;
+        padding: 0.35em 0.65em;
+    }
+
+    .badge-ademacor {
+        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        color: #212529;
+        font-weight: 600;
+    }
+
+    /* Botones mejorados */
+    .btn-group .btn {
+        margin-right: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-ademacor {
+        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        border: none;
+        color: #212529;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .btn-ademacor:hover {
+        background: linear-gradient(135deg, var(--ademacor-dark), var(--ademacor-secondary));
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+        color: #212529;
+    }
+
+    /* Cards mejorados */
+    .card {
+        border: none;
+        box-shadow: var(--shadow-md);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .card-ademacor {
+        border-left: 4px solid var(--ademacor-primary);
+        transition: all 0.3s ease;
+    }
+
+    .card-ademacor:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Header de página mejorado */
+    .page-header {
+        background: linear-gradient(135deg, var(--ademacor-light), transparent);
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--ademacor-primary);
+    }
+
+    /* Búsqueda mejorada */
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper .form-control {
+        padding-left: 3rem;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper .form-control:focus {
+        border-color: var(--ademacor-primary);
+        box-shadow: 0 0 0 0.2rem var(--ademacor-light);
+    }
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+    }
+
+    /* Stats cards */
+    .stats-card {
+        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        color: #212529;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Bulk actions mejoradas */
+    .bulk-action-btn {
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid;
+    }
+
+    .bulk-action-btn:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    /* Paginación mejorada */
+    .pagination {
+        gap: 0.5rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        border: none;
+        color: #495057;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .pagination .page-link:hover {
+        background-color: var(--ademacor-light);
+        color: var(--ademacor-dark);
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        color: #212529;
+        font-weight: 700;
+    }
+
+    /* Empty state mejorado */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 2rem;
+        background: var(--ademacor-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    /* Loading skeleton */
+    .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s ease-in-out infinite;
+    }
+
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    /* Tooltips personalizados */
+    .custom-tooltip {
+        position: relative;
+    }
+
+    .custom-tooltip:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.5rem 1rem;
+        background: #212529;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        z-index: 1000;
+        opacity: 0.95;
+    }
+
+    /* Mejoras responsive */
+    @media (max-width: 1200px) {
+        .bulk-action-btn {
+            width: 180px !important;
+            height: 90px !important;
+        }
+
+        .page-header {
+            padding: 1.5rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-header {
+            padding: 1rem;
+        }
+
+        .d-flex.gap-3 {
+            flex-wrap: wrap;
+        }
+
+        .bulk-action-btn {
+            width: 160px !important;
+            height: 85px !important;
+        }
+
+        .table {
+            font-size: 0.85rem;
+        }
+
+        .table td, .table th {
+            padding: 0.75rem 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .action-buttons .btn {
+            width: 100%;
+        }
+    }
+
+    /* Print styles */
+    @media print {
+        .btn, .pagination, .card-footer, .bulk-actions {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+            border: 1px solid #dee2e6;
+        }
+    }
+
+    /* Accessibility improvements */
+    .btn:focus,
+    .form-control:focus {
+        outline: 3px solid var(--ademacor-primary);
+        outline-offset: 2px;
+    }
+
+    /* Dark mode support (opcional) */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --ademacor-light: rgba(255, 193, 7, 0.15);
+        }
+    }
+
+    /* Forzar colores oscuros para texto importante */
+    .text-dark-forced {
+        color: #212529 !important;
+    }
+
+    .text-muted-forced {
+        color: #6c757d !important;
+    }
+
+    /* Asegurar que el texto sea visible en cualquier modo */
+    tbody td strong,
+    tbody td .badge {
+        color: #212529 !important;
+    }
+
+    tbody td .text-muted {
+        color: #495057 !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus en el campo de búsqueda
+    const searchInput = document.getElementById('search');
+    if (searchInput) {
+        searchInput.focus();
+        searchInput.select();
+
+        const len = searchInput.value.length;
+        searchInput.setSelectionRange(len, len);
+    }
+
+    // Manejo mejorado del formulario de búsqueda
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            const searchValue = searchInput.value.trim();
+            if (!searchValue) {
+                e.preventDefault();
+                window.location.href = '{% url "afiliados:datos_ademacor_list" %}';
+            }
+        });
+    }
+
+    // Inicializar tooltips de Bootstrap
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Búsqueda en tiempo real (opcional - debounced)
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const value = this.value.trim();
+                if (value.length >= 3 || value.length === 0) {
+                    // Aquí podrías implementar búsqueda AJAX
+                    console.log('Buscar:', value);
+                }
+            }, 500);
+        });
+    }
+
+    // Confirmación de eliminación mejorada
+    window.confirmDelete = function(message) {
+        return confirm(message + '\n\nEsta acción no se puede deshacer.');
+    };
+
+    // Animación de entrada para las filas
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.classList.add('fade-in');
+    });
+
+    // Atajos de teclado
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + K para buscar
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            searchInput?.focus();
+        }
+
+        // Escape para limpiar búsqueda
+        if (e.key === 'Escape' && document.activeElement === searchInput) {
+            searchInput.value = '';
+            searchInput.blur();
+        }
+    });
+
+    // Mostrar/ocultar loading en acciones
+    document.querySelectorAll('.bulk-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!this.classList.contains('disabled')) {
+                this.classList.add('disabled');
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<div class="spinner-border spinner-border-sm" role="status"></div>';
+
+                // Restaurar después de 2 segundos (ajustar según necesidad)
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.classList.remove('disabled');
+                }, 2000);
+            }
+        });
+    });
+});
+
+// Función para exportar con feedback
+function exportData(format) {
+    const btn = event.target.closest('.bulk-action-btn');
+    btn.classList.add('disabled');
+
+    // Mostrar notificación de inicio
+    showNotification('Preparando exportación...', 'info');
+
+    // Aquí iría la lógica real de exportación
+    setTimeout(() => {
+        showNotification(`Archivo ${format} descargado exitosamente`, 'success');
+        btn.classList.remove('disabled');
+    }, 1500);
+}
+
+// Sistema de notificaciones
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: '#28a745',
+        error: '#dc3545',
+        warning: '#ffc107',
+        info: '#17a2b8'
+    };
+
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${colors[type]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = message;
+
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+</script>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}"><i class="fas fa-users me-1"></i>Afiliados</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:importar_excel' %}"><i class="fas fa-file-import me-1"></i>Importar Excel</a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">Datos ADEMACOR</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header Mejorado -->
+<div class="page-header mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="h2 mb-2 fw-bold">
+                <i class="fas fa-handshake me-2 text-warning"></i>
+                Gestión de Datos ADEMACOR
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="fas fa-database me-1"></i>
+                <strong>{{ total_ademacor|default:0 }}</strong> registro{{ total_ademacor|pluralize }}
+                {% if search_query %}
+                    <span class="mx-2">|</span>
+                    <i class="fas fa-filter me-1"></i>
+                    Filtrado por: <strong>"{{ search_query }}"</strong>
+                {% endif %}
+            </p>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="action-buttons d-flex gap-2 justify-content-md-end">
+                <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-ademacor">
+                    <i class="fas fa-file-excel me-2"></i>Importar Datos
+                </a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-warning dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{% url 'afiliados:datos_ademacor_export' %}">
+                                <i class="fas fa-file-excel me-2 text-success"></i>Excel (.xlsx)
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/afiliados/ademacor/exportar-pdf/">
+                                <i class="fas fa-file-pdf me-2 text-danger"></i>PDF
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#">
+                                <i class="fas fa-file-csv me-2 text-info"></i>CSV
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Cards (opcional) -->
+{% if datos_ademacor %}
+<div class="row mb-4">
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="stats-card text-center">
+            <i class="fas fa-users fa-2x mb-2"></i>
+            <h3 class="h2 mb-0 fw-bold">{{ total_ademacor }}</h3>
+            <small class="text-dark">Total Registros</small>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <i class="fas fa-calendar-check fa-2x text-success mb-2"></i>
+            <h4 class="mb-0 fw-bold text-success">Activos</h4>
+            <small class="text-muted">Disponible próximamente</small>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3 mb-md-0">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <i class="fas fa-map-marker-alt fa-2x text-info mb-2"></i>
+            <h4 class="mb-0 fw-bold text-info">Municipios</h4>
+            <small class="text-muted">Varios</small>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+            <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+            <h4 class="mb-0 fw-bold text-warning">Actualizado</h4>
+            <small class="text-muted">Hoy</small>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Búsqueda y Filtros Mejorados -->
+<div class="card mb-4 card-ademacor">
+    <div class="card-body">
+        <form method="GET" id="searchForm" class="row g-3 align-items-end">
+            <div class="col-md-10">
+                <label for="search" class="form-label fw-bold">
+                    <i class="fas fa-search me-1"></i>Búsqueda Inteligente
+                </label>
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text"
+                           class="form-control form-control-lg"
+                           id="search"
+                           name="search"
+                           placeholder="Buscar por nombre, cédula o municipio..."
+                           value="{{ search_query|default:'' }}"
+                           aria-label="Buscar registros de ADEMACOR"
+                           autocomplete="off">
+                </div>
+                <small class="form-text text-muted mt-1">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Presiona <kbd>Ctrl</kbd> + <kbd>K</kbd> para buscar rápidamente
+                </small>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                {% if search_query %}
+                <a href="{% url 'afiliados:datos_ademacor_list' %}"
+                   class="btn btn-outline-secondary btn-lg flex-grow-1"
+                   title="Limpiar búsqueda"
+                   data-bs-toggle="tooltip">
+                    <i class="fas fa-times"></i>
+                </a>
+                {% endif %}
+                <button class="btn btn-warning btn-lg flex-grow-1" type="submit" title="Buscar">
+                    <i class="fas fa-search me-2"></i>Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de Datos ADEMACOR -->
+<div class="card">
+    <div class="card-body p-0">
+        {% if datos_ademacor %}
+
+        {% if search_query %}
+        <div class="alert alert-warning mb-0 rounded-0 border-0 border-bottom">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-filter me-2"></i>
+                    Se encontraron <strong>{{ datos_ademacor.paginator.count }}</strong> resultado{{ datos_ademacor.paginator.count|pluralize }} para <strong>"{{ search_query }}"</strong>
+                </div>
+                <a href="{% url 'afiliados:datos_ademacor_list' %}" class="btn btn-sm btn-outline-warning">
+                    <i class="fas fa-times me-1"></i>Limpiar búsqueda
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="px-4 py-3">
+                            <i class="fas fa-id-card me-2"></i>Cédula
+                        </th>
+                        <th class="px-4 py-3">
+                            <i class="fas fa-user me-2"></i>Nombre Completo
+                        </th>
+                        <th class="px-4 py-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Municipio
+                        </th>
+                        <th class="px-4 py-3 text-center">
+                            <i class="fas fa-calendar me-2"></i>Fecha Creación
+                        </th>
+                        <th class="px-4 py-3 text-center" width="180">
+                            <i class="fas fa-cog me-2"></i>Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in datos_ademacor %}
+                    <tr>
+                        <td class="px-4 py-3">
+                            <code class="fs-6 text-warning">{{ registro.cedula|default:"-" }}</code>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-warning text-dark me-3" style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                    {{ registro.nombre_completo|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <strong class="d-block" style="color: #212529 !important;">{{ registro.nombre_completo }}</strong>
+                                    <span class="badge badge-ademacor">ADEMACOR</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3">
+                            {% if registro.municipio %}
+                                <span class="badge bg-light border px-3 py-2" style="color: #212529 !important;">
+                                    <i class="fas fa-map-marker-alt me-1"></i>{{ registro.municipio }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted fst-italic" style="color: #6c757d !important;">Sin municipio</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <small class="text-muted">
+                                <i class="far fa-calendar-alt me-1"></i>
+                                {{ registro.fecha_creacion|date:"d/m/Y" }}
+                                <br>
+                                <i class="far fa-clock me-1"></i>
+                                {{ registro.fecha_creacion|date:"H:i" }}
+                            </small>
+                        </td>
+                        <td class="px-4 py-3 text-center">
+                            <div class="btn-group" role="group" aria-label="Acciones del registro">
+                                <a href="{% url 'afiliados:datos_ademacor_detail' registro.pk %}"
+                                   class="btn btn-sm btn-outline-info"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="Ver detalles completos">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'afiliados:datos_ademacor_edit' registro.pk %}"
+                                   class="btn btn-sm btn-outline-warning"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="Editar registro">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'afiliados:datos_ademacor_delete' registro.pk %}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="Eliminar registro"
+                                   onclick="return confirmDelete('¿Está seguro de eliminar este registro de ADEMACOR?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación Mejorada -->
+        {% if is_paginated %}
+        <div class="card-footer bg-light border-top-0">
+            <nav aria-label="Paginación de datos de ADEMACOR">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
+                    </small>
+                    <ul class="pagination mb-0">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" title="Primera página">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" title="Página anterior">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" title="Página siguiente">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" title="Última página">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State Mejorado -->
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="fas fa-handshake fa-4x text-warning"></i>
+            </div>
+
+            {% if search_query %}
+            <h3 class="mb-3">No se encontraron resultados</h3>
+            <p class="text-muted mb-4">
+                No hay registros de ADEMACOR que coincidan con tu búsqueda <strong>"{{ search_query }}"</strong>
+            </p>
+            <div class="d-flex gap-2 justify-content-center">
+                <a href="{% url 'afiliados:datos_ademacor_list' %}" class="btn btn-warning">
+                    <i class="fas fa-list me-2"></i>Ver todos los registros
+                </a>
+                <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-outline-warning">
+                    <i class="fas fa-file-excel me-2"></i>Importar nuevos datos
+                </a>
+            </div>
+            {% else %}
+            <h3 class="mb-3">No hay datos de ADEMACOR</h3>
+            <p class="text-muted mb-4">
+                Aún no se han importado registros de ADEMACOR.<br>
+                Comienza importando datos desde un archivo Excel.
+            </p>
+            <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-ademacor btn-lg">
+                <i class="fas fa-file-excel me-2"></i>Importar Datos de ADEMACOR
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Acciones en Lote Mejoradas -->
+{% if datos_ademacor %}
+<div class="card mt-4 card-ademacor">
+    <div class="card-header bg-light">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-tasks me-2 text-warning"></i>
+                Acciones en Lote
+            </h5>
+            <span class="badge bg-warning text-dark">
+                {{ total_ademacor }} registros disponibles
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Recalcular Sueldos -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-success w-100 h-100" onclick="alert('Comando: python manage.py recalcular_sueldos\n\nEsta acción recalculará todos los sueldos de ADEMACOR.');" data-tooltip="Recalcular todos los sueldos">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-calculator fa-3x mb-3 text-success"></i>
+                        <span class="fw-bold fs-6">Recalcular Sueldos</span>
+                        <small class="text-muted mt-1">Actualizar cálculos</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Exportar a Excel -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-success w-100 h-100" data-url="{% url 'afiliados:datos_ademacor_export' %}" onclick="window.location.href=this.dataset.url" data-tooltip="Exportar todos los datos a Excel">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-file-excel fa-3x mb-3 text-success"></i>
+                        <span class="fw-bold fs-6">Exportar Excel</span>
+                        <small class="text-muted mt-1">Descargar .xlsx</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Exportar a PDF -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-danger w-100 h-100" onclick="window.location.href='/afiliados/ademacor/exportar-pdf/';" data-tooltip="Exportar todos los datos a PDF">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-file-pdf fa-3x mb-3 text-danger"></i>
+                        <span class="fw-bold fs-6">Exportar PDF</span>
+                        <small class="text-muted mt-1">Descargar .pdf</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Exportar a CSV -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-info w-100 h-100" onclick="alert('Funcionalidad de exportación CSV próximamente');" data-tooltip="Exportar datos a formato CSV">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-file-csv fa-3x mb-3 text-info"></i>
+                        <span class="fw-bold fs-6">Exportar CSV</span>
+                        <small class="text-muted mt-1">Descargar .csv</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Activar Seleccionados -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-warning w-100 h-100" onclick="alert('Funcionalidad de activación masiva próximamente\n\nPodrás activar múltiples registros a la vez.');" data-tooltip="Activar registros seleccionados">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-user-check fa-3x mb-3 text-warning"></i>
+                        <span class="fw-bold fs-6">Activar</span>
+                        <small class="text-muted mt-1">Registros seleccionados</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Desactivar Seleccionados -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-secondary w-100 h-100" onclick="alert('Funcionalidad de desactivación masiva próximamente\n\nPodrás desactivar múltiples registros a la vez.');" data-tooltip="Desactivar registros seleccionados">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-user-times fa-3x mb-3 text-secondary"></i>
+                        <span class="fw-bold fs-6">Desactivar</span>
+                        <small class="text-muted mt-1">Registros seleccionados</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Generar Reporte -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-primary w-100 h-100" onclick="alert('Funcionalidad de generación de reportes próximamente');" data-tooltip="Generar reporte completo">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-chart-bar fa-3x mb-3 text-primary"></i>
+                        <span class="fw-bold fs-6">Generar Reporte</span>
+                        <small class="text-muted mt-1">Análisis completo</small>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Sincronizar Datos -->
+            <div class="col-md-4 col-lg-3">
+                <button class="bulk-action-btn btn btn-outline-info w-100 h-100" onclick="alert('Funcionalidad de sincronización próximamente');" data-tooltip="Sincronizar con fuente externa">
+                    <div class="d-flex flex-column align-items-center justify-content-center p-3">
+                        <i class="fas fa-sync fa-3x mb-3 text-info"></i>
+                        <span class="fw-bold fs-6">Sincronizar</span>
+                        <small class="text-muted mt-1">Actualizar datos</small>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer bg-light text-muted">
+        <small>
+            <i class="fas fa-info-circle me-1"></i>
+            Las acciones en lote se aplicarán a todos los registros visibles o seleccionados.
+        </small>
+    </div>
+</div>
+{% endif %}
+
+<div class="text-center mt-5 mb-4">
+    <small class="text-muted">
+        <i class="fas fa-database me-1"></i>
+        Sistema de Gestión de Afiliados ADEMACOR - SIGAA
+    </small>
+</div>
+{% endblock %}

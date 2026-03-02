@@ -1,0 +1,358 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if afiliado %}Editar{% else %}Nuevo{% endif %} Afiliado - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliado_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if afiliado %}Editar{% else %}Nuevo{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-{% if afiliado %}edit{% else %}user-plus{% endif %} me-2"></i>
+            {% if afiliado %}Editar Afiliado{% else %}Nuevo Afiliado{% endif %}
+        </h1>
+        {% if afiliado %}
+        <p class="text-muted mb-0">Modificando información de {{ afiliado.nombre_completo }}</p>
+        {% else %}
+        <p class="text-muted mb-0">Complete la información del nuevo afiliado</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        {% if afiliado %}
+        <a href="{% url 'afiliados:afiliado_detail' afiliado.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" id="afiliadoForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Personal Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-user me-2"></i>
+                Información Personal
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cedula" class="form-label">
+                        Cédula <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="cedula" name="cedula" 
+                           value="{{ afiliado.cedula|default:'' }}" required
+                           placeholder="Ej: 12345678">
+                    <div class="invalid-feedback">
+                        Por favor ingrese la cédula del afiliado.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="nombre_completo" class="form-label">
+                        Nombre Completo <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nombre_completo" name="nombre_completo" 
+                           value="{{ afiliado.nombre_completo|default:'' }}" required
+                           placeholder="Nombres y apellidos completos">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el nombre completo.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento" 
+                           value="{{ afiliado.fecha_nacimiento|date:'Y-m-d'|default:'' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="edad" class="form-label">Edad</label>
+                    <input type="number" class="form-control" id="edad" name="edad" 
+                           value="{{ afiliado.edad|default:'' }}" min="18" max="100"
+                           placeholder="Años">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="estado_civil" class="form-label">Estado Civil</label>
+                    <select class="form-select" id="estado_civil" name="estado_civil">
+                        <option value="">Seleccionar...</option>
+                        <option value="Soltero" {% if afiliado.estado_civil == 'Soltero' %}selected{% endif %}>Soltero</option>
+                        <option value="Casado" {% if afiliado.estado_civil == 'Casado' %}selected{% endif %}>Casado</option>
+                        <option value="Divorciado" {% if afiliado.estado_civil == 'Divorciado' %}selected{% endif %}>Divorciado</option>
+                        <option value="Viudo" {% if afiliado.estado_civil == 'Viudo' %}selected{% endif %}>Viudo</option>
+                        <option value="Unión Libre" {% if afiliado.estado_civil == 'Unión Libre' %}selected{% endif %}>Unión Libre</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="ciudad_de_nacimiento" class="form-label">Ciudad de Nacimiento</label>
+                    <input type="text" class="form-control" id="ciudad_de_nacimiento" name="ciudad_de_nacimiento" 
+                           value="{{ afiliado.ciudad_de_nacimiento|default:'' }}"
+                           placeholder="Ciudad donde nació">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="departamento" class="form-label">Departamento</label>
+                    <input type="text" class="form-control" id="departamento" name="departamento" 
+                           value="{{ afiliado.departamento|default:'' }}"
+                           placeholder="Departamento de residencia">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nombre_conyuge" class="form-label">Nombre del Cónyuge</label>
+                    <input type="text" class="form-control" id="nombre_conyuge" name="nombre_conyuge" 
+                           value="{{ afiliado.nombre_conyuge|default:'' }}"
+                           placeholder="Si aplica">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="nombre_hijos" class="form-label">Nombre(s) de Hijos</label>
+                    <input type="text" class="form-control" id="nombre_hijos" name="nombre_hijos" 
+                           value="{{ afiliado.nombre_hijos|default:'' }}"
+                           placeholder="Separados por comas">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-address-book me-2"></i>
+                Información de Contacto
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="direccion" class="form-label">Dirección</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion" 
+                           value="{{ afiliado.direccion|default:'' }}"
+                           placeholder="Dirección completa de residencia">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="telefono" class="form-label">Teléfono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono" 
+                           value="{{ afiliado.telefono|default:'' }}"
+                           placeholder="Ej: +57 300 123 4567">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           value="{{ afiliado.email|default:'' }}"
+                           placeholder="correo@ejemplo.com">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="municipio" class="form-label">Municipio</label>
+                    <input type="text" class="form-control" id="municipio" name="municipio" 
+                           value="{{ afiliado.municipio|default:'' }}"
+                           placeholder="Municipio de residencia">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Academic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Información Académica
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="titulo_pregrado" class="form-label">Título de Pregrado</label>
+                    <input type="text" class="form-control" id="titulo_pregrado" name="titulo_pregrado" 
+                           value="{{ afiliado.titulo_pregrado|default:'' }}"
+                           placeholder="Ej: Licenciado en Matemáticas">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="titulo_posgrado" class="form-label">
+                        Título de Posgrado
+                        <i class="fas fa-info-circle text-info" data-bs-toggle="tooltip" 
+                           title="Usado para detectar maestría/doctorado en cálculo de sueldo"></i>
+                    </label>
+                    <input type="text" class="form-control" id="titulo_posgrado" name="titulo_posgrado" 
+                           value="{{ afiliado.titulo_posgrado|default:'' }}"
+                           placeholder="Ej: Magíster en Educación, Doctor en Ciencias">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="estudios_posgrado" class="form-label">Estudios de Posgrado (Detalle)</label>
+                    <textarea class="form-control" id="estudios_posgrado" name="estudios_posgrado" 
+                              rows="3" placeholder="Descripción detallada de estudios de posgrado realizados">{{ afiliado.estudios_posgrado|default:'' }}</textarea>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="otros_titulos" class="form-label">Otros Títulos</label>
+                    <textarea class="form-control" id="otros_titulos" name="otros_titulos" 
+                              rows="2" placeholder="Otros títulos, certificaciones o estudios adicionales">{{ afiliado.otros_titulos|default:'' }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Professional Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-briefcase me-2"></i>
+                Información Laboral
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="grado_escalafon" class="form-label">
+                        Grado de Escalafón
+                        <i class="fas fa-star text-warning" data-bs-toggle="tooltip" 
+                           title="Determina el sueldo base según tabla salarial"></i>
+                    </label>
+                    <select class="form-select" id="grado_escalafon" name="grado_escalafon">
+                        <option value="">Seleccionar grado...</option>
+                        <option value="1" {% if afiliado.grado_escalafon == '1' %}selected{% endif %}>Grado 1</option>
+                        <option value="2" {% if afiliado.grado_escalafon == '2' %}selected{% endif %}>Grado 2</option>
+                        <option value="3" {% if afiliado.grado_escalafon == '3' %}selected{% endif %}>Grado 3</option>
+                        <option value="4" {% if afiliado.grado_escalafon == '4' %}selected{% endif %}>Grado 4</option>
+                        <option value="5" {% if afiliado.grado_escalafon == '5' %}selected{% endif %}>Grado 5</option>
+                        <option value="6" {% if afiliado.grado_escalafon == '6' %}selected{% endif %}>Grado 6</option>
+                        <option value="7" {% if afiliado.grado_escalafon == '7' %}selected{% endif %}>Grado 7</option>
+                        <option value="8" {% if afiliado.grado_escalafon == '8' %}selected{% endif %}>Grado 8</option>
+                        <option value="9" {% if afiliado.grado_escalafon == '9' %}selected{% endif %}>Grado 9</option>
+                        <option value="10" {% if afiliado.grado_escalafon == '10' %}selected{% endif %}>Grado 10</option>
+                        <option value="11" {% if afiliado.grado_escalafon == '11' %}selected{% endif %}>Grado 11</option>
+                        <option value="12" {% if afiliado.grado_escalafon == '12' %}selected{% endif %}>Grado 12</option>
+                        <option value="13" {% if afiliado.grado_escalafon == '13' %}selected{% endif %}>Grado 13</option>
+                        <option value="14" {% if afiliado.grado_escalafon == '14' %}selected{% endif %}>Grado 14</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="cargo_desempenado" class="form-label">
+                        Cargo Desempeñado
+                        <i class="fas fa-percentage text-success" data-bs-toggle="tooltip" 
+                           title="Afecta el porcentaje adicional del sueldo"></i>
+                    </label>
+                    <input type="text" class="form-control" id="cargo_desempenado" name="cargo_desempenado" 
+                           value="{{ afiliado.cargo_desempenado|default:'' }}"
+                           placeholder="Ej: Rector, Decano, Director, Docente">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="anos_servicio" class="form-label">
+                        Años de Servicio
+                        <i class="fas fa-clock text-info" data-bs-toggle="tooltip" 
+                           title="Afecta el porcentaje por antigüedad (2-12%)"></i>
+                    </label>
+                    <input type="number" class="form-control" id="anos_servicio" name="anos_servicio" 
+                           value="{{ afiliado.anos_servicio|default:'' }}" min="0" max="50"
+                           placeholder="Años">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fecha_ingreso" class="form-label">Fecha de Ingreso</label>
+                    <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" 
+                           value="{{ afiliado.fecha_ingreso|date:'Y-m-d'|default:'' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="activo" class="form-label">Estado</label>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if afiliado.activo %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            Afiliado Activo
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Solo los afiliados activos participan en el cálculo de sueldos
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+                <div>
+                    {% if afiliado %}
+                        <form method="post" action="{% url 'afiliados:recalcular_sueldo' afiliado.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-warning me-2">
+                                <i class="fas fa-calculator me-2"></i>Recalcular Sueldo
+                            </button>
+                        </form>
+                    {% endif %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {% if afiliado %}Actualizar{% else %}Crear{% endif %} Afiliado
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Initialize form validation
+    validateForm('afiliadoForm');
+    
+    // Auto-calculate age from birth date
+    document.getElementById('fecha_nacimiento').addEventListener('change', function() {
+        const birthDate = new Date(this.value);
+        const today = new Date();
+        const age = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+        
+        if (age > 0 && age < 120) {
+            document.getElementById('edad').value = age;
+        }
+    });
+    
+    // Format phone number
+    document.getElementById('telefono').addEventListener('input', function() {
+        let value = this.value.replace(/\D/g, '');
+        if (value.length >= 10) {
+            value = value.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3');
+        }
+        this.value = value;
+    });
+</script>
+{% endblock %}

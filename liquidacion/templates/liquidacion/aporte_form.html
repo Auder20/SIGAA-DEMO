@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Aporte{% else %}Nuevo Aporte{% endif %} - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:aporte_list' %}">Aportes</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if object %}Editar Aporte{% else %}Nuevo Aporte{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if object %}Editar Aporte{% else %}Nuevo Aporte{% endif %}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if object %}
+                Modificar aporte {{ object.nombre }} para {{ object.sueldo.afiliado.nombre_completo }}
+            {% else %}
+                Crear un nuevo aporte para un afiliado
+            {% endif %}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Form Section -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-form me-2"></i>
+                    Información del Aporte
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="aporteForm">
+                    {% csrf_token %}
+                    
+                    <!-- Sueldo Selection -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="id_sueldo" class="form-label fw-bold">
+                                <i class="fas fa-user me-2"></i>Sueldo del Afiliado
+                            </label>
+                            <select name="sueldo" id="id_sueldo" class="form-select" required onchange="loadSueldoData()">
+                                <option value="">Seleccione un sueldo...</option>
+                                {% for sueldo in sueldos %}
+                                    <option value="{{ sueldo.pk }}" 
+                                            data-afiliado="{{ sueldo.afiliado.nombre_completo }}"
+                                            data-cedula="{{ sueldo.afiliado.cedula }}"
+                                            data-sueldo-base="{{ sueldo.sueldo_base }}"
+                                            data-anio="{{ sueldo.anio }}"
+                                            {% if object and object.sueldo.pk == sueldo.pk %}selected{% endif %}>
+                                        {{ sueldo.afiliado.nombre_completo }} - {{ sueldo.anio }} (${{ sueldo.sueldo_base|floatformat:0 }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Seleccione el sueldo base sobre el cual se calculará el aporte</div>
+                        </div>
+                    </div>
+
+                    <!-- Aporte Type -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="id_nombre" class="form-label fw-bold">
+                                <i class="fas fa-tag me-2"></i>Tipo de Aporte
+                            </label>
+                            <select name="nombre" id="id_nombre" class="form-select" required onchange="updateAporteType()">
+                                <option value="">Seleccione tipo...</option>
+                                <option value="ADEMACOR" {% if object and object.nombre == 'ADEMACOR' %}selected{% endif %}>
+                                    ADEMACOR (Salud)
+                                </option>
+                                <option value="FAMECOR" {% if object and object.nombre == 'FAMECOR' %}selected{% endif %}>
+                                    FAMECOR (Familiar)
+                                </option>
+                                <option value="OTROS" {% if object and object.nombre == 'OTROS' %}selected{% endif %}>
+                                    OTROS
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="id_porcentaje" class="form-label fw-bold">
+                                <i class="fas fa-percentage me-2"></i>Porcentaje
+                            </label>
+                            <div class="input-group">
+                                <input type="number" name="porcentaje" id="id_porcentaje" 
+                                       class="form-control" step="0.01" min="0" max="100" 
+                                       value="{% if object %}{{ object.porcentaje }}{% endif %}"
+                                       required onchange="calculateAporte()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <div class="form-text">Porcentaje a aplicar sobre el sueldo base</div>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Value -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="id_valor" class="form-label fw-bold">
+                                <i class="fas fa-calculator me-2"></i>Valor Calculado
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" name="valor" id="id_valor" 
+                                       class="form-control" step="0.01" min="0"
+                                       value="{% if object %}{{ object.valor }}{% endif %}"
+                                       required readonly>
+                            </div>
+                            <div class="form-text">Valor automáticamente calculado</div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="button" class="btn btn-info" onclick="calculateAporte()">
+                                <i class="fas fa-sync-alt me-2"></i>Recalcular
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-primary" onclick="previewAporte()">
+                                <i class="fas fa-eye me-2"></i>Vista Previa
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Actualizar{% else %}Guardar{% endif %} Aporte
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Ayuda
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6>Tipos de Aportes:</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <span class="badge bg-danger me-2">ADEMACOR</span>
+                        <small>Servicios de salud y bienestar médico</small>
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-primary me-2">FAMECOR</span>
+                        <small>Beneficios familiares y apoyo social</small>
+                    </li>
+                    <li class="mb-2">
+                        <span class="badge bg-secondary me-2">OTROS</span>
+                        <small>Aportes adicionales específicos</small>
+                    </li>
+                </ul>
+
+                <hr>
+
+                <h6>Cálculo Automático:</h6>
+                <p class="small text-muted">
+                    El valor del aporte se calcula automáticamente multiplicando 
+                    el sueldo base por el porcentaje especificado.
+                </p>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <small>
+                        Asegúrese de seleccionar el sueldo correcto antes de 
+                        especificar el porcentaje.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="card mt-3" id="previewCard" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="previewContent">
+                    <!-- Preview content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedSueldo = null;
+
+function loadSueldoData() {
+    const sueldoSelect = document.getElementById('id_sueldo');
+    const selectedOption = sueldoSelect.options[sueldoSelect.selectedIndex];
+    
+    if (selectedOption.value) {
+        selectedSueldo = {
+            pk: selectedOption.value,
+            afiliado: selectedOption.dataset.afiliado,
+            cedula: selectedOption.dataset.cedula,
+            sueldoBase: parseFloat(selectedOption.dataset.sueldoBase),
+            anio: selectedOption.dataset.anio
+        };
+        
+        // Auto-calculate if percentage is already set
+        calculateAporte();
+    } else {
+        selectedSueldo = null;
+        document.getElementById('id_valor').value = '';
+    }
+}
+
+function updateAporteType() {
+    const tipoSelect = document.getElementById('id_nombre');
+    const porcentajeInput = document.getElementById('id_porcentaje');
+    
+    // Set default percentages based on type
+    switch(tipoSelect.value) {
+        case 'ADEMACOR':
+            porcentajeInput.value = '4.0';
+            break;
+        case 'FAMECOR':
+            porcentajeInput.value = '2.0';
+            break;
+        case 'OTROS':
+            porcentajeInput.value = '1.0';
+            break;
+    }
+    
+    calculateAporte();
+}
+
+function calculateAporte() {
+    if (!selectedSueldo) {
+        alert('Por favor seleccione un sueldo primero');
+        return;
+    }
+    
+    const porcentaje = parseFloat(document.getElementById('id_porcentaje').value) || 0;
+    const valor = selectedSueldo.sueldoBase * (porcentaje / 100);
+    
+    document.getElementById('id_valor').value = valor.toFixed(2);
+}
+
+function previewAporte() {
+    if (!selectedSueldo) {
+        alert('Por favor seleccione un sueldo primero');
+        return;
+    }
+    
+    const nombre = document.getElementById('id_nombre').value;
+    const porcentaje = document.getElementById('id_porcentaje').value;
+    const valor = document.getElementById('id_valor').value;
+    
+    if (!nombre || !porcentaje || !valor) {
+        alert('Por favor complete todos los campos');
+        return;
+    }
+    
+    const previewContent = `
+        <table class="table table-sm">
+            <tr><td><strong>Afiliado:</strong></td><td>${selectedSueldo.afiliado}</td></tr>
+            <tr><td><strong>Cédula:</strong></td><td>${selectedSueldo.cedula}</td></tr>
+            <tr><td><strong>Año:</strong></td><td>${selectedSueldo.anio}</td></tr>
+            <tr><td><strong>Sueldo Base:</strong></td><td>$${selectedSueldo.sueldoBase.toLocaleString()}</td></tr>
+            <tr><td><strong>Tipo Aporte:</strong></td><td><span class="badge bg-primary">${nombre}</span></td></tr>
+            <tr><td><strong>Porcentaje:</strong></td><td>${porcentaje}%</td></tr>
+            <tr><td><strong>Valor:</strong></td><td class="text-success fw-bold">$${parseFloat(valor).toLocaleString()}</td></tr>
+        </table>
+    `;
+    
+    document.getElementById('previewContent').innerHTML = previewContent;
+    document.getElementById('previewCard').style.display = 'block';
+}
+
+// Form validation
+document.getElementById('aporteForm').addEventListener('submit', function(e) {
+    if (!selectedSueldo) {
+        e.preventDefault();
+        alert('Por favor seleccione un sueldo');
+        return;
+    }
+    
+    const nombre = document.getElementById('id_nombre').value;
+    const porcentaje = document.getElementById('id_porcentaje').value;
+    const valor = document.getElementById('id_valor').value;
+    
+    if (!nombre || !porcentaje || !valor) {
+        e.preventDefault();
+        alert('Por favor complete todos los campos obligatorios');
+        return;
+    }
+    
+    if (parseFloat(porcentaje) <= 0 || parseFloat(porcentaje) > 100) {
+        e.preventDefault();
+        alert('El porcentaje debe estar entre 0 y 100');
+        return;
+    }
+});
+
+// Initialize form if editing
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if form has object data for editing
+    const sueldoSelect = document.getElementById('id_sueldo');
+    if (sueldoSelect && sueldoSelect.value) {
+        loadSueldoData();
+    }
+});
+</script>
+{% endblock %}

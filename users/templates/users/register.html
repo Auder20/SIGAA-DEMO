@@ -1,0 +1,125 @@
+{% extends 'users/base_auth.html' %}
+
+{% block title %}Registro - SIGAA{% endblock %}
+
+{% block content %}
+    <h4 class="text-center mb-4">Crear una cuenta</h4>
+
+    <form method="post" action="{% url 'users:register' %}">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="id_first_name" class="form-label">Nombres</label>
+                <input type="text" name="first_name" class="form-control" id="id_first_name"
+                       value="{{ form.first_name.value|default:'' }}" required>
+                {% if form.first_name.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.first_name.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="id_last_name" class="form-label">Apellidos</label>
+                <input type="text" name="last_name" class="form-control" id="id_last_name"
+                       value="{{ form.last_name.value|default:'' }}" required>
+                {% if form.last_name.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.last_name.errors.0 }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_username" class="form-label">Nombre de usuario</label>
+            <input type="text" name="username" class="form-control" id="id_username"
+                   value="{{ form.username.value|default:'' }}" required>
+            {% if form.username.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.username.errors.0 }}
+                </div>
+            {% else %}
+                <div class="form-text">Requerido. 150 caracteres o menos. Letras, dígitos y @/./+/-/_ solamente.</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Correo electrónico</label>
+            <input type="email" name="email" class="form-control" id="id_email"
+                   value="{{ form.email.value|default:'' }}" required>
+            {% if form.email.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.email.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_rol" class="form-label">Rol</label>
+            <select name="rol" class="form-select" id="id_rol" required>
+                <option value="" disabled selected>Seleccione un rol</option>
+                {% for value, label in form.fields.rol.choices %}
+                    <option value="{{ value }}" {% if form.rol.value == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if form.rol.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.rol.errors.0 }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_password1" class="form-label">Contraseña</label>
+            <input type="password" name="password1" class="form-control" id="id_password1" required>
+            {% if form.password1.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.password1.errors.0 }}
+                </div>
+            {% endif %}
+            <div class="form-text">
+                <ul class="mb-0 ps-3">
+                    <li>Tu contraseña no puede ser demasiado similar a tu otra información personal.</li>
+                    <li>Tu contraseña debe contener al menos 8 caracteres.</li>
+                    <li>Tu contraseña no puede ser una contraseña de uso común.</li>
+                    <li>Tu contraseña no puede ser enteramente numérica.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <label for="id_password2" class="form-label">Confirmar contraseña</label>
+            <input type="password" name="password2" class="form-control" id="id_password2" required>
+            {% if form.password2.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.password2.errors.0 }}
+                </div>
+            {% else %}
+                <div class="form-text">Ingrese la misma contraseña que antes, para verificación.</div>
+            {% endif %}
+        </div>
+
+        <div class="d-grid gap-2 mb-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Registrarse
+            </button>
+        </div>
+
+        <div class="d-grid gap-2">
+            <a href="{% url 'users:login' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver al inicio de sesión
+            </a>
+        </div>
+    </form>
+{% endblock %}
+
+{% block extra_links %}
+    <p class="mb-0">
+        ¿Ya tienes una cuenta?
+        <a href="{% url 'users:login' %}">Inicia sesión aquí</a>
+    </p>
+{% endblock %}

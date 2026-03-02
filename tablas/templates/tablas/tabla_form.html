@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if tabla %}Editar{% else %}Nueva{% endif %} Tabla Salarial - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tabla_list' %}">Tablas Salariales</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if tabla %}Editar{% else %}Nueva{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-{% if tabla %}edit{% else %}table{% endif %} me-2"></i>
+            {% if tabla %}Editar Tabla Salarial{% else %}Nueva Tabla Salarial{% endif %}
+        </h1>
+        {% if tabla %}
+        <p class="text-muted mb-0">Modificando: {{ tabla.nombre }}</p>
+        {% else %}
+        <p class="text-muted mb-0">Configure una nueva tabla salarial para el sistema</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'tablas:tabla_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        {% if tabla %}
+        <a href="{% url 'tablas:tabla_detail' tabla.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" id="tablaForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Información Básica
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nombre" class="form-label">
+                        Nombre de la Tabla <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                           value="{{ tabla.nombre|default:'' }}" required
+                           placeholder="Ej: Tabla Salarial 2024">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el nombre de la tabla.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="vigencia" class="form-label">
+                        Año de Vigencia <span class="text-danger">*</span>
+                    </label>
+                    <input type="number" class="form-control" id="vigencia" name="vigencia" 
+                           value="{{ tabla.vigencia|default:'' }}" required
+                           min="2020" max="2030" placeholder="2024">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el año de vigencia.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="descripcion" class="form-label">Descripción</label>
+                    <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                              placeholder="Descripción de la tabla salarial...">{{ tabla.descripcion|default:'' }}</textarea>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="activa" class="form-label">Estado</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="activa" name="activa" 
+                               {% if tabla.activa or not tabla %}checked{% endif %}>
+                        <label class="form-check-label" for="activa">
+                            <strong>Tabla Activa</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Solo una tabla puede estar activa por año
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Salary Scales -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-layer-group me-2"></i>
+                Escalas Salariales
+            </h5>
+            <button type="button" class="btn btn-sm btn-primary" onclick="agregarEscala()">
+                <i class="fas fa-plus me-1"></i>Agregar Escala
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="escalas-container">
+                {% if tabla.escalas %}
+                    {% for escala in tabla.escalas %}
+                    <div class="escala-item border rounded p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h6 class="mb-0">Escala {{ forloop.counter }}</h6>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarEscala(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Grado</label>
+                                <input type="number" class="form-control" name="grado[]" 
+                                       value="{{ escala.grado }}" required min="1" max="20">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Nivel</label>
+                                <input type="number" class="form-control" name="nivel[]" 
+                                       value="{{ escala.nivel }}" required min="1" max="10">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Sueldo Base</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" name="sueldo_base[]" 
+                                           value="{{ escala.sueldo_base }}" required min="0" step="1000">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-layer-group fa-3x mb-3"></i>
+                    <p>No hay escalas configuradas. Haga clic en "Agregar Escala" para comenzar.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Configuration -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                Configuración Adicional
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="incremento_anual" class="form-label">Incremento Anual (%)</label>
+                    <div class="input-group">
+                        <input type="number" class="form-control" id="incremento_anual" name="incremento_anual" 
+                               value="{{ tabla.incremento_anual|default:'' }}" 
+                               step="0.1" min="0" max="50" placeholder="0.0">
+                        <span class="input-group-text">%</span>
+                    </div>
+                    <small class="form-text text-muted">
+                        Incremento automático aplicado anualmente
+                    </small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fecha_aprobacion" class="form-label">Fecha de Aprobación</label>
+                    <input type="date" class="form-control" id="fecha_aprobacion" name="fecha_aprobacion" 
+                           value="{{ tabla.fecha_aprobacion|date:'Y-m-d'|default:'' }}">
+                    <small class="form-text text-muted">
+                        Fecha oficial de aprobación de la tabla
+                    </small>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="incluir_prima" name="incluir_prima" 
+                               {% if tabla.incluir_prima %}checked{% endif %}>
+                        <label class="form-check-label" for="incluir_prima">
+                            <strong>Incluir Prima</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Incluir prima en los cálculos base
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="incluir_cesantias" name="incluir_cesantias" 
+                               {% if tabla.incluir_cesantias %}checked{% endif %}>
+                        <label class="form-check-label" for="incluir_cesantias">
+                            <strong>Incluir Cesantías</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Incluir cesantías en los cálculos
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="retroactiva" name="retroactiva" 
+                               {% if tabla.retroactiva %}checked{% endif %}>
+                        <label class="form-check-label" for="retroactiva">
+                            <strong>Aplicación Retroactiva</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Aplicar retroactivamente desde fecha de aprobación
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'tablas:tabla_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {% if tabla %}Actualizar{% else %}Crear{% endif %} Tabla
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Template for new scale -->
+<template id="escala-template">
+    <div class="escala-item border rounded p-3 mb-3">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <h6 class="mb-0">Nueva Escala</h6>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="eliminarEscala(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Grado</label>
+                <input type="number" class="form-control" name="grado[]" required min="1" max="20" placeholder="1">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label class="form-label">Nivel</label>
+                <input type="number" class="form-control" name="nivel[]" required min="1" max="10" placeholder="1">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Sueldo Base</label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" name="sueldo_base[]" required min="0" step="1000" placeholder="0">
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize form validation
+    validateForm('tablaForm');
+    
+    // Add new scale
+    function agregarEscala() {
+        const container = document.getElementById('escalas-container');
+        const template = document.getElementById('escala-template');
+        const clone = template.content.cloneNode(true);
+        
+        // Remove empty state if exists
+        const emptyState = container.querySelector('.text-center');
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        container.appendChild(clone);
+        updateScaleNumbers();
+    }
+    
+    // Remove scale
+    function eliminarEscala(button) {
+        if (confirm('¿Está seguro que desea eliminar esta escala?')) {
+            button.closest('.escala-item').remove();
+            updateScaleNumbers();
+            
+            // Show empty state if no scales
+            const container = document.getElementById('escalas-container');
+            if (container.children.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-layer-group fa-3x mb-3"></i>
+                        <p>No hay escalas configuradas. Haga clic en "Agregar Escala" para comenzar.</p>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    // Update scale numbers
+    function updateScaleNumbers() {
+        const escalas = document.querySelectorAll('.escala-item h6');
+        escalas.forEach((h6, index) => {
+            h6.textContent = `Escala ${index + 1}`;
+        });
+    }
+    
+    // Validate year
+    document.getElementById('vigencia').addEventListener('change', function() {
+        const year = parseInt(this.value);
+        const currentYear = new Date().getFullYear();
+        
+        if (year < currentYear - 5 || year > currentYear + 5) {
+            this.setCustomValidity('El año debe estar entre ' + (currentYear - 5) + ' y ' + (currentYear + 5));
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+{% endblock %}

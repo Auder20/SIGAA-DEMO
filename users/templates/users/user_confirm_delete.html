@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Usuario - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'users:users_main' %}">Usuarios</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'users:user_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'users:user_detail' object.pk %}">{{ object.username }}</a>
+</li>
+<li class="breadcrumb-item active">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-times text-danger" style="font-size: 4rem;"></i>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ¡Acción Irreversible!
+                    </h5>
+                    <p class="mb-0">
+                        Está a punto de eliminar permanentemente el usuario <strong>{{ object.username }}</strong>.
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Información del Usuario a Eliminar:</h6>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Usuario:</strong></div>
+                            <div class="col-sm-8">{{ object.username }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Nombre:</strong></div>
+                            <div class="col-sm-8">{{ object.get_full_name|default:"No especificado" }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Email:</strong></div>
+                            <div class="col-sm-8">{{ object.email|default:"No especificado" }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Estado:</strong></div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-{% if object.is_active %}success{% else %}danger{% endif %}">
+                                    {% if object.is_active %}Activo{% else %}Inactivo{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Tipo:</strong></div>
+                            <div class="col-sm-8">
+                                {% if object.is_superuser %}
+                                    <span class="badge bg-warning text-dark">Super Usuario</span>
+                                {% elif object.is_staff %}
+                                    <span class="badge bg-info">Staff</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Usuario</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-info-circle me-2"></i>Consecuencias de la eliminación:</h6>
+                    <ul class="mb-0">
+                        <li>Se perderá todo el historial de actividad del usuario</li>
+                        <li>Se eliminarán todas las sesiones activas</li>
+                        <li>Los registros relacionados quedarán sin usuario asignado</li>
+                    </ul>
+                </div>
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'users:user_detail' object.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Sí, Eliminar Usuario
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    if (!confirm('¿Está completamente seguro que desea eliminar este usuario? Esta acción NO se puede deshacer.')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

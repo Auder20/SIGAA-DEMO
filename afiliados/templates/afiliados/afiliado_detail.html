@@ -1,0 +1,333 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ afiliado.nombre_completo }} - Detalle Afiliado - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliado_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item active">{{ afiliado.nombre_completo }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-user me-2"></i>
+            {{ afiliado.nombre_completo }}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if afiliado.activo %}
+                <span class="badge bg-success me-2">
+                    <i class="fas fa-check me-1"></i>Activo
+                </span>
+            {% else %}
+                <span class="badge bg-danger me-2">
+                    <i class="fas fa-times me-1"></i>Inactivo
+                </span>
+            {% endif %}
+            Cédula: {{ afiliado.cedula|default:"No registrada" }}
+        </p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        <a href="{% url 'afiliados:afiliado_update' afiliado.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Editar
+        </a>
+        <a href="{% url 'afiliados:afiliado_delete' afiliado.pk %}" class="btn btn-danger" 
+           onclick="return confirmDelete('¿Eliminar a {{ afiliado.nombre_completo }}?')">
+            <i class="fas fa-trash me-2"></i>Eliminar
+        </a>
+        <a href="{% url 'afiliados:desafiliar_afiliado' afiliado.pk %}" class="btn btn-warning" 
+           onclick="return confirm('¿Está seguro de que desea desafiliar a {{ afiliado.nombre_completo }}?\n\nEl afiliado será movido a la lista de desafiliados.');">
+            <i class="fas fa-user-minus me-2"></i>Desafiliar
+        </a>
+    </div>
+</div>
+
+<!-- Salary Information Card -->
+{% if afiliado.sueldo_actual %}
+<div class="card mb-4 border-success">
+    <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-money-bill-wave me-2"></i>
+            Información Salarial Actual
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h3 class="text-success mb-1">${{ afiliado.sueldo_actual.sueldo_neto|floatformat:0 }}</h3>
+                    <small class="text-muted">Sueldo Neto</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-info mb-1">${{ afiliado.sueldo_actual.sueldo_base|floatformat:0 }}</h4>
+                    <small class="text-muted">Sueldo Base</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-warning mb-1">${{ afiliado.sueldo_actual.bonificaciones|floatformat:0 }}</h4>
+                    <small class="text-muted">Bonificaciones</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h4 class="text-danger mb-1">${{ afiliado.sueldo_actual.descuentos|floatformat:0 }}</h4>
+                    <small class="text-muted">Descuentos</small>
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-6">
+                <small class="text-muted">Fecha de cálculo:</small>
+                <p class="mb-1">{{ afiliado.sueldo_actual.fecha_calculo|date:"d/m/Y" }}</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <form method="post" action="{% url 'afiliados:recalcular_sueldo' afiliado.pk %}" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-calculator me-1"></i>Recalcular Sueldo
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning d-flex align-items-center justify-content-between">
+    <div>
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Sin sueldo calculado</strong> - Aún no se ha calculado el sueldo para este afiliado.
+    </div>
+    <div>
+        <form method="post" action="{% url 'afiliados:recalcular_sueldo' afiliado.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success btn-sm">
+                <i class="fas fa-calculator me-1"></i>Calcular Ahora
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Personal and Contact Information -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Información Personal
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Cédula:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.cedula|default:"No registrada" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Fecha de Nacimiento:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.fecha_nacimiento|date:"d/m/Y"|default:"No registrada" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Edad:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.edad|default:"No registrada" }} años</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Estado Civil:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.estado_civil|default:"No registrado" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Ciudad de Nacimiento:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.ciudad_de_nacimiento|default:"No registrada" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Departamento:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.departamento|default:"No registrado" }}</div>
+                </div>
+                {% if afiliado.nombre_conyuge %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Cónyuge:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.nombre_conyuge }}</div>
+                </div>
+                {% endif %}
+                {% if afiliado.nombre_hijos %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Hijos:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.nombre_hijos }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-address-book me-2"></i>
+                    Información de Contacto
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Dirección:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.direccion|default:"No registrada" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Municipio:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.municipio|default:"No registrado" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Teléfono:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.telefono %}
+                            <a href="tel:{{ afiliado.telefono }}" class="text-decoration-none">
+                                <i class="fas fa-phone me-1"></i>{{ afiliado.telefono }}
+                            </a>
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Email:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.email %}
+                            <a href="mailto:{{ afiliado.email }}" class="text-decoration-none">
+                                <i class="fas fa-envelope me-1"></i>{{ afiliado.email }}
+                            </a>
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic and Professional Information -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    Información Académica
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Título Pregrado:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.titulo_pregrado|default:"No registrado" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Título Posgrado:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.titulo_posgrado %}
+                            <span class="badge bg-info">{{ afiliado.titulo_posgrado }}</span>
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </div>
+                </div>
+                {% if afiliado.estudios_posgrado %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Estudios Posgrado:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.estudios_posgrado }}</div>
+                </div>
+                {% endif %}
+                {% if afiliado.otros_titulos %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Otros Títulos:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.otros_titulos }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-briefcase me-2"></i>
+                    Información Laboral
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Grado Escalafón:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.grado_escalafon %}
+                            <span class="badge bg-primary">Grado {{ afiliado.grado_escalafon }}</span>
+                        {% else %}
+                            <span class="text-muted">No asignado</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Cargo Actual:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.cargo_desempenado|default:"No registrado" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Años de Servicio:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.anos_servicio %}
+                            <span class="badge bg-secondary">{{ afiliado.anos_servicio }} años</span>
+                        {% else %}
+                            No registrado
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Fecha de Ingreso:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.fecha_ingreso|date:"d/m/Y"|default:"No registrada" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="card">
+    <div class="card-body">
+        <div class="d-flex justify-content-between">
+            <div>
+                <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+                </a>
+                <a href="{% url 'afiliados:afiliados_main' %}" class="btn btn-outline-info">
+                    <i class="fas fa-home me-2"></i>Panel Afiliados
+                </a>
+            </div>
+            <div>
+                <button class="btn btn-outline-success me-2" 
+                        onclick="alert('Use: python manage.py recalcular_sueldos --afiliado {{ afiliado.cedula }}')">
+                    <i class="fas fa-calculator me-2"></i>Recalcular Sueldo
+                </button>
+                <a href="{% url 'afiliados:afiliado_update' afiliado.pk %}" class="btn btn-warning me-2">
+                    <i class="fas fa-edit me-2"></i>Editar
+                </a>
+                <a href="{% url 'afiliados:afiliado_delete' afiliado.pk %}" class="btn btn-danger" 
+                   onclick="return confirmDelete('¿Eliminar a {{ afiliado.nombre_completo }}?')">
+                    <i class="fas fa-trash me-2"></i>Eliminar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

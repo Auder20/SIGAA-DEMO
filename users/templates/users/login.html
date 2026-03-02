@@ -1,0 +1,59 @@
+﻿{% extends 'users/base_auth.html' %}
+
+{% block title %}Iniciar Sesión - SIGAA{% endblock %}
+
+{% block content %}
+<h4 class="text-center mb-4">Iniciar Sesión</h4>
+
+<form method="post" action="{% url 'users:login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label for="id_username" class="form-label">Usuario</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="fas fa-user"></i></span>
+      <input type="text" name="username" class="form-control" id="id_username" placeholder="Ingrese su usuario" required autofocus />
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label for="id_password" class="form-label">Contraseña</label>
+    <div class="input-group">
+      <span class="input-group-text"><i class="fas fa-lock"></i></span>
+      <input type="password" name="password" class="form-control" id="id_password" placeholder="Ingrese su contraseña" required />
+    </div>
+    <div class="form-text text-end">
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+        {% endfor %}
+      </div>
+      {% endif %}
+      <a href="{% url 'users:password_reset' %}" class="text-decoration-none">¿Olvidaste tu contraseña?</a>
+    </div>
+  </div>
+
+  <div class="d-grid gap-2 mb-3">
+    <button type="submit" class="btn btn-primary btn-lg">
+      <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+    </button>
+  </div>
+
+  <div class="d-grid gap-2 mb-4">
+    <a href="/" class="btn btn-outline-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+  </div>
+</form>
+{% endblock %}
+
+{% block extra_links %}
+<p class="mb-1">
+  <a href="{% url 'users:password_reset' %}">¿Olvidaste tu contraseña?</a>
+</p>
+<p class="mb-0">
+  ¿No tienes una cuenta?
+  <a href="{% url 'users:register' %}">Regístrate aquí</a>
+</p>
+{% endblock %}

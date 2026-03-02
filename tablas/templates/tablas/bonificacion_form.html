@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if bonificacion %}Editar{% else %}Nueva{% endif %} Bonificación - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:bonificacion_list' %}">Bonificaciones</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if bonificacion %}Editar{% else %}Nueva{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-{% if bonificacion %}edit{% else %}gift{% endif %} me-2"></i>
+            {% if bonificacion %}Editar Bonificación{% else %}Nueva Bonificación{% endif %}
+        </h1>
+        {% if bonificacion %}
+        <p class="text-muted mb-0">Modificando: {{ bonificacion.nombre }}</p>
+        {% else %}
+        <p class="text-muted mb-0">Configure una nueva bonificación para el sistema</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        {% if bonificacion %}
+        <a href="{% url 'tablas:bonificacion_detail' bonificacion.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" id="bonificacionForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Información Básica
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="nombre" class="form-label">
+                        Nombre de la Bonificación <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" 
+                           value="{{ bonificacion.nombre|default:'' }}" required
+                           placeholder="Ej: Bonificación por Antigüedad">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el nombre de la bonificación.
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="activo" class="form-label">Estado</label>
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" 
+                               {% if bonificacion.activo or not bonificacion %}checked{% endif %}>
+                        <label class="form-check-label" for="activo">
+                            <strong>Bonificación Activa</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Solo las bonificaciones activas se aplicarán en los cálculos
+                    </small>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                          placeholder="Descripción detallada de la bonificación...">{{ bonificacion.descripcion|default:'' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculation Configuration -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-calculator me-2"></i>
+                Configuración de Cálculo
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="tipo" class="form-label">
+                        Tipo de Bonificación <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="porcentaje" {% if bonificacion.tipo == 'porcentaje' %}selected{% endif %}>Porcentaje del Sueldo</option>
+                        <option value="fijo" {% if bonificacion.tipo == 'fijo' %}selected{% endif %}>Monto Fijo</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor seleccione el tipo de bonificación.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="valor" class="form-label">
+                        Valor <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text" id="valor-prefix">%</span>
+                        <input type="number" class="form-control" id="valor" name="valor" 
+                               value="{{ bonificacion.valor|default:'' }}" required
+                               step="0.01" min="0" placeholder="0.00">
+                        <div class="invalid-feedback">
+                            Por favor ingrese el valor de la bonificación.
+                        </div>
+                    </div>
+                    <small class="form-text text-muted" id="valor-help">
+                        Ingrese el porcentaje (ej: 15 para 15%)
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Rules -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-rules me-2"></i>
+                Reglas de Aplicación
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="minimo_antiguedad" class="form-label">Antigüedad Mínima (años)</label>
+                    <input type="number" class="form-control" id="minimo_antiguedad" name="minimo_antiguedad" 
+                           value="{{ bonificacion.minimo_antiguedad|default:'' }}"
+                           min="0" placeholder="0">
+                    <small class="form-text text-muted">
+                        Años mínimos de servicio requeridos (0 = sin restricción)
+                    </small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="maximo_antiguedad" class="form-label">Antigüedad Máxima (años)</label>
+                    <input type="number" class="form-control" id="maximo_antiguedad" name="maximo_antiguedad" 
+                           value="{{ bonificacion.maximo_antiguedad|default:'' }}"
+                           min="0" placeholder="Sin límite">
+                    <small class="form-text text-muted">
+                        Años máximos de servicio (vacío = sin límite)
+                    </small>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="cargos_aplicables" class="form-label">Cargos Aplicables</label>
+                    <select class="form-select" id="cargos_aplicables" name="cargos_aplicables" multiple>
+                        <option value="rector">Rector</option>
+                        <option value="decano">Decano</option>
+                        <option value="director">Director</option>
+                        <option value="coordinador">Coordinador</option>
+                        <option value="docente">Docente</option>
+                        <option value="administrativo">Administrativo</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        Seleccione los cargos a los que aplica (vacío = todos los cargos)
+                    </small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="niveles_educativos" class="form-label">Niveles Educativos</label>
+                    <select class="form-select" id="niveles_educativos" name="niveles_educativos" multiple>
+                        <option value="doctorado">Doctorado</option>
+                        <option value="maestria">Maestría</option>
+                        <option value="especializacion">Especialización</option>
+                        <option value="pregrado">Pregrado</option>
+                    </select>
+                    <small class="form-text text-muted">
+                        Niveles educativos aplicables (vacío = todos los niveles)
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Settings -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                Configuración Adicional
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="acumulable" name="acumulable" 
+                               {% if bonificacion.acumulable %}checked{% endif %}>
+                        <label class="form-check-label" for="acumulable">
+                            <strong>Acumulable</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Se puede combinar con otras bonificaciones
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="gravable" name="gravable" 
+                               {% if bonificacion.gravable %}checked{% endif %}>
+                        <label class="form-check-label" for="gravable">
+                            <strong>Gravable</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Sujeta a descuentos de ley
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="automatica" name="automatica" 
+                               {% if bonificacion.automatica %}checked{% endif %}>
+                        <label class="form-check-label" for="automatica">
+                            <strong>Aplicación Automática</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Se aplica automáticamente si cumple condiciones
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        {% if bonificacion %}Actualizar{% else %}Crear{% endif %} Bonificación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize form validation
+    validateForm('bonificacionForm');
+    
+    // Update value input based on type selection
+    document.getElementById('tipo').addEventListener('change', function() {
+        const valorPrefix = document.getElementById('valor-prefix');
+        const valorHelp = document.getElementById('valor-help');
+        const valorInput = document.getElementById('valor');
+        
+        if (this.value === 'porcentaje') {
+            valorPrefix.textContent = '%';
+            valorHelp.textContent = 'Ingrese el porcentaje (ej: 15 para 15%)';
+            valorInput.placeholder = '0.00';
+            valorInput.max = '100';
+        } else if (this.value === 'fijo') {
+            valorPrefix.textContent = '$';
+            valorHelp.textContent = 'Ingrese el monto fijo en pesos';
+            valorInput.placeholder = '0.00';
+            valorInput.removeAttribute('max');
+        } else {
+            valorPrefix.textContent = '';
+            valorHelp.textContent = 'Seleccione primero el tipo de bonificación';
+            valorInput.placeholder = '0.00';
+        }
+    });
+    
+    // Validate age range
+    document.getElementById('maximo_antiguedad').addEventListener('change', function() {
+        const minimo = parseInt(document.getElementById('minimo_antiguedad').value) || 0;
+        const maximo = parseInt(this.value);
+        
+        if (maximo && maximo < minimo) {
+            this.setCustomValidity('La antigüedad máxima debe ser mayor que la mínima');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Initialize type change event
+    document.getElementById('tipo').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

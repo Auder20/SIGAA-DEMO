@@ -1,0 +1,140 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Asegurar que el contenedor principal ocupe todo el ancho */
+        #container {
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* Estilo para los campos de formulario */
+        .form-row input[type=text], 
+        .form-row input[type=password], 
+        .form-row input[type=email], 
+        .form-row input[type=url], 
+        .form-row input[type=number], 
+        .form-row input[type=tel],
+        .form-row textarea, 
+        .form-row select, 
+        .form-row .vTextField {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-row input[type=text]:focus, 
+        .form-row input[type=password]:focus, 
+        .form-row input[type=email]:focus, 
+        .form-row input[type=url]:focus, 
+        .form-row input[type=number]:focus, 
+        .form-row input[type=tel]:focus,
+        .form-row textarea:focus, 
+        .form-row select:focus, 
+        .form-row .vTextField:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+            outline: none;
+        }
+        
+        /* Estilo para las tablas */
+        #result_list tbody tr:hover {
+            background-color: var(--orange-light) !important;
+        }
+        
+        #result_list th, #result_list td {
+            vertical-align: middle;
+        }
+        
+        /* Estilo para los filtros laterales */
+        #changelist-filter {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        #changelist-filter h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        #changelist-filter ul {
+            padding-left: 0;
+            list-style: none;
+        }
+        
+        #changelist-filter li {
+            margin-bottom: 5px;
+        }
+        
+        #changelist-filter a {
+            color: #333;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: block;
+            padding: 3px 0;
+        }
+        
+        #changelist-filter a:hover, #changelist-filter li.selected a {
+            color: var(--primary-color);
+            padding-left: 5px;
+        }
+        
+        /* Estilo para los mensajes */
+        .messagelist li {
+            background: #e9f7ef;
+            border-left: 4px solid #28a745;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            list-style: none;
+            border-radius: 4px;
+        }
+        
+        .messagelist .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        
+        .messagelist .error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        /* Estilo para los campos de búsqueda */
+        #searchbar {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+        
+        /* Estilo para los botones de acción */
+        .action-counter, .actions .button {
+            margin-right: 10px;
+        }
+        
+        /* Estilo para el pie de página */
+        #footer {
+            text-align: center;
+            padding: 15px 0;
+            color: #6c757d;
+            font-size: 0.9em;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block footer %}
+    <div id="footer">
+        <p>© {% now "Y" %} SIGAA - Sistema de Gestión y Análisis de Aportes de Afiliados</p>
+    </div>
+{% endblock %}

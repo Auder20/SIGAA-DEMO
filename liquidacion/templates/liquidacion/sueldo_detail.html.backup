@@ -1,0 +1,422 @@
+{% extends 'base.html' %} {% load currency_filters %} {% block title %}Detalle
+de Sueldo - {{ sueldo.afiliado.nombre_completo }} - SIGAA{% endblock %} {% block
+breadcrumb_items %}
+<li class="breadcrumb-item">
+  <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'liquidacion:sueldo_list' %}">Sueldos</a>
+</li>
+<li class="breadcrumb-item active">{{ sueldo.afiliado.nombre_completo }}</li>
+{% endblock %} {% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3 mb-1">
+      <i class="fas fa-money-bill-wave me-2"></i>
+      Detalle de Sueldo
+    </h1>
+    <p class="text-muted mb-0">
+      {{ sueldo.afiliado.nombre_completo }} - {{ sueldo.afiliado.cedula }}
+    </p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Volver
+    </a>
+    <button class="btn btn-success" onclick="recalcularSueldo()">
+      <i class="fas fa-sync me-2"></i>Recalcular
+    </button>
+    <a
+      href="{% url 'liquidacion:sueldo_update' sueldo.pk %}"
+      class="btn btn-warning"
+    >
+      <i class="fas fa-edit me-2"></i>Editar
+    </a>
+    <a
+      href="{% url 'liquidacion:sueldo_delete' sueldo.pk %}"
+      class="btn btn-danger"
+      onclick="return confirm('¿Está seguro de eliminar este sueldo?')"
+    >
+      <i class="fas fa-trash me-2"></i>Eliminar
+    </a>
+  </div>
+</div>
+
+<!-- Afiliado Information -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-user me-2"></i>
+          Información del Afiliado
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <td class="fw-bold">Nombre Completo:</td>
+                <td>{{ sueldo.afiliado.nombre_completo }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Cédula:</td>
+                <td>{{ sueldo.afiliado.cedula }}</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Cargo:</td>
+                <td>
+                  {% if sueldo.afiliado.cargo_desempenado %}
+                  <span class="badge bg-info"
+                    >{{ sueldo.afiliado.cargo_desempenado }}</span
+                  >
+                  {% else %}
+                  <span class="text-muted">No especificado</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-borderless">
+              <tr>
+                <td class="fw-bold">Grado de Escalafón:</td>
+                <td>
+                  {% if sueldo.afiliado.grado_escalafon %}
+                  <span class="badge bg-primary"
+                    >{{ sueldo.afiliado.grado_escalafon }}</span
+                  >
+                  {% else %}
+                  <span class="text-muted">No especificado</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Años de Servicio:</td>
+                <td>{{ sueldo.afiliado.anos_servicio|default:"0" }} años</td>
+              </tr>
+              <tr>
+                <td class="fw-bold">Nivel Educativo:</td>
+                <td>
+                  {% if sueldo.afiliado.nivel_educativo %}
+                  <span class="badge bg-success"
+                    >{{ sueldo.afiliado.nivel_educativo }}</span
+                  >
+                  {% else %}
+                  <span class="text-muted">No especificado</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Salary Calculation Details -->
+<div class="row mb-4">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-calculator me-2"></i>
+          Desglose del Cálculo
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Porcentaje</th>
+                <th class="text-end">Valor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <i class="fas fa-star text-warning me-2"></i>
+                  <strong
+                    >Sueldo Base (Grado {{
+                    sueldo.afiliado.grado_escalafon|default:"N/A" }})</strong
+                  >
+                </td>
+                <td>-</td>
+                <td class="text-end fw-bold text-primary">
+                  ${{ sueldo.sueldo_base|floatformat:0|default:"0" }}
+                </td>
+              </tr>
+
+              {% if sueldo.bonificacion_cargo > 0 %}
+              <tr>
+                <td>
+                  <i class="fas fa-briefcase text-info me-2"></i>
+                  Bonificación por Cargo
+                </td>
+                <td>{{ sueldo.porcentaje_cargo|default:"0" }}%</td>
+                <td class="text-end text-success">
+                  +${{ sueldo.bonificacion_cargo|floatformat:0 }}
+                </td>
+              </tr>
+              {% endif %} {% if sueldo.bonificacion_anos > 0 %}
+              <tr>
+                <td>
+                  <i class="fas fa-clock text-warning me-2"></i>
+                  Bonificación por Años de Servicio
+                </td>
+                <td>{{ sueldo.porcentaje_anos|default:"0" }}%</td>
+                <td class="text-end text-success">
+                  +${{ sueldo.bonificacion_anos|floatformat:0 }}
+                </td>
+              </tr>
+              {% endif %} {% if sueldo.bonificacion_educacion > 0 %}
+              <tr>
+                <td>
+                  <i class="fas fa-graduation-cap text-primary me-2"></i>
+                  Bonificación por Nivel Educativo
+                </td>
+                <td>{{ sueldo.porcentaje_educacion|default:"0" }}%</td>
+                <td class="text-end text-success">
+                  +${{ sueldo.bonificacion_educacion|floatformat:0 }}
+                </td>
+              </tr>
+              {% endif %} {% if sueldo.bonificaciones_adicionales > 0 %}
+              <tr>
+                <td>
+                  <i class="fas fa-plus text-success me-2"></i>
+                  Bonificaciones Adicionales
+                </td>
+                <td>-</td>
+                <td class="text-end text-success">
+                  +${{ sueldo.bonificaciones_adicionales|floatformat:0 }}
+                </td>
+              </tr>
+              {% endif %} {% if sueldo.descuentos > 0 %}
+              <tr>
+                <td>
+                  <i class="fas fa-minus text-danger me-2"></i>
+                  Descuentos
+                </td>
+                <td>-</td>
+                <td class="text-end text-danger">
+                  -${{ sueldo.descuentos|floatformat:0 }}
+                </td>
+              </tr>
+              {% endif %}
+            </tbody>
+            <tfoot>
+              <tr class="table-primary">
+                <th>
+                  <i class="fas fa-money-bill-wave me-2"></i>
+                  <strong>SUELDO NETO TOTAL</strong>
+                </th>
+                <th>-</th>
+                <th class="text-end">
+                  <h4 class="mb-0 text-primary">
+                    ${{ sueldo.sueldo_neto|floatformat:0 }}
+                  </h4>
+                </th>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary Card -->
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header bg-info text-white">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-chart-pie me-2"></i>
+          Resumen
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="text-center mb-3">
+          <h2 class="text-primary mb-1">
+            ${{ sueldo.sueldo_neto|floatformat:0 }}
+          </h2>
+          <p class="text-muted mb-0">Sueldo Neto</p>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Sueldo Base</span>
+            <span class="fw-bold">${{ sueldo.sueldo_base|floatformat:0 }}</span>
+          </div>
+          <div class="progress mb-2" style="height: 6px">
+            <div class="progress-bar bg-primary" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Bonificaciones</span>
+            <span class="fw-bold text-success"
+              >+${{ sueldo.bonificaciones|floatformat:0 }}</span
+            >
+          </div>
+          <div class="progress mb-2" style="height: 6px">
+            <div class="progress-bar bg-success" style="width: 25%"></div>
+          </div>
+        </div>
+
+        {% if sueldo.descuentos > 0 %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between mb-1">
+            <span>Descuentos</span>
+            <span class="fw-bold text-danger"
+              >-${{ sueldo.descuentos|floatformat:0 }}</span
+            >
+          </div>
+          <div class="progress mb-2" style="height: 6px">
+            <div class="progress-bar bg-danger" style="width: 15%"></div>
+          </div>
+        </div>
+        {% endif %}
+
+        <hr />
+
+        <div class="text-center">
+          <small class="text-muted">
+            <i class="fas fa-calendar me-1"></i>
+            Calculado el {{ sueldo.fecha_calculo|date:"d/m/Y H:i" }}
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Aportes Section -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-percentage me-2"></i>
+          Aportes y Descuentos
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if aportes %}
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Concepto</th>
+                <th>Tipo</th>
+                <th class="text-end">Valor</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <i class="fas fa-heart text-danger me-2"></i>
+                  ADEMACOR
+                </td>
+                <td><span class="badge bg-info">Aporte</span></td>
+                <td class="text-end fw-bold">
+                  {{ aportes.ademacor|cop|default:"$0" }}
+                </td>
+                <td class="text-muted">Aporte de salud</td>
+              </tr>
+              <tr>
+                <td>
+                  <i class="fas fa-users text-primary me-2"></i>
+                  FAMICOR
+                </td>
+                <td><span class="badge bg-info">Aporte</span></td>
+                <td class="text-end fw-bold">
+                  {{ aportes.famicor|cop|default:"$0" }}
+                </td>
+                <td class="text-muted">Aporte familiar</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+          <i class="fas fa-percentage fa-3x text-muted mb-3"></i>
+          <p class="text-muted">No hay aportes registrados para este sueldo.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calculation History -->
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <i class="fas fa-history me-2"></i>
+          Historial de Cálculos
+        </h5>
+      </div>
+      <div class="card-body">
+        {% if historial_calculos %}
+        <div class="table-responsive">
+          <table class="table table-sm">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Sueldo Neto</th>
+                <th>Motivo</th>
+                <th>Usuario</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for calculo in historial_calculos %}
+              <tr>
+                <td>{{ calculo.fecha|date:"d/m/Y H:i" }}</td>
+                <td class="fw-bold">
+                  ${{ calculo.sueldo_neto|floatformat:0 }}
+                </td>
+                <td>{{ calculo.motivo|default:"Cálculo automático" }}</td>
+                <td>{{ calculo.usuario|default:"Sistema" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-3">
+          <i class="fas fa-history fa-2x text-muted mb-2"></i>
+          <p class="text-muted mb-0">
+            No hay historial de cálculos disponible.
+          </p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function recalcularSueldo() {
+    if (
+      confirm(
+        '¿Recalcular este sueldo? Esto actualizará todos los valores basándose en los parámetros actuales.',
+      )
+    ) {
+      alert('Funcionalidad de recálculo - implementar en el backend');
+      // Aquí iría la lógica para recalcular el sueldo
+    }
+  }
+
+  function exportarDetalle() {
+    alert('Funcionalidad de exportación - implementar en el backend');
+  }
+</script>
+{% endblock %}

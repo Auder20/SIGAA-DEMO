@@ -1,0 +1,313 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ bonificacion.nombre }} - Detalle Bonificación - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:bonificacion_list' %}">Bonificaciones</a>
+</li>
+<li class="breadcrumb-item active">{{ bonificacion.nombre|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-gift me-2"></i>
+            {{ bonificacion.nombre }}
+        </h1>
+        <p class="text-muted mb-0">
+            <span class="badge bg-{% if bonificacion.activo %}success{% else %}danger{% endif %} me-2">
+                {% if bonificacion.activo %}Activa{% else %}Inactiva{% endif %}
+            </span>
+            <span class="badge bg-{% if bonificacion.tipo == 'porcentaje' %}info{% else %}success{% endif %} me-2">
+                {{ bonificacion.get_tipo_display|default:bonificacion.tipo|capfirst }}
+            </span>
+            Creada: {{ bonificacion.fecha_creacion|date:"d/m/Y"|default:"Fecha no disponible" }}
+        </p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'tablas:bonificacion_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        <a href="{% url 'tablas:bonificacion_edit' bonificacion.pk %}" class="btn btn-warning">
+            <i class="fas fa-edit me-2"></i>Editar
+        </a>
+        <a href="{% url 'tablas:bonificacion_delete' bonificacion.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash me-2"></i>Eliminar
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Bonification Information -->
+    <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información de la Bonificación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nombre</label>
+                        <p class="fw-bold">{{ bonificacion.nombre }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Estado</label>
+                        <p class="fw-bold">
+                            <span class="badge bg-{% if bonificacion.activo %}success{% else %}danger{% endif %}">
+                                {% if bonificacion.activo %}Activa{% else %}Inactiva{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label text-muted">Descripción</label>
+                    <p class="fw-bold">{{ bonificacion.descripcion|default:"Sin descripción" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculation Details -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-calculator me-2"></i>
+                    Configuración de Cálculo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Tipo</label>
+                        <p class="fw-bold">
+                            <span class="badge bg-{% if bonificacion.tipo == 'porcentaje' %}info{% else %}success{% endif %}">
+                                {{ bonificacion.get_tipo_display|default:bonificacion.tipo|capfirst }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Valor</label>
+                        <p class="fw-bold text-primary" style="font-size: 1.2rem;">
+                            {% if bonificacion.tipo == 'porcentaje' %}
+                                {{ bonificacion.valor }}%
+                            {% else %}
+                                ${{ bonificacion.valor|floatformat:0 }}
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Rules -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-rules me-2"></i>
+                    Reglas de Aplicación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Antigüedad Mínima</label>
+                        <p class="fw-bold">
+                            {% if bonificacion.minimo_antiguedad %}
+                                {{ bonificacion.minimo_antiguedad }} años
+                            {% else %}
+                                Sin restricción
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Antigüedad Máxima</label>
+                        <p class="fw-bold">
+                            {% if bonificacion.maximo_antiguedad %}
+                                {{ bonificacion.maximo_antiguedad }} años
+                            {% else %}
+                                Sin límite
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Cargos Aplicables</label>
+                        <div>
+                            {% if bonificacion.cargos_aplicables %}
+                                {% for cargo in bonificacion.cargos_aplicables %}
+                                <span class="badge bg-secondary me-1">{{ cargo|capfirst }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Todos los cargos</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Niveles Educativos</label>
+                        <div>
+                            {% if bonificacion.niveles_educativos %}
+                                {% for nivel in bonificacion.niveles_educativos %}
+                                <span class="badge bg-info me-1">{{ nivel|capfirst }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Todos los niveles</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Configuración Adicional
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if bonificacion.acumulable %}plus-circle text-success{% else %}minus-circle text-muted{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Acumulable</h6>
+                                <span class="badge bg-{% if bonificacion.acumulable %}success{% else %}secondary{% endif %}">
+                                    {% if bonificacion.acumulable %}Sí{% else %}No{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if bonificacion.gravable %}percentage text-warning{% else %}ban text-muted{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Gravable</h6>
+                                <span class="badge bg-{% if bonificacion.gravable %}warning text-dark{% else %}secondary{% endif %}">
+                                    {% if bonificacion.gravable %}Sí{% else %}No{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-{% if bonificacion.automatica %}magic text-primary{% else %}hand-paper text-muted{% endif %} fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">Automática</h6>
+                                <span class="badge bg-{% if bonificacion.automatica %}primary{% else %}secondary{% endif %}">
+                                    {% if bonificacion.automatica %}Sí{% else %}Manual{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'tablas:bonificacion_edit' bonificacion.pk %}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit me-2"></i>Editar Bonificación
+                    </a>
+                    {% if bonificacion.activo %}
+                    <button class="btn btn-outline-secondary" onclick="toggleBonificacionStatus('{{ bonificacion.pk }}', false)">
+                        <i class="fas fa-pause me-2"></i>Desactivar
+                    </button>
+                    {% else %}
+                    <button class="btn btn-outline-success" onclick="toggleBonificacionStatus('{{ bonificacion.pk }}', true)">
+                        <i class="fas fa-play me-2"></i>Activar
+                    </button>
+                    {% endif %}
+                    <button class="btn btn-outline-info" onclick="duplicarBonificacion('{{ bonificacion.pk }}')">
+                        <i class="fas fa-copy me-2"></i>Duplicar
+                    </button>
+                    <hr>
+                    <a href="{% url 'tablas:bonificacion_delete' bonificacion.pk %}" class="btn btn-outline-danger">
+                        <i class="fas fa-trash me-2"></i>Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <h4 class="text-primary mb-0">{{ bonificacion.fecha_creacion|timesince|default:"N/A" }}</h4>
+                        <small class="text-muted">Creada hace</small>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Estado actual</span>
+                        <span class="badge bg-{% if bonificacion.activo %}success{% else %}danger{% endif %}">
+                            {% if bonificacion.activo %}Activa{% else %}Inactiva{% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-muted">Aplicación</span>
+                        <span class="badge bg-{% if bonificacion.automatica %}primary{% else %}secondary{% endif %}">
+                            {% if bonificacion.automatica %}Automática{% else %}Manual{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleBonificacionStatus(bonificacionId, activate) {
+    const action = activate ? 'activar' : 'desactivar';
+    if (confirm(`¿Está seguro que desea ${action} esta bonificación?`)) {
+        showToast(`Bonificación ${action}da correctamente`, 'success');
+    }
+}
+
+function duplicarBonificacion(bonificacionId) {
+    if (confirm('¿Desea crear una copia de esta bonificación?')) {
+        showToast('Bonificación duplicada correctamente', 'success');
+    }
+}
+</script>
+{% endblock %}

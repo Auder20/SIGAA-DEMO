@@ -1,0 +1,332 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tabla.nombre }} - Tabla Salarial - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tabla_list' %}">Tablas Salariales</a>
+</li>
+<li class="breadcrumb-item active">{{ tabla.nombre|truncatechars:30 }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+        <div class="d-flex align-items-center mb-2">
+            <h1 class="h2 mb-0 me-3">
+                <i class="fas fa-table me-2"></i>
+                {{ tabla.nombre }}
+            </h1>
+            <span class="badge bg-{% if tabla.activa %}success{% else %}secondary{% endif %} fs-6">
+                {% if tabla.activa %}Activa{% else %}Inactiva{% endif %}
+            </span>
+        </div>
+        <p class="text-muted mb-0">
+            <i class="fas fa-calendar me-1"></i>
+            Vigencia: {{ tabla.vigencia }}
+            {% if tabla.fecha_aprobacion %}
+            | <i class="fas fa-check-circle me-1"></i>
+            Aprobada: {{ tabla.fecha_aprobacion|date:"d/m/Y" }}
+            {% endif %}
+        </p>
+    </div>
+    <div class="action-buttons">
+        <div class="btn-group" role="group">
+            <a href="{% url 'tablas:tabla_list' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Volver
+            </a>
+            <a href="{% url 'tablas:tabla_edit' tabla.pk %}" class="btn btn-outline-primary">
+                <i class="fas fa-edit me-2"></i>Editar
+            </a>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-cog me-2"></i>Acciones
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" onclick="duplicarTabla()">
+                        <i class="fas fa-copy me-2"></i>Duplicar Tabla
+                    </a></li>
+                    <li><a class="dropdown-item" href="#" onclick="exportarTabla()">
+                        <i class="fas fa-download me-2"></i>Exportar
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="{% url 'tablas:tabla_delete' tabla.pk %}">
+                        <i class="fas fa-trash me-2"></i>Eliminar
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Main Information -->
+    <div class="col-lg-8">
+        <!-- Basic Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Información General
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Nombre</label>
+                        <p class="fw-bold mb-0">{{ tabla.nombre }}</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label text-muted">Año de Vigencia</label>
+                        <p class="fw-bold mb-0">{{ tabla.vigencia }}</p>
+                    </div>
+                </div>
+                
+                {% if tabla.descripcion %}
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label class="form-label text-muted">Descripción</label>
+                        <p class="mb-0">{{ tabla.descripcion }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Estado</label>
+                        <p class="mb-0">
+                            <span class="badge bg-{% if tabla.activa %}success{% else %}secondary{% endif %}">
+                                {% if tabla.activa %}Activa{% else %}Inactiva{% endif %}
+                            </span>
+                        </p>
+                    </div>
+                    {% if tabla.incremento_anual %}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Incremento Anual</label>
+                        <p class="fw-bold mb-0">{{ tabla.incremento_anual }}%</p>
+                    </div>
+                    {% endif %}
+                    {% if tabla.fecha_aprobacion %}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label text-muted">Fecha de Aprobación</label>
+                        <p class="fw-bold mb-0">{{ tabla.fecha_aprobacion|date:"d/m/Y" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Scales -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-layer-group me-2"></i>
+                    Escalas Salariales
+                </h5>
+                <span class="badge bg-primary">{{ tabla.escalas.count }} escalas</span>
+            </div>
+            <div class="card-body">
+                {% if tabla.escalas.exists %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Grado</th>
+                                <th>Nivel</th>
+                                <th>Sueldo Base</th>
+                                <th>Con Prima</th>
+                                <th>Total Mensual</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for escala in tabla.escalas.all %}
+                            <tr>
+                                <td>
+                                    <span class="badge bg-info">{{ escala.grado }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">{{ escala.nivel }}</span>
+                                </td>
+                                <td class="fw-bold">${{ escala.sueldo_base|floatformat:0 }}</td>
+                                <td>
+                                    {% if tabla.incluir_prima %}
+                                        ${{ escala.sueldo_base|add:escala.prima|floatformat:0 }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-primary">
+                                    ${{ escala.total_mensual|floatformat:0 }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-layer-group fa-3x mb-3"></i>
+                    <p class="mb-0">No hay escalas salariales configuradas</p>
+                    <a href="{% url 'tablas:tabla_edit' tabla.pk %}" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-plus me-1"></i>Agregar Escalas
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Quick Stats -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Estadísticas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-1">{{ tabla.escalas.count }}</h4>
+                            <small class="text-muted">Escalas</small>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-success mb-1">{{ tabla.vigencia }}</h4>
+                        <small class="text-muted">Vigencia</small>
+                    </div>
+                </div>
+                
+                {% if tabla.escalas.exists %}
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6 mb-2">
+                        <small class="text-muted d-block">Sueldo Mínimo</small>
+                        <strong class="text-success">${{ tabla.sueldo_minimo|floatformat:0 }}</strong>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <small class="text-muted d-block">Sueldo Máximo</small>
+                        <strong class="text-primary">${{ tabla.sueldo_maximo|floatformat:0 }}</strong>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Configuration -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Configuración
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Prima Incluida</span>
+                    <span class="badge bg-{% if tabla.incluir_prima %}success{% else %}secondary{% endif %}">
+                        {% if tabla.incluir_prima %}Sí{% else %}No{% endif %}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Cesantías Incluidas</span>
+                    <span class="badge bg-{% if tabla.incluir_cesantias %}success{% else %}secondary{% endif %}">
+                        {% if tabla.incluir_cesantias %}Sí{% else %}No{% endif %}
+                    </span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span>Aplicación Retroactiva</span>
+                    <span class="badge bg-{% if tabla.retroactiva %}warning{% else %}secondary{% endif %}">
+                        {% if tabla.retroactiva %}Sí{% else %}No{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="duplicarTabla()">
+                        <i class="fas fa-copy me-2"></i>Duplicar Tabla
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportarTabla()">
+                        <i class="fas fa-download me-2"></i>Exportar Datos
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="verHistorial()">
+                        <i class="fas fa-history me-2"></i>Ver Historial
+                    </button>
+                    {% if tabla.activa %}
+                    <button class="btn btn-outline-warning btn-sm" onclick="toggleEstado()">
+                        <i class="fas fa-pause me-2"></i>Desactivar
+                    </button>
+                    {% else %}
+                    <button class="btn btn-outline-success btn-sm" onclick="toggleEstado()">
+                        <i class="fas fa-play me-2"></i>Activar
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function duplicarTabla() {
+        if (confirm('¿Desea crear una copia de esta tabla salarial?')) {
+            // Implement duplication logic
+            window.location.href = '{% url "tablas:tabla_create" %}?duplicate={{ tabla.pk }}';
+        }
+    }
+    
+    function exportarTabla() {
+        // Implement export logic
+        window.location.href = '{% url "tablas:tabla_export" tabla.pk %}';
+    }
+    
+    function verHistorial() {
+        // Implement history view
+        alert('Funcionalidad de historial en desarrollo');
+    }
+    
+    function toggleEstado() {
+        const accion = '{{ tabla.activa|yesno:"desactivar,activar" }}';
+        if (confirm(`¿Está seguro que desea ${accion} esta tabla salarial?`)) {
+            fetch('{% url "tablas:tabla_toggle_status" tabla.pk %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error al cambiar el estado de la tabla');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al cambiar el estado de la tabla');
+            });
+        }
+    }
+</script>
+{% endblock %}

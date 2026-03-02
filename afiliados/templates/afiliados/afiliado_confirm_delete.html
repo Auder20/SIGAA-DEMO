@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Afiliado - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliado_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliado_detail' afiliado.pk %}">{{ afiliado.nombre_completo }}</a>
+</li>
+<li class="breadcrumb-item active">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-times fa-4x text-danger mb-3"></i>
+                    <h4>¿Eliminar Afiliado?</h4>
+                    <p class="text-muted">Esta acción no se puede deshacer</p>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Información del afiliado a eliminar:</strong>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Nombre:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.nombre_completo }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Cédula:</strong></div>
+                    <div class="col-sm-8">{{ afiliado.cedula|default:"No registrada" }}</div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Estado:</strong></div>
+                    <div class="col-sm-8">
+                        {% if afiliado.activo %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if afiliado.grado_escalafon %}
+                <div class="row mb-3">
+                    <div class="col-sm-4"><strong>Grado:</strong></div>
+                    <div class="col-sm-8">
+                        <span class="badge bg-primary">Grado {{ afiliado.grado_escalafon }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if afiliado.sueldo_actual %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Advertencia:</strong> Este afiliado tiene un sueldo calculado de 
+                    <strong>${{ afiliado.sueldo_actual.sueldo_neto|floatformat:0 }}</strong>. 
+                    Al eliminarlo también se eliminará toda la información salarial asociada.
+                </div>
+                {% endif %}
+
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Alternativa:</strong> En lugar de eliminar, considere desactivar el afiliado 
+                    para mantener el historial de datos.
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'afiliados:afiliado_detail' afiliado.pk %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-info">
+                                <i class="fas fa-list me-2"></i>Volver a Lista
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-2"></i>
+                                Sí, Eliminar Definitivamente
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add confirmation on form submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        if (!confirm('¿Está completamente seguro de eliminar a {{ afiliado.nombre_completo }}? Esta acción NO se puede deshacer.')) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

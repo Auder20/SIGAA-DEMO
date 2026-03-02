@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reportes de Totales de Aportes - SIGAA{% endblock %}
+
+{% block extra_css %}
+<style>
+    .summary-card {
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .summary-card h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .summary-card p {
+        margin: 5px 0;
+        opacity: 0.9;
+    }
+
+    .report-section {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 25px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        color: #FF6B35;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #FF6B35;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 20px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+
+    .form-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group select:focus {
+        outline: none;
+        border-color: #FF6B35;
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    .btn-generate {
+        background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 16px;
+    }
+
+    .btn-generate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+    }
+
+    .format-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .format-btn {
+        flex: 1;
+        padding: 10px 15px;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .format-btn:hover {
+        border-color: #FF6B35;
+        background: #FFF8F5;
+    }
+
+    .format-btn.active {
+        background: #FF6B35;
+        color: white;
+        border-color: #FF6B35;
+    }
+
+    .reports-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .reports-table th,
+    .reports-table td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .reports-table th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .reports-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .badge-ademacor {
+        background: #FFF8F5;
+        color: #FF6B35;
+        border: 1px solid #FF6B35;
+    }
+
+    .badge-famecor {
+        background: #E8F5E8;
+        color: #28A745;
+        border: 1px solid #28A745;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        border: 1px solid #dee2e6;
+        background: white;
+        border-radius: 5px;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: #495057;
+    }
+
+    .btn-action:hover {
+        background: #f8f9fa;
+        border-color: #FF6B35;
+        color: #FF6B35;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+
+    .empty-state svg {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .total-amount {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .percentage {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Messages -->
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="summary-card">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h3>📊 Reportes de Totales de Aportes</h3>
+                <p>Sistema de Gestión y Análisis de Aportes de Afiliados</p>
+                <p>Genera reportes consolidados de ADEMACOR y FAMECOR por período</p>
+            </div>
+            <a href="{% url 'reportes:reportes_main' %}" class="btn btn-light">
+                <i class="fas fa-arrow-left me-2"></i>Volver a Reportes
+            </a>
+        </div>
+    </div>
+
+    <!-- Formulario de Generación -->
+    <div class="report-section">
+        <h4 class="section-title">🔧 Generar Nuevo Reporte</h4>
+
+        <form method="post" action="{% url 'reportes:generar_reporte_aportes_totales' %}">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="mes">Mes:</label>
+                    <select name="mes" id="mes" required>
+                        {% for value, label in meses %}
+                            <option value="{{ value }}" {% if value == mes_actual %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="anio">Año:</label>
+                    <select name="anio" id="anio" required>
+                        {% for value, label in años %}
+                            <option value="{{ value }}" {% if value == año_actual %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-generate">
+                        ⚡ Generar Reporte
+                    </button>
+                </div>
+            </div>
+
+            <div class="format-buttons">
+                <button type="button" class="format-btn active" data-format="pantalla">
+                    🖥️ Ver en Pantalla
+                </button>
+                <button type="button" class="format-btn" data-format="excel">
+                    📊 Exportar a Excel
+                </button>
+                <button type="button" class="format-btn" data-format="pdf">
+                    📄 Exportar a PDF
+                </button>
+            </div>
+
+            <!-- Campo oculto para formato -->
+            <input type="hidden" name="formato" id="formato" value="pantalla">
+        </form>
+    </div>
+
+    <!-- Reportes Existentes -->
+    <div class="report-section">
+        <h4 class="section-title">📋 Reportes Generados</h4>
+
+        {% if reportes %}
+            <div class="table-responsive">
+                <table class="reports-table">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Total ADEMACOR</th>
+                            <th>Total FAMECOR</th>
+                            <th>Total General</th>
+                            <th>Afiliados</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reporte in reportes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ reporte.get_nombre_mes }} {{ reporte.anio }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge badge-ademacor">ADEMACOR</span>
+                                    <div class="total-amount">${{ reporte.total_ademacor|floatformat:2 }}</div>
+                                    <div class="percentage">{{ reporte.get_porcentaje_ademacor|floatformat:1 }}%</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-famecor">FAMECOR</span>
+                                    <div class="total-amount">${{ reporte.total_famecor|floatformat:2 }}</div>
+                                    <div class="percentage">{{ reporte.get_porcentaje_famecor|floatformat:1 }}%</div>
+                                </td>
+                                <td>
+                                    <strong>${{ reporte.total_general|floatformat:2 }}</strong>
+                                </td>
+                                <td>{{ reporte.cantidad_afiliados }}</td>
+                                <td>
+                                    <small>{{ reporte.fecha_calculo|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{% url 'reportes:detalle_reporte_aportes_totales' reporte.pk %}" class="btn-action">
+                                            👁️ Ver
+                                        </a>
+                                        {% if reporte.archivo_excel %}
+                                            <a href="{{ reporte.archivo_excel.url }}" class="btn-action">
+                                                📊 Excel
+                                            </a>
+                                        {% endif %}
+                                        {% if reporte.archivo_pdf %}
+                                            <a href="{{ reporte.archivo_pdf.url }}" class="btn-action">
+                                                📄 PDF
+                                            </a>
+                                        {% endif %}
+                                        <form method="post" action="{% url 'reportes:recalcular_reporte_aportes_totales' reporte.pk %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action" onclick="return confirm('¿Recalcular este reporte?')">
+                                                🔄 Recalcular
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                <h5>No hay reportes generados</h5>
+                <p>Genera tu primer reporte utilizando el formulario superior</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejo de botones de formato
+    const formatButtons = document.querySelectorAll('.format-btn');
+    const formatoInput = document.getElementById('formato');
+
+    formatButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remover clase active de todos los botones
+            formatButtons.forEach(btn => btn.classList.remove('active'));
+
+            // Agregar clase active al botón clickeado
+            this.classList.add('active');
+
+            // Actualizar campo oculto
+            formatoInput.value = this.dataset.format;
+        });
+    });
+});
+</script>
+{% endblock %}

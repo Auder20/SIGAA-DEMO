@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Editar Sueldo{% else %}Nuevo Sueldo{% endif %} - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:sueldo_list' %}">Sueldos</a>
+</li>
+<li class="breadcrumb-item active">{% if object %}Editar{% else %}Nuevo{% endif %}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="fas fa-{% if object %}edit{% else %}plus{% endif %} me-2"></i>
+            {% if object %}Editar Sueldo{% else %}Nuevo Sueldo{% endif %}
+        </h1>
+        <p class="text-muted mb-0">
+            {% if object %}
+                Modificar sueldo de {{ object.afiliado.nombre_completo }}
+            {% else %}
+                Crear un nuevo registro de sueldo
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<!-- Form Card -->
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-form me-2"></i>
+                    Información del Sueldo
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" id="sueldoForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Afiliado Selection -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <label for="{{ form.afiliado.id_for_label }}" class="form-label required">
+                                <i class="fas fa-user me-1"></i>Afiliado
+                            </label>
+                            <select class="form-select" name="{{ form.afiliado.name }}" id="{{ form.afiliado.id_for_label }}" required>
+                                <option value="">Seleccione un afiliado...</option>
+                                {% for afiliado in afiliados %}
+                                    <option value="{{ afiliado.pk }}" 
+                                            {% if form.afiliado.value == afiliado.pk %}selected{% endif %}
+                                            data-cedula="{{ afiliado.cedula }}"
+                                            data-grado="{{ afiliado.grado_escalafon|default:'' }}"
+                                            data-cargo="{{ afiliado.cargo_desempenado|default:'' }}">
+                                        {{ afiliado.nombre_completo }} - {{ afiliado.cedula }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.afiliado.errors %}
+                                <div class="invalid-feedback d-block">{{ form.afiliado.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Salary Base Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="{{ form.sueldo_base.id_for_label }}" class="form-label required">
+                                <i class="fas fa-dollar-sign me-1"></i>Sueldo Base
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" 
+                                       name="{{ form.sueldo_base.name }}" 
+                                       id="{{ form.sueldo_base.id_for_label }}"
+                                       value="{{ form.sueldo_base.value|default:'' }}"
+                                       step="0.01" min="0" required>
+                            </div>
+                            {% if form.sueldo_base.errors %}
+                                <div class="invalid-feedback d-block">{{ form.sueldo_base.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Sueldo base según tabla salarial</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="{{ form.tabla_salarial.id_for_label }}" class="form-label">
+                                <i class="fas fa-table me-1"></i>Tabla Salarial
+                            </label>
+                            <select class="form-select" name="{{ form.tabla_salarial.name }}" id="{{ form.tabla_salarial.id_for_label }}">
+                                <option value="">Seleccione tabla salarial...</option>
+                                {% for tabla in tablas_salariales %}
+                                    <option value="{{ tabla.pk }}" 
+                                            {% if form.tabla_salarial.value == tabla.pk %}selected{% endif %}
+                                            data-sueldo="{{ tabla.sueldo_base }}">
+                                        {{ tabla }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.tabla_salarial.errors %}
+                                <div class="invalid-feedback d-block">{{ form.tabla_salarial.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Bonifications -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-plus me-2"></i>Bonificaciones
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.bonificacion_cargo.id_for_label }}" class="form-label">
+                                        <i class="fas fa-briefcase me-1"></i>Por Cargo
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.bonificacion_cargo.name }}" 
+                                               id="{{ form.bonificacion_cargo.id_for_label }}"
+                                               value="{{ form.bonificacion_cargo.value|default:'0' }}"
+                                               step="0.01" min="0">
+                                    </div>
+                                    {% if form.bonificacion_cargo.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.bonificacion_cargo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.bonificacion_anos.id_for_label }}" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>Por Años
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.bonificacion_anos.name }}" 
+                                               id="{{ form.bonificacion_anos.id_for_label }}"
+                                               value="{{ form.bonificacion_anos.value|default:'0' }}"
+                                               step="0.01" min="0">
+                                    </div>
+                                    {% if form.bonificacion_anos.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.bonificacion_anos.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="{{ form.bonificacion_educacion.id_for_label }}" class="form-label">
+                                        <i class="fas fa-graduation-cap me-1"></i>Por Educación
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.bonificacion_educacion.name }}" 
+                                               id="{{ form.bonificacion_educacion.id_for_label }}"
+                                               value="{{ form.bonificacion_educacion.value|default:'0' }}"
+                                               step="0.01" min="0">
+                                    </div>
+                                    {% if form.bonificacion_educacion.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.bonificacion_educacion.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="{{ form.bonificaciones_adicionales.id_for_label }}" class="form-label">
+                                        <i class="fas fa-star me-1"></i>Bonificaciones Adicionales
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.bonificaciones_adicionales.name }}" 
+                                               id="{{ form.bonificaciones_adicionales.id_for_label }}"
+                                               value="{{ form.bonificaciones_adicionales.value|default:'0' }}"
+                                               step="0.01" min="0">
+                                    </div>
+                                    {% if form.bonificaciones_adicionales.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.bonificaciones_adicionales.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.descuentos.id_for_label }}" class="form-label">
+                                        <i class="fas fa-minus me-1"></i>Descuentos
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.descuentos.name }}" 
+                                               id="{{ form.descuentos.id_for_label }}"
+                                               value="{{ form.descuentos.value|default:'0' }}"
+                                               step="0.01" min="0">
+                                    </div>
+                                    {% if form.descuentos.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.descuentos.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Result -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0">
+                                <i class="fas fa-calculator me-2"></i>Resultado del Cálculo
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="{{ form.sueldo_neto.id_for_label }}" class="form-label required">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Sueldo Neto
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" 
+                                               name="{{ form.sueldo_neto.name }}" 
+                                               id="{{ form.sueldo_neto.id_for_label }}"
+                                               value="{{ form.sueldo_neto.value|default:'' }}"
+                                               step="0.01" min="0" required readonly>
+                                    </div>
+                                    {% if form.sueldo_neto.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.sueldo_neto.errors.0 }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Se calcula automáticamente</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.fecha_calculo.id_for_label }}" class="form-label">
+                                        <i class="fas fa-calendar me-1"></i>Fecha de Cálculo
+                                    </label>
+                                    <input type="datetime-local" class="form-control" 
+                                           name="{{ form.fecha_calculo.name }}" 
+                                           id="{{ form.fecha_calculo.id_for_label }}"
+                                           value="{{ form.fecha_calculo.value|date:'Y-m-d\TH:i' }}">
+                                    {% if form.fecha_calculo.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.fecha_calculo.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-info" onclick="calcularAutomatico()">
+                                <i class="fas fa-magic me-2"></i>Calcular Automático
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>
+                                {% if object %}Actualizar{% else %}Guardar{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Card -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Ayuda
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6><i class="fas fa-lightbulb text-warning me-2"></i>Cálculo Automático</h6>
+                <p class="small mb-3">
+                    Use el botón "Calcular Automático" para que el sistema determine automáticamente 
+                    las bonificaciones basándose en:
+                </p>
+                <ul class="small mb-3">
+                    <li>Grado de escalafón del afiliado</li>
+                    <li>Cargo desempeñado</li>
+                    <li>Años de servicio</li>
+                    <li>Nivel educativo</li>
+                </ul>
+
+                <h6><i class="fas fa-calculator text-primary me-2"></i>Componentes</h6>
+                <ul class="small mb-3">
+                    <li><strong>Sueldo Base:</strong> Según tabla salarial</li>
+                    <li><strong>Por Cargo:</strong> Rector 25%, Decano 15%, Director 10%</li>
+                    <li><strong>Por Años:</strong> 2% a 12% según antigüedad</li>
+                    <li><strong>Por Educación:</strong> Doctorado 15%, Maestría 10%, Especialización 5%</li>
+                </ul>
+
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Nota:</strong> El sueldo neto se calcula automáticamente sumando 
+                    el sueldo base más las bonificaciones menos los descuentos.
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Card -->
+        <div class="card mt-3" id="previewCard" style="display: none;">
+            <div class="card-header bg-success text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-eye me-2"></i>Vista Previa
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center">
+                    <h4 class="text-primary mb-1" id="previewTotal">$0</h4>
+                    <p class="text-muted mb-3">Sueldo Neto Calculado</p>
+                </div>
+                <div id="previewBreakdown"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate net salary when values change
+    const inputs = document.querySelectorAll('input[type="number"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', calculateNetSalary);
+    });
+
+    // Load afiliado data when selected
+    const afiliadoSelect = document.getElementById('{{ form.afiliado.id_for_label }}');
+    if (afiliadoSelect) {
+        afiliadoSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                // Auto-fill based on afiliado data
+                updateAfiliadoInfo(selectedOption);
+            }
+        });
+    }
+
+    // Load tabla salarial data when selected
+    const tablaSelect = document.getElementById('{{ form.tabla_salarial.id_for_label }}');
+    if (tablaSelect) {
+        tablaSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                const sueldoBase = selectedOption.dataset.sueldo;
+                document.getElementById('{{ form.sueldo_base.id_for_label }}').value = sueldoBase;
+                calculateNetSalary();
+            }
+        });
+    }
+
+    // Initial calculation
+    calculateNetSalary();
+});
+
+function updateAfiliadoInfo(option) {
+    const grado = option.dataset.grado;
+    const cargo = option.dataset.cargo;
+    
+    // Show info to user
+    showToast(`Afiliado seleccionado: ${option.text}`, 'info');
+    
+    // Could auto-select tabla salarial based on grado
+    if (grado) {
+        const tablaSelect = document.getElementById('{{ form.tabla_salarial.id_for_label }}');
+        for (let i = 0; i < tablaSelect.options.length; i++) {
+            if (tablaSelect.options[i].text.includes(grado)) {
+                tablaSelect.selectedIndex = i;
+                tablaSelect.dispatchEvent(new Event('change'));
+                break;
+            }
+        }
+    }
+}
+
+function calculateNetSalary() {
+    const sueldoBase = parseFloat(document.getElementById('{{ form.sueldo_base.id_for_label }}').value) || 0;
+    const bonifCargo = parseFloat(document.getElementById('{{ form.bonificacion_cargo.id_for_label }}').value) || 0;
+    const bonifAnos = parseFloat(document.getElementById('{{ form.bonificacion_anos.id_for_label }}').value) || 0;
+    const bonifEducacion = parseFloat(document.getElementById('{{ form.bonificacion_educacion.id_for_label }}').value) || 0;
+    const bonifAdicionales = parseFloat(document.getElementById('{{ form.bonificaciones_adicionales.id_for_label }}').value) || 0;
+    const descuentos = parseFloat(document.getElementById('{{ form.descuentos.id_for_label }}').value) || 0;
+
+    const totalBonificaciones = bonifCargo + bonifAnos + bonifEducacion + bonifAdicionales;
+    const sueldoNeto = sueldoBase + totalBonificaciones - descuentos;
+
+    document.getElementById('{{ form.sueldo_neto.id_for_label }}').value = sueldoNeto.toFixed(2);
+
+    // Update preview
+    updatePreview(sueldoBase, totalBonificaciones, descuentos, sueldoNeto);
+}
+
+function updatePreview(base, bonificaciones, descuentos, neto) {
+    const previewCard = document.getElementById('previewCard');
+    const previewTotal = document.getElementById('previewTotal');
+    const previewBreakdown = document.getElementById('previewBreakdown');
+
+    previewTotal.textContent = `$${neto.toLocaleString()}`;
+    
+    previewBreakdown.innerHTML = `
+        <div class="d-flex justify-content-between mb-1">
+            <span>Sueldo Base:</span>
+            <span class="fw-bold">$${base.toLocaleString()}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-1">
+            <span>Bonificaciones:</span>
+            <span class="fw-bold text-success">+$${bonificaciones.toLocaleString()}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2">
+            <span>Descuentos:</span>
+            <span class="fw-bold text-danger">-$${descuentos.toLocaleString()}</span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between">
+            <strong>Total:</strong>
+            <strong class="text-primary">$${neto.toLocaleString()}</strong>
+        </div>
+    `;
+
+    previewCard.style.display = neto > 0 ? 'block' : 'none';
+}
+
+function calcularAutomatico() {
+    const afiliadoSelect = document.getElementById('{{ form.afiliado.id_for_label }}');
+    if (!afiliadoSelect.value) {
+        showToast('Debe seleccionar un afiliado primero', 'warning');
+        return;
+    }
+
+    if (confirm('¿Calcular automáticamente las bonificaciones basándose en los datos del afiliado?')) {
+        // This would call the backend calculation service
+        alert('Funcionalidad de cálculo automático - implementar en el backend');
+        // The backend would return the calculated values and update the form
+    }
+}
+
+function showToast(message, type = 'info') {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.parentNode.removeChild(toast);
+        }
+    }, 5000);
+}
+
+// Form validation
+document.getElementById('sueldoForm').addEventListener('submit', function(e) {
+    const requiredFields = this.querySelectorAll('[required]');
+    let isValid = true;
+
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            field.classList.remove('is-invalid');
+        }
+    });
+
+    if (!isValid) {
+        e.preventDefault();
+        showToast('Por favor complete todos los campos requeridos', 'danger');
+    }
+});
+</script>
+{% endblock %}

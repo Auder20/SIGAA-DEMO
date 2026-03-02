@@ -1,0 +1,255 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SIGAA - Administración{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos mejorados para el sidebar - FORZAR FONDO OSCURO */
+    .sidebar,
+    .sidebar.bg-light,
+    .bg-light.sidebar,
+    div.sidebar[class*="bg-"] {
+        background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;
+        background-color: #2c3e50 !important;
+        min-height: 100vh;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        padding: 0 !important;
+    }
+    
+    .sidebar .position-sticky {
+        background: transparent !important;
+    }
+    
+    /* Eliminar fondos blancos */
+    .sidebar * {
+        background-color: transparent !important;
+    }
+    
+    .sidebar .nav-link {
+        color: #ecf0f1 !important;
+        padding: 12px 20px;
+        border-radius: 8px;
+        margin: 5px 10px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        background-color: transparent !important;
+    }
+    
+    .sidebar .nav-link:hover {
+        background-color: rgba(52, 152, 219, 0.3) !important;
+        transform: translateX(5px);
+        color: #fff !important;
+    }
+    
+    .sidebar .nav-link.active {
+        background-color: #3498db !important;
+        color: #fff !important;
+        box-shadow: 0 2px 8px rgba(52, 152, 219, 0.4);
+    }
+    
+    .sidebar h5 {
+        color: #fff !important;
+        font-weight: 600;
+        padding: 15px;
+        border-bottom: 2px solid rgba(255,255,255,0.1);
+        background-color: transparent !important;
+    }
+    
+    .sidebar-heading {
+        color: #95a5a6 !important;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+        padding: 10px 20px !important;
+        margin-top: 20px !important;
+        background-color: transparent !important;
+    }
+    
+    .sidebar .nav-link i {
+        width: 20px;
+        text-align: center;
+    }
+    
+    .sidebar ul.nav {
+        background-color: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .sidebar li.nav-item {
+        background-color: transparent !important;
+        list-style: none;
+    }
+    
+    /* Botón de toggle para móvil */
+    .sidebar .btn-link {
+        color: #fff !important;
+        background-color: transparent !important;
+    }
+    
+    /* Contenedor del collapse */
+    .sidebar #sidebarMenu {
+        background-color: transparent !important;
+    }
+    
+    /* Mejora del contenido principal */
+    main {
+        background-color: #f8f9fa;
+    }
+    
+    .border-bottom {
+        border-color: #dee2e6 !important;
+    }
+    
+    /* Asegurar que no hay fondos blancos */
+    .sidebar .d-flex {
+        background-color: transparent !important;
+    }
+    
+    .sidebar .collapse {
+        background-color: transparent !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            z-index: 1000;
+            transition: left 0.3s ease;
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 d-md-block sidebar" style="background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%) !important;">
+            <div class="position-sticky pt-3">
+                <div class="d-flex justify-content-between align-items-center px-3 mb-3">
+                    <h5 class="mb-0">Menú Principal</h5>
+                    <button class="btn btn-link d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-expanded="false" aria-controls="sidebarMenu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+                <div class="collapse d-md-block" id="sidebarMenu">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{% url 'custom_admin:dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:index' %}" target="_blank">
+                                <i class="fas fa-cog me-2"></i>
+                                Admin Django
+                            </a>
+                        </li>
+                    </ul>
+
+                    {% if user.is_staff %}
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1">
+                        <span>Administración</span>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:afiliados_afiliado_changelist' %}" target="_blank">
+                                <i class="fas fa-users me-2"></i>
+                                Afiliados
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:liquidacion_sueldo_changelist' %}" target="_blank">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>
+                                Liquidaciones
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'liquidacion:tablas_salariales:tablasalarial_list' %}">
+                                <i class="fas fa-table me-2"></i>
+                                Tablas Salariales
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'admin:tablas_tablasalarial_changelist' %}" target="_blank">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Tablas (Admin)
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'reportes:reportes_main' %}">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Reportes
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{% block page_title %}Panel de Administración{% endblock %}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <a href="{% url 'home' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-home me-1"></i> Ir al sitio
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block admin_content %}
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Activar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Resaltar enlace activo en el sidebar
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentPath = window.location.pathname;
+        const sidebarLinks = document.querySelectorAll('.sidebar .nav-link');
+        
+        sidebarLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+    });
+</script>
+{% endblock %}

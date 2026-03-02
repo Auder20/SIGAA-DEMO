@@ -1,0 +1,132 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+
+{% block page_title %}Dashboard de Administración{% endblock %}
+
+{% block admin_content %}
+<div class="row">
+    <!-- Quick Stats -->
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Resumen General</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-users fa-3x mb-3 text-primary"></i>
+                                <h5 class="card-title">Afiliados</h5>
+                                <p class="display-6">{{ afiliados_count|default:0 }}</p>
+                                <a href="{% url 'admin:afiliados_afiliado_changelist' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-file-invoice-dollar fa-3x mb-3 text-success"></i>
+                                <h5 class="card-title">Liquidaciones</h5>
+                                <p class="display-6">{{ liquidaciones_count|default:0 }}</p>
+                                <a href="{% url 'admin:liquidacion_sueldo_changelist' %}" class="btn btn-sm btn-outline-success">Ver todas</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-table fa-3x mb-3 text-warning"></i>
+                                <h5 class="card-title">Tablas Salariales</h5>
+                                <p class="display-6">{{ tablas_count|default:0 }}</p>
+                                <a href="{% url 'admin:tablas_tablasalarial_changelist' %}" class="btn btn-sm btn-outline-warning">Ver todas</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-line fa-3x mb-3 text-info"></i>
+                                <h5 class="card-title">Reportes</h5>
+                                <p class="display-6">{{ reportes_count|default:0 }}</p>
+                                <a href="{% url 'reportes:reporte_list' %}" class="btn btn-sm btn-outline-info">Ver reportes</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Actividad Reciente</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Acción</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_activity %}
+                            {% for log in recent_activity %}
+                            <tr>
+                                <td>{{ log.user.get_full_name|default:log.user.username }}</td>
+                                <td>
+                                    {% if log.action_flag == 1 %}
+                                        <span class="badge bg-success">Creación</span>
+                                    {% elif log.action_flag == 2 %}
+                                        <span class="badge bg-warning">Edición</span>
+                                    {% elif log.action_flag == 3 %}
+                                        <span class="badge bg-danger">Eliminación</span>
+                                    {% endif %}
+                                    {{ log.object_repr }}
+                                </td>
+                                <td>{{ log.action_time|date:"d/m/Y H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No hay actividad reciente</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'admin:afiliados_afiliado_add' %}" class="btn btn-primary mb-2">
+                        <i class="fas fa-user-plus me-2"></i>Nuevo Afiliado
+                    </a>
+                    <a href="{% url 'admin:liquidacion_sueldo_add' %}" class="btn btn-success mb-2">
+                        <i class="fas fa-file-invoice-dollar me-2"></i>Nueva Liquidación
+                    </a>
+                    <a href="{% url 'reportes:reportes_main' %}" class="btn btn-info mb-2">
+                        <i class="fas fa-file-export me-2"></i>Generar Reporte
+                    </a>
+                    <a href="{% url 'admin:users_user_add' %}" class="btn btn-warning mb-2">
+                        <i class="fas fa-user-shield me-2"></i>Nuevo Usuario
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

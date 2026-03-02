@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Sueldos - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item active">Lista de Sueldos</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="fas fa-money-bill-wave me-2"></i>
+            Lista de Sueldos
+        </h1>
+        <p class="text-muted mb-0">Gestión de sueldos calculados automáticamente</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" onclick="alert('Use: python manage.py recalcular_sueldos')">
+            <i class="fas fa-sync me-2"></i>Recalcular Todos
+        </button>
+        <a href="{% url 'liquidacion:sueldo_create' %}" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Nuevo Sueldo
+        </a>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Buscar Afiliado</label>
+                <input type="text" class="form-control" id="search" name="search"
+                       value="{{ request.GET.search }}" placeholder="Nombre, apellido o cédula...">
+            </div>
+            <div class="col-md-3">
+                <label for="anio" class="form-label">Año</label>
+                <select class="form-select" id="anio" name="anio">
+                    <option value="">Todos los años</option>
+                    {% for year in years_available %}
+                        <option value="{{ year }}" {% if request.GET.anio == year|stringformat:"s" %}selected{% endif %}>
+                            {{ year }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="mes" class="form-label">Mes</label>
+                <select class="form-select" id="mes" name="mes">
+                    <option value="">Todos los meses</option>
+                    {% for mes_num, mes_nombre in months_available %}
+                        <option value="{{ mes_num }}" {% if request.GET.mes == mes_num|stringformat:"s" %}selected{% endif %}>
+                            {{ mes_nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-search me-2"></i>Buscar
+                    </button>
+                    {% if request.GET.search or request.GET.anio or request.GET.mes %}
+                    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-times me-2"></i>Limpiar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Statistics Summary -->
+{% if sueldos %}
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-2"></i>
+                <h4>{{ total_sueldos }}</h4>
+                <small>Total Sueldos</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #28a745, #20c997);">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x mb-2"></i>
+                <h4>${{ total_nomina|floatformat:0|default:0 }}</h4>
+                <small>Total Nómina</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                <h4>${{ promedio|floatformat:0|default:0 }}</h4>
+                <small>Promedio</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #17a2b8, #6f42c1);">
+            <div class="card-body text-center">
+                <i class="fas fa-coins fa-2x mb-2"></i>
+                <h4>${{ bonificaciones|floatformat:0|default:0 }}</h4>
+                <small>Bonificaciones</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Sueldos Table -->
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-table me-2"></i>
+            Sueldos Registrados
+            {% if is_paginated %}
+                <span class="badge bg-primary">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            {% endif %}
+        </h5>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="exportarExcel()">
+                <i class="fas fa-file-excel me-1"></i>Excel
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="exportarPDF()">
+                <i class="fas fa-file-pdf me-1"></i>PDF
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        {% if sueldos %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" id="sueldos-table">
+                <thead class="table-light">
+                    <tr>
+                        <th>Afiliado</th>
+                        <th>Grado</th>
+                        <th>Sueldo Base</th>
+                        <th>Bonificaciones</th>
+                        <th>Descuentos</th>
+                        <th>Sueldo Neto</th>
+                        <th>Fecha Cálculo</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sueldo in sueldos %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-3">
+                                    <i class="fas fa-user text-white"></i>
+                                </div>
+                                <div>
+                                    <strong>{{ sueldo.afiliado.nombre_completo }}</strong>
+                                    <br><small class="text-muted">{{ sueldo.afiliado.cedula }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            {% if sueldo.afiliado.grado_escalafon %}
+                                <span class="badge bg-primary">{{ sueldo.afiliado.grado_escalafon }}</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-info fw-bold">${{ sueldo.sueldo_base|floatformat:0 }}</td>
+                        <td class="text-success">${{ sueldo.bonificaciones|floatformat:0 }}</td>
+                        <td class="text-danger">${{ sueldo.descuentos|floatformat:0|default:0 }}</td>
+                        <td class="text-primary fw-bold">${{ sueldo.sueldo_neto|floatformat:0 }}</td>
+                        <td>
+                            <small>{{ sueldo.fecha_calculo|date:"d/m/Y H:i" }}</small>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'liquidacion:sueldo_detail' sueldo.pk %}"
+                                   class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'liquidacion:sueldo_update' sueldo.pk %}"
+                                   class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'liquidacion:sueldo_delete' sueldo.pk %}"
+                                   class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                   onclick="return confirm('¿Está seguro de eliminar este sueldo?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="card-footer">
+            <nav aria-label="Paginación de sueldos">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.anio %}&anio={{ request.GET.anio }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}">
+                                <i class="fas fa-angle-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.anio %}&anio={{ request.GET.anio }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}">
+                                <i class="fas fa-angle-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.anio %}&anio={{ request.GET.anio }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.anio %}&anio={{ request.GET.anio }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}">
+                                <i class="fas fa-angle-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.anio %}&anio={{ request.GET.anio }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}">
+                                <i class="fas fa-angle-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            <div class="text-center mt-2">
+                <small class="text-muted">
+                    Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} sueldos
+                </small>
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-money-bill-wave fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No hay sueldos registrados</h4>
+            <p class="text-muted mb-4">Comience calculando los sueldos automáticamente o cree uno manualmente.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-primary" onclick="alert('Use: python manage.py recalcular_sueldos')">
+                    <i class="fas fa-sync me-2"></i>Calcular Sueldos Automáticamente
+                </button>
+                <a href="{% url 'liquidacion:sueldo_create' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Crear Sueldo Manual
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Export functions
+function exportarExcel() {
+    alert('Funcionalidad de exportación a Excel - implementar en el backend');
+}
+
+function exportarPDF() {
+    alert('Funcionalidad de exportación a PDF - implementar en el backend');
+}
+</script>
+{% endblock %}

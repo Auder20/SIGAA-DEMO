@@ -1,0 +1,968 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* ============================================
+       VARIABLES GLOBALES - Paleta ADEMACOR
+       ============================================ */
+    :root {
+        --primary-color: #FF6B35;
+        --primary-hover: #E55A2B;
+        --primary-light: #FF8A5B;
+        --primary-ultralight: #FFF4F0;
+        --success-color: #2ecc71;
+        --success-light: #d5f4e6;
+        --danger-color: #e74c3c;
+        --danger-light: #fadbd8;
+        --warning-color: #f39c12;
+        --warning-light: #fef5e7;
+        --info-color: #3498db;
+        --light-gray: #f8f9fa;
+        --medium-gray: #e0e0e0;
+        --dark-gray: #6c757d;
+        --border-color: #dee2e6;
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --orange-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8A5B 100%);
+        --transition-fast: all 0.2s ease;
+        --transition-medium: all 0.3s ease;
+    }
+
+    body {
+        background-color: var(--light-gray);
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #content-main {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* BREADCRUMBS */
+    .breadcrumbs {
+        background: white;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .breadcrumbs a {
+        color: var(--dark-gray);
+        text-decoration: none;
+        transition: var(--transition-fast);
+        font-weight: 500;
+    }
+
+    .breadcrumbs a:hover {
+        color: var(--primary-color);
+    }
+
+    .breadcrumbs a::before {
+        content: '›';
+        margin: 0 0.5rem;
+        color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .breadcrumbs a:first-child::before {
+        content: '';
+        margin: 0;
+    }
+
+    /* ACCIONES */
+    .actions {
+        background: white;
+        padding: 1.25rem 1.75rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .actions-left, .actions-right {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    /* BOTONES */
+    .btn, .button, input[type="submit"] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.65rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-fast);
+        border: 2px solid transparent;
+        font-size: 0.95rem;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .btn-primary, input[type="submit"].default {
+        background: var(--orange-gradient);
+        color: white;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    .btn-primary:hover, input[type="submit"].default:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(255, 107, 53, 0.4);
+    }
+
+    .btn-secondary, .button {
+        background: white;
+        color: var(--dark-gray);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover, .button:hover {
+        background: var(--light-gray);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+    }
+
+    .btn-danger {
+        background: white;
+        color: var(--danger-color);
+        border: 2px solid var(--danger-color);
+    }
+
+    .btn-danger:hover {
+        background: var(--danger-color);
+        color: white;
+    }
+
+    /* FORMULARIO */
+    form {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        transition: var(--transition-medium);
+    }
+
+    form.has-changes {
+        box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.3), var(--shadow-lg);
+    }
+
+    fieldset.module {
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    fieldset.module h2 {
+        background: var(--orange-gradient);
+        color: white;
+        padding: 1.5rem 2rem;
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ALERTAS */
+    .alert {
+        padding: 1rem 1.5rem;
+        margin: 1.5rem 2rem;
+        border-radius: 10px;
+        border-left: 4px solid;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .alert-danger {
+        background: var(--danger-light);
+        border-left-color: var(--danger-color);
+        color: #721c24;
+    }
+
+    /* ESTADÍSTICAS */
+    .stats-container {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, var(--primary-ultralight) 0%, white 100%);
+        border-bottom: 1px solid var(--border-color);
+        flex-wrap: wrap;
+    }
+
+    .stat-card {
+        flex: 1;
+        min-width: 200px;
+        background: white;
+        padding: 1.25rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition-fast);
+        border-left: 4px solid;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-card.primary { border-left-color: var(--primary-color); }
+    .stat-card.success { border-left-color: var(--success-color); }
+    .stat-card.info { border-left-color: var(--info-color); }
+    .stat-card.warning { border-left-color: var(--warning-color); }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--dark-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: var(--orange-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* TABLA */
+    .table-responsive {
+        overflow-x: auto;
+        padding: 2rem;
+        background: linear-gradient(to bottom, white 0%, #fafafa 100%);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        box-shadow: var(--shadow-sm);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    th {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.8px;
+        position: relative;
+    }
+
+    th::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--orange-gradient);
+    }
+
+    td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        transition: var(--transition-fast);
+        background: white;
+    }
+
+    tbody tr {
+        transition: var(--transition-fast);
+        position: relative;
+    }
+
+    tbody tr:hover {
+        background: linear-gradient(90deg, 
+            rgba(255, 107, 53, 0.03) 0%, 
+            rgba(255, 138, 91, 0.05) 50%, 
+            rgba(255, 107, 53, 0.03) 100%);
+        transform: scale(1.005);
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    tbody tr.modified {
+        background: linear-gradient(90deg, 
+            rgba(255, 193, 7, 0.1) 0%, 
+            rgba(255, 193, 7, 0.05) 100%);
+    }
+
+    tbody tr.modified::before {
+        content: '●';
+        position: absolute;
+        left: 0.5rem;
+        color: var(--warning-color);
+        font-size: 1.2rem;
+        animation: blink 1.5s ease-in-out infinite;
+    }
+
+    tr.marked-for-deletion {
+        background: linear-gradient(90deg, 
+            rgba(231, 76, 60, 0.1) 0%, 
+            rgba(231, 76, 60, 0.05) 100%);
+        opacity: 0.6;
+        text-decoration: line-through;
+    }
+
+    /* INPUTS */
+    input[type="number"], input[type="text"] {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: var(--transition-fast);
+        background: white;
+    }
+
+    input[type="number"]:focus, input[type="text"]:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15);
+    }
+
+    input.valid {
+        border-color: var(--success-color);
+        background: var(--success-light);
+    }
+
+    input.invalid {
+        border-color: var(--danger-color);
+        background: var(--danger-light);
+        animation: shake 0.4s ease;
+    }
+
+    input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        accent-color: var(--danger-color);
+    }
+
+    td:first-child {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    td:nth-child(3), td:nth-child(4) {
+        font-family: 'Courier New', monospace;
+        font-size: 0.95rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-left: 3px solid var(--info-color);
+    }
+
+    td:nth-child(4) strong {
+        color: var(--primary-color);
+        font-size: 1.05rem;
+    }
+
+    /* SUBMIT ROW */
+    .submit-row {
+        background: linear-gradient(to right, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.75rem 2rem;
+        border-top: 3px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+    }
+
+    .submit-row-left, .submit-row-right {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .changes-indicator {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--warning-light);
+        border: 2px solid var(--warning-color);
+        border-radius: 8px;
+        color: #856404;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .changes-indicator.visible {
+        display: flex;
+    }
+
+    /* LOADING */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loading-overlay.active {
+        display: flex;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 2.5rem 3.5rem;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid var(--light-gray);
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 1.5rem;
+    }
+
+    /* ANIMACIONES */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-10px); }
+        75% { transform: translateX(10px); }
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* RESPONSIVO */
+    @media (max-width: 768px) {
+        #content-main { padding: 1rem; }
+        .actions { flex-direction: column; align-items: stretch; }
+        .actions-left, .actions-right { width: 100%; flex-direction: column; }
+        table { min-width: 800px; }
+        th, td { padding: 0.75rem 0.5rem; font-size: 0.85rem; }
+        .submit-row { flex-direction: column; align-items: stretch; }
+        .btn { width: 100%; }
+    }
+
+    /* MODO OSCURO */
+    @media (prefers-color-scheme: dark) {
+        body { background-color: #1a1a1a; color: #e0e0e0; }
+        .breadcrumbs, form, .actions { background: #2a2a2a; }
+        td { background: #2a2a2a; color: #e0e0e0; }
+        input[type="number"], input[type="text"] { background: #333; color: #e0e0e0; }
+        .btn-secondary, .button { background: #2a2a2a; color: #e0e0e0; }
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}"><i class="fas fa-home"></i> {% trans 'Home' %}</a>
+    <a href="{% url 'admin:app_list' app_label='liquidacion' %}"><i class="fas fa-calculator"></i> Liquidación</a>
+    <a href="{% url 'liquidacion:tablasalarial_list' %}"><i class="fas fa-table"></i> Tablas Salariales</a>
+    <span style="color: var(--primary-color); font-weight: 600;"><i class="fas fa-edit"></i> {{ title }}</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="actions">
+        <div class="actions-left">
+            <a href="{% url 'liquidacion:tablasalarial_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+        <div class="actions-right">
+            <button type="button" class="btn btn-info" id="resetChangesBtn" style="display: none;">
+                <i class="fas fa-undo"></i> Restablecer
+            </button>
+            <button type="button" class="btn btn-success" id="previewBtn">
+                <i class="fas fa-eye"></i> Vista previa
+            </button>
+        </div>
+    </div>
+    
+    <form method="post" id="tablasalarial_form" novalidate>
+        {% csrf_token %}
+        {{ formset.management_form }}
+        
+        {% if formset.non_form_errors %}
+        <div class="alert alert-danger">
+            {% for error in formset.non_form_errors %}{{ error|escape }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="stats-container">
+            <div class="stat-card primary">
+                <div class="stat-label"><i class="fas fa-hashtag"></i> Registros</div>
+                <div class="stat-value" id="totalRecords">{{ formset|length }}</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-label"><i class="fas fa-coins"></i> Promedio</div>
+                <div class="stat-value" id="avgSalary">Gs. 0</div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-label"><i class="fas fa-chart-line"></i> Máximo</div>
+                <div class="stat-value" id="maxSalary">Gs. 0</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-label"><i class="fas fa-edit"></i> Cambios</div>
+                <div class="stat-value" id="changesCount">0</div>
+            </div>
+        </div>
+
+        <fieldset class="module aligned">
+            <h2>Editar Tabla Salarial {{ anio }}</h2>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-graduation-cap"></i> Grado</th>
+                            <th><i class="fas fa-money-bill-wave"></i> Salario Base</th>
+                            <th><i class="fas fa-chart-bar"></i> Aumento</th>
+                            <th><i class="fas fa-coins"></i> Total</th>
+                            {% if formset.can_delete %}<th><i class="fas fa-trash"></i> Eliminar</th>{% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                        <tr class="form-row" data-grado="{{ form.grado.value }}" data-original-salary="{{ form.salario_base.value }}">
+                            <td>
+                                {{ form.id }}
+                                <strong>{{ form.grado.value }}</strong>
+                                {{ form.grado }}
+                            </td>
+                            <td>
+                                {{ form.salario_base }}
+                                {% if form.salario_base.errors %}
+                                <div style="color: var(--danger-color); font-size: 0.85rem; margin-top: 0.5rem;">
+                                    {% for error in form.salario_base.errors %}{{ error }}{% endfor %}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="aumento-cell">
+                                <span class="aumento-value">Gs. {{ form.instance.calcular_aumento_por_grado|floatformat:0 }}</span>
+                            </td>
+                            <td class="total-cell">
+                                <strong class="total-value">Gs. {{ form.instance.calcular_sueldo_con_bonificacion|floatformat:0 }}</strong>
+                            </td>
+                            {% if formset.can_delete %}
+                            <td class="delete-cell">{{ form.DELETE }}</td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </fieldset>
+        
+        <div class="submit-row">
+            <div class="submit-row-left">
+                <input type="submit" value="💾 Guardar cambios" class="default" name="_save">
+                <a href="{% url 'liquidacion:tablasalarial_list' %}" class="button" id="cancelBtn">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+            <div class="submit-row-right">
+                <div class="changes-indicator" id="changesIndicator">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="changesText">Cambios sin guardar</span>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <p style="font-size: 1.1rem; font-weight: 600; margin: 0;">Guardando...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+// CONFIGURACIÓN
+const CONFIG = {
+    AUMENTO_POR_GRADO: 0.05, // 5% por grado
+    CURRENCY_SYMBOL: 'Gs.',
+    MIN_SALARY: 0,
+    MAX_SALARY: 99999999,
+    DEBOUNCE_DELAY: 300
+};
+
+// UTILIDADES
+function formatCurrency(value) {
+    if (isNaN(value) || !value) return `${CONFIG.CURRENCY_SYMBOL} 0`;
+    const rounded = Math.round(value);
+    const parts = rounded.toString().split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return `${CONFIG.CURRENCY_SYMBOL} ${parts.join(',')}`;
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func(...args), wait);
+    };
+}
+
+// ESTADO
+const AppState = {
+    originalValues: new Map(),
+    hasChanges: false,
+    deletedRows: new Set(),
+    
+    init() {
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const grado = row.dataset.grado;
+            const input = row.querySelector('input[name$="-salario_base"]');
+            if (input) this.originalValues.set(grado, parseFloat(input.value) || 0);
+        });
+    },
+    
+    checkChanges() {
+        let changesDetected = false;
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const grado = row.dataset.grado;
+            const input = row.querySelector('input[name$="-salario_base"]');
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            
+            if (input) {
+                const current = parseFloat(input.value) || 0;
+                const original = this.originalValues.get(grado);
+                if (current !== original) {
+                    changesDetected = true;
+                    row.classList.add('modified');
+                } else {
+                    row.classList.remove('modified');
+                }
+            }
+            
+            if (checkbox && checkbox.checked) {
+                changesDetected = true;
+                row.classList.add('marked-for-deletion');
+                this.deletedRows.add(grado);
+            } else {
+                row.classList.remove('marked-for-deletion');
+                this.deletedRows.delete(grado);
+            }
+        });
+        
+        this.hasChanges = changesDetected;
+        this.updateUI();
+    },
+    
+    updateUI() {
+        const form = document.getElementById('tablasalarial_form');
+        const indicator = document.getElementById('changesIndicator');
+        const resetBtn = document.getElementById('resetChangesBtn');
+        const changesCount = document.getElementById('changesCount');
+        
+        if (this.hasChanges) {
+            form.classList.add('has-changes');
+            indicator.classList.add('visible');
+            resetBtn.style.display = 'inline-flex';
+            const modifiedCount = document.querySelectorAll('tr.modified').length;
+            const deletedCount = this.deletedRows.size;
+            changesCount.textContent = modifiedCount + deletedCount;
+        } else {
+            form.classList.remove('has-changes');
+            indicator.classList.remove('visible');
+            resetBtn.style.display = 'none';
+            changesCount.textContent = '0';
+        }
+    },
+    
+    reset() {
+        document.querySelectorAll('tbody tr').forEach(row => {
+            const grado = row.dataset.grado;
+            const input = row.querySelector('input[name$="-salario_base"]');
+            const checkbox = row.querySelector('input[type="checkbox"]');
+            if (input) input.value = this.originalValues.get(grado);
+            if (checkbox) checkbox.checked = false;
+            row.classList.remove('modified', 'marked-for-deletion');
+        });
+        this.deletedRows.clear();
+        this.hasChanges = false;
+        updateCalculations();
+        this.updateUI();
+    }
+};
+
+// CÁLCULOS
+function updateCalculations() {
+    const rows = document.querySelectorAll('tbody tr');
+    let totalSalary = 0, maxSalary = 0, validRows = 0;
+    
+    rows.forEach(row => {
+        const input = row.querySelector('input[name$="-salario_base"]');
+        const aumentoCell = row.querySelector('.aumento-value');
+        const totalCell = row.querySelector('.total-value');
+        const grado = parseInt(row.dataset.grado) || 0;
+        
+        if (input && !row.classList.contains('marked-for-deletion')) {
+            const salarioBase = parseFloat(input.value) || 0;
+            
+            if (salarioBase < CONFIG.MIN_SALARY || salarioBase > CONFIG.MAX_SALARY) {
+                input.classList.add('invalid');
+                input.classList.remove('valid');
+            } else {
+                input.classList.remove('invalid');
+                input.classList.add('valid');
+            }
+            
+            const aumento = salarioBase * CONFIG.AUMENTO_POR_GRADO * (grado - 1);
+            const total = salarioBase + aumento;
+            
+            if (aumentoCell) aumentoCell.textContent = formatCurrency(aumento);
+            if (totalCell) totalCell.textContent = formatCurrency(total);
+            
+            totalSalary += total;
+            if (total > maxSalary) maxSalary = total;
+            validRows++;
+        }
+    });
+    
+    const avgSalary = validRows > 0 ? totalSalary / validRows : 0;
+    document.getElementById('totalRecords').textContent = validRows;
+    document.getElementById('avgSalary').textContent = formatCurrency(avgSalary);
+    document.getElementById('maxSalary').textContent = formatCurrency(maxSalary);
+}
+
+// EVENTOS
+document.addEventListener('DOMContentLoaded', function() {
+    AppState.init();
+    updateCalculations();
+    
+    const debouncedCalc = debounce(() => {
+        updateCalculations();
+        AppState.checkChanges();
+    }, CONFIG.DEBOUNCE_DELAY);
+    
+    document.querySelectorAll('input[name$="-salario_base"]').forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/[^\d]/g, '');
+            debouncedCalc();
+        });
+        
+        input.addEventListener('blur', function() {
+            const value = parseFloat(this.value) || 0;
+            if (value < CONFIG.MIN_SALARY) this.value = CONFIG.MIN_SALARY;
+            if (value > CONFIG.MAX_SALARY) this.value = CONFIG.MAX_SALARY;
+            updateCalculations();
+            AppState.checkChanges();
+        });
+    });
+    
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (this.checked) {
+                const row = this.closest('tr');
+                const grado = row.dataset.grado;
+                if (!confirm(`¿Eliminar el grado ${grado}?`)) {
+                    this.checked = false;
+                }
+            }
+            AppState.checkChanges();
+            updateCalculations();
+        });
+    });
+    
+    document.getElementById('resetChangesBtn').addEventListener('click', function() {
+        if (confirm('¿Restablecer todos los cambios?\n\nSe perderán las modificaciones no guardadas.')) {
+            AppState.reset();
+        }
+    });
+    
+    document.getElementById('previewBtn').addEventListener('click', generatePreview);
+    
+    document.getElementById('cancelBtn').addEventListener('click', function(e) {
+        if (AppState.hasChanges) {
+            if (!confirm('Tiene cambios sin guardar.\n\n¿Salir sin guardar?')) {
+                e.preventDefault();
+            }
+        }
+    });
+    
+    document.getElementById('tablasalarial_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const visibleRows = document.querySelectorAll('tbody tr:not(.marked-for-deletion)').length;
+        if (visibleRows === 0) {
+            alert('Debe mantener al menos un registro');
+            return;
+        }
+        
+        const invalidInputs = document.querySelectorAll('input.invalid');
+        if (invalidInputs.length > 0) {
+            alert('Corrija los errores antes de guardar');
+            invalidInputs[0].focus();
+            return;
+        }
+        
+        const modifiedCount = document.querySelectorAll('tr.modified').length;
+        const deletedCount = AppState.deletedRows.size;
+        
+        let msg = '¿Guardar los cambios?';
+        if (modifiedCount > 0 || deletedCount > 0) {
+            msg += '\n\nCambios:';
+            if (modifiedCount > 0) msg += `\n• ${modifiedCount} modificado(s)`;
+            if (deletedCount > 0) msg += `\n• ${deletedCount} eliminado(s)`;
+        }
+        
+        if (confirm(msg)) {
+            document.getElementById('loadingOverlay').classList.add('active');
+            setTimeout(() => this.submit(), 500);
+        }
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (AppState.hasChanges) {
+            e.preventDefault();
+            e.returnValue = 'Cambios sin guardar';
+            return e.returnValue;
+        }
+    });
+    
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            document.querySelector('input[name="_save"]').click();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && AppState.hasChanges) {
+            e.preventDefault();
+            document.getElementById('resetChangesBtn').click();
+        }
+        if (e.key === 'Escape') {
+            if (!AppState.hasChanges || confirm('¿Cancelar y volver?')) {
+                window.location.href = document.getElementById('cancelBtn').href;
+            }
+        }
+    });
+});
+
+function generatePreview() {
+    const rows = document.querySelectorAll('tbody tr:not(.marked-for-deletion)');
+    let html = `
+        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 2rem;" id="previewModal">
+            <div style="background: white; border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                <div style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 1.25rem;"><i class="fas fa-eye"></i> Vista Previa</h3>
+                    <button onclick="this.closest('#previewModal').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;">×</button>
+                </div>
+                <div style="padding: 2rem;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #f8f9fa;">
+                                <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #FF6B35;">Grado</th>
+                                <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #FF6B35;">Salario Base</th>
+                                <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #FF6B35;">Aumento</th>
+                                <th style="padding: 1rem; text-align: right; border-bottom: 2px solid #FF6B35;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+    
+    rows.forEach(row => {
+        const grado = row.dataset.grado;
+        const input = row.querySelector('input[name$="-salario_base"]');
+        const aumentoCell = row.querySelector('.aumento-value');
+        const totalCell = row.querySelector('.total-value');
+        
+        if (input) {
+            html += `
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 0.875rem; font-weight: 600;">${grado}</td>
+                    <td style="padding: 0.875rem; text-align: right;">${formatCurrency(parseFloat(input.value) || 0)}</td>
+                    <td style="padding: 0.875rem; text-align: right;">${aumentoCell ? aumentoCell.textContent : 'Gs. 0'}</td>
+                    <td style="padding: 0.875rem; text-align: right; font-weight: 700; color: #FF6B35;">${totalCell ? totalCell.textContent : 'Gs. 0'}</td>
+                </tr>`;
+        }
+    });
+    
+    html += `
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 2px solid #eee; text-align: center;">
+                        <button onclick="window.print()" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer; margin-right: 0.5rem;">
+                            <i class="fas fa-print"></i> Imprimir
+                        </button>
+                        <button onclick="this.closest('#previewModal').remove()" style="background: #6c757d; color: white; border: none; padding: 0.75rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+</script>
+{% endblock %}

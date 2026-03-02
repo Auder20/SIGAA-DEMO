@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Tabla Salarial - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tablas_main' %}">Tablas</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tabla_list' %}">Tablas Salariales</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'tablas:tabla_detail' object.pk %}">{{ object.nombre|truncatechars:20 }}</a>
+</li>
+<li class="breadcrumb-item active">Eliminar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirmar Eliminación
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-table text-danger" style="font-size: 4rem; opacity: 0.3;"></i>
+                </div>
+                
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ¡Acción Irreversible!
+                    </h5>
+                    <p class="mb-0">
+                        Está a punto de eliminar permanentemente la tabla salarial <strong>{{ object.nombre }}</strong>.
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Información de la Tabla a Eliminar:</h6>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Nombre:</strong></div>
+                            <div class="col-sm-8">{{ object.nombre }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Vigencia:</strong></div>
+                            <div class="col-sm-8">{{ object.vigencia }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Estado:</strong></div>
+                            <div class="col-sm-8">
+                                <span class="badge bg-{% if object.activa %}success{% else %}secondary{% endif %}">
+                                    {% if object.activa %}Activa{% else %}Inactiva{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Escalas:</strong></div>
+                            <div class="col-sm-8">{{ object.escalas.count }} escalas configuradas</div>
+                        </div>
+                        {% if object.fecha_aprobacion %}
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Fecha Aprobación:</strong></div>
+                            <div class="col-sm-8">{{ object.fecha_aprobacion|date:"d/m/Y" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-info-circle me-2"></i>Consecuencias de la eliminación:</h6>
+                    <ul class="mb-0">
+                        <li>Se perderán todas las escalas salariales configuradas</li>
+                        <li>Los cálculos de liquidación que dependan de esta tabla se verán afectados</li>
+                        <li>Se perderá el historial de configuración de la tabla</li>
+                        <li>Los empleados asignados a escalas de esta tabla quedarán sin referencia salarial</li>
+                        {% if object.activa %}
+                        <li><strong>Esta tabla está actualmente ACTIVA y en uso</strong></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                {% if object.activa %}
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-circle me-2"></i>¡Advertencia Especial!</h6>
+                    <p class="mb-0">
+                        Esta tabla salarial está <strong>ACTIVA</strong> y puede estar siendo utilizada 
+                        en cálculos de liquidación actuales. Se recomienda desactivarla primero 
+                        antes de eliminarla.
+                    </p>
+                </div>
+                {% endif %}
+
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'tablas:tabla_detail' object.pk %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>
+                            Sí, Eliminar Tabla Salarial
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const confirmMessage = '¿Está completamente seguro que desea eliminar esta tabla salarial?\n\n' +
+                          'Esta acción NO se puede deshacer y afectará:\n' +
+                          '- Todas las escalas salariales\n' +
+                          '- Los cálculos de liquidación\n' +
+                          '- Los empleados asignados a esta tabla\n\n' +
+                          'Escriba "ELIMINAR" para confirmar:';
+    
+    const userInput = prompt(confirmMessage);
+    if (userInput !== 'ELIMINAR') {
+        e.preventDefault();
+        if (userInput !== null) {
+            alert('Eliminación cancelada. Debe escribir exactamente "ELIMINAR" para confirmar.');
+        }
+    }
+});
+</script>
+{% endblock %}

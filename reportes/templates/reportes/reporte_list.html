@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Reportes - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reportes_main' %}">Reportes</a>
+</li>
+<li class="breadcrumb-item active">Lista</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-chart-bar me-2"></i>
+            Lista de Reportes
+        </h1>
+        <p class="text-muted mb-0">{{ total_reportes|default:0 }} reporte{{ total_reportes|pluralize }} registrado{{ total_reportes|pluralize }}</p>
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'reportes:reporte_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Nuevo Reporte
+        </a>
+        <button class="btn btn-success" onclick="alert('Funcionalidad de exportación próximamente')">
+            <i class="fas fa-file-excel me-2"></i>Exportar Excel
+        </button>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <!-- Búsqueda por texto -->
+            <div class="col-md-6">
+                <label for="search" class="form-label">
+                    <i class="fas fa-search me-2"></i>Búsqueda por Texto
+                </label>
+                <input type="text" class="form-control" id="search" name="search"
+                       placeholder="Buscar en tipo, descripción o generado por..."
+                       value="{{ request.GET.search }}">
+                <div class="form-text">
+                    Busca en: tipo de reporte, descripción, nombre de usuario o nombre del generador
+                </div>
+            </div>
+
+            <!-- Filtro por tipo -->
+            <div class="col-md-3">
+                <label for="tipo" class="form-label">Tipo de Reporte</label>
+                <select class="form-select" id="tipo" name="tipo">
+                    <option value="">Todos los tipos</option>
+                    <option value="diferencias_secretaria_ademacor" {% if request.GET.tipo == 'diferencias_secretaria_ademacor' %}selected{% endif %}>Diferencias Secretaría-ADEMACOR</option>
+                    <option value="afiliados" {% if request.GET.tipo == 'afiliados' %}selected{% endif %}>Afiliados</option>
+                    <option value="sueldos" {% if request.GET.tipo == 'sueldos' %}selected{% endif %}>Sueldos</option>
+                    <option value="aportes" {% if request.GET.tipo == 'aportes' %}selected{% endif %}>Aportes</option>
+                    <option value="general" {% if request.GET.tipo == 'general' %}selected{% endif %}>General</option>
+                </select>
+            </div>
+
+            <!-- Fecha exacta -->
+            <div class="col-md-3">
+                <label for="fecha_exacta" class="form-label">
+                    <i class="fas fa-calendar-alt me-2"></i>Fecha Exacta
+                </label>
+                <input type="date" class="form-control" id="fecha_exacta" name="fecha_exacta"
+                       value="{{ request.GET.fecha_exacta }}">
+                <div class="form-text">Selecciona una fecha específica</div>
+            </div>
+
+            <!-- Filtros de mes y año -->
+            <div class="col-md-3">
+                <label for="mes" class="form-label">Mes</label>
+                <select class="form-select" id="mes" name="mes">
+                    <option value="">Todos los meses</option>
+                    {% for valor, nombre in meses %}
+                    <option value="{{ valor }}" {% if request.GET.mes == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label for="ano" class="form-label">Año</label>
+                <select class="form-select" id="ano" name="ano">
+                    <option value="">Todos los años</option>
+                    {% for valor, nombre in anos %}
+                    <option value="{{ valor }}" {% if request.GET.ano == valor %}selected{% endif %}>{{ nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                    <a href="{% url 'reportes:reporte_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-eraser me-2"></i>Limpiar Filtros
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reports Table -->
+<div class="card">
+    <div class="card-body">
+        {% if reportes %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Descripción</th>
+                        <th>Generado por</th>
+                        <th>Fecha Generación</th>
+                        <th>Estado</th>
+                        <th>Archivos</th>
+                        <th width="180">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reporte in reportes %}
+                    <tr>
+                        <td>
+                            <span class="badge bg-info">{{ reporte.get_tipo_display|default:reporte.tipo|capfirst }}</span>
+                        </td>
+                        <td>
+                            <div class="fw-bold">{{ reporte.get_tipo_display|default:reporte.tipo|title }}</div>
+                            <small class="text-muted">{{ reporte.descripcion|default:"-"|truncatechars:80 }}</small>
+                        </td>
+                        <td>
+                            {% if reporte.generado_por %}
+                                <div class="fw-bold">{{ reporte.generado_por.get_full_name|default:reporte.generado_por.username }}</div>
+                                <small class="text-muted">{{ reporte.generado_por.username }}</small>
+                            {% else %}
+                                <span class="text-muted">Sistema</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div>{{ reporte.fecha_generado|date:"d/m/Y"|default:"-" }}</div>
+                            <small class="text-muted">{{ reporte.fecha_generado|date:"H:i"|default:"" }}</small>
+                        </td>
+                        <td>
+                            {% if reporte.activo %}
+                                <span class="badge bg-success">
+                                    <i class="fas fa-check me-1"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-pause me-1"></i>Inactivo
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group-vertical btn-group-sm" role="group">
+                                {% if reporte.archivo_excel %}
+                                    <a class="btn btn-outline-success" href="{{ reporte.archivo_excel.url }}" download title="Descargar Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-outline-secondary" disabled title="Excel no disponible">
+                                        <i class="fas fa-file-excel"></i>
+                                    </button>
+                                {% endif %}
+                                {% if reporte.archivo_pdf %}
+                                    <a class="btn btn-outline-danger" href="{{ reporte.archivo_pdf.url }}" download title="Descargar PDF">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-outline-secondary" disabled title="PDF no disponible">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'reportes:reporte_detail' reporte.pk %}" class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'reportes:reporte_update' reporte.pk %}" class="btn btn-sm btn-outline-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'reportes:reporte_delete' reporte.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Paginación de reportes" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.fecha_exacta %}&fecha_exacta={{ request.GET.fecha_exacta }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.fecha_exacta %}&fecha_exacta={{ request.GET.fecha_exacta }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.fecha_exacta %}&fecha_exacta={{ request.GET.fecha_exacta }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.fecha_exacta %}&fecha_exacta={{ request.GET.fecha_exacta }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.tipo %}&tipo={{ request.GET.tipo }}{% endif %}{% if request.GET.fecha_exacta %}&fecha_exacta={{ request.GET.fecha_exacta }}{% endif %}{% if request.GET.mes %}&mes={{ request.GET.mes }}{% endif %}{% if request.GET.ano %}&ano={{ request.GET.ano }}{% endif %}">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-chart-bar fa-4x text-muted mb-4"></i>
+            <h4 class="text-muted">No hay reportes registrados</h4>
+            <p class="text-muted mb-4">
+                {% if request.GET.search or request.GET.tipo or request.GET.fecha_exacta or request.GET.mes or request.GET.ano %}
+                    No se encontraron reportes que coincidan con los filtros aplicados.
+                    <br>
+                    <strong>Filtros activos:</strong>
+                    {% if request.GET.search %}<span class="badge bg-secondary">Búsqueda: {{ request.GET.search }}</span>{% endif %}
+                    {% if request.GET.tipo %}<span class="badge bg-info">Tipo: {{ request.GET.tipo }}</span>{% endif %}
+                    {% if request.GET.fecha_exacta %}<span class="badge bg-warning">Fecha: {{ request.GET.fecha_exacta }}</span>{% endif %}
+                    {% if request.GET.mes and request.GET.ano %}<span class="badge bg-success">Período: {{ request.GET.mes }}/{{ request.GET.ano }}</span>{% endif %}
+                    <br><a href="{% url 'reportes:reporte_list' %}" class="btn btn-link">Limpiar filtros</a>
+                {% else %}
+                    Comience creando su primer reporte del sistema.
+                {% endif %}
+            </p>
+            <div>
+                <a href="{% url 'reportes:reporte_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Nuevo Reporte
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

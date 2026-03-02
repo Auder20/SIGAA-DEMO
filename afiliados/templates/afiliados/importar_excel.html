@@ -1,0 +1,1234 @@
+{% extends 'base.html' %}
+
+{% block title %}Importar Excel - SIGAA{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
+    --shadow-md: 0 4px 8px rgba(0,0,0,.1);
+    --shadow-lg: 0 8px 20px rgba(0,0,0,.15);
+}
+
+/* Page Header */
+.page-header-import {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), transparent);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+/* Cards mejorados */
+.card {
+    border: none;
+    box-shadow: var(--shadow-md);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+    border-bottom: 2px solid rgba(0,0,0,.05);
+    padding: 1.25rem 1.5rem;
+}
+
+/* Type Cards */
+.import-type-card {
+    height: 100%;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.import-type-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-lg);
+}
+
+.import-type-card.border-primary:hover {
+    border-color: var(--primary-color);
+    background: rgba(13, 110, 253, 0.05);
+}
+
+.import-type-card.border-success:hover {
+    border-color: var(--success-color);
+    background: rgba(25, 135, 84, 0.05);
+}
+
+.import-type-card.border-warning:hover {
+    border-color: var(--warning-color);
+    background: rgba(255, 193, 7, 0.05);
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 3px dashed #dee2e6;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.upload-zone:hover {
+    border-color: var(--primary-color);
+    background: rgba(13, 110, 253, 0.05);
+}
+
+.upload-zone.dragover {
+    border-color: var(--success-color);
+    background: rgba(25, 135, 84, 0.1);
+    transform: scale(1.02);
+}
+
+.upload-zone input[type="file"] {
+    display: none;
+}
+
+.upload-icon {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.upload-zone:hover .upload-icon {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+/* File Preview */
+.file-preview-card {
+    background: linear-gradient(135deg, #d4edda, #c3e6cb);
+    border-left: 4px solid var(--success-color);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Import Buttons */
+.import-btn-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.btn-import {
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-import::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-import:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn-import:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Progress Bar */
+.upload-progress-container {
+    margin-top: 1.5rem;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.progress {
+    height: 30px;
+    border-radius: 15px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: width 0.4s ease;
+}
+
+/* Template Section */
+.template-table {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.template-download-btn {
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.template-download-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Results Card */
+.results-card {
+    animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.result-stat {
+    padding: 1.5rem;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.result-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+}
+
+.result-number {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+/* Instructions Accordion */
+.instruction-item {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.instruction-item:hover {
+    background: white;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header-import {
+        padding: 1rem;
+    }
+    
+    .upload-zone {
+        padding: 2rem 1rem;
+    }
+    
+    .import-btn-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .result-number {
+        font-size: 2rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        width: 100%;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        width: 100%;
+    }
+}
+
+/* Alerts mejorados */
+.alert {
+    border-radius: 10px;
+    border: none;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: var(--info-color);
+    background: rgba(13, 202, 240, 0.1);
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+    background: rgba(25, 135, 84, 0.1);
+}
+
+.alert-warning {
+    border-left-color: var(--warning-color);
+    background: rgba(255, 193, 7, 0.1);
+}
+
+/* Loading Spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.spinner-content {
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Tooltip personalizado */
+.custom-tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-tooltip .tooltip-text {
+    visibility: hidden;
+    background-color: #212529;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    font-size: 0.875rem;
+}
+
+.custom-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">
+        <i class="fas fa-users me-1"></i>Afiliados
+    </a>
+</li>
+<li class="breadcrumb-item active" aria-current="page">Importar Excel</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header Mejorado -->
+<div class="page-header-import mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h1 class="h2 mb-2 fw-bold">
+                <i class="fas fa-file-import me-2 text-primary"></i>
+                Importar Datos desde Excel
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="fas fa-info-circle me-1"></i>
+                Cargue archivos Excel con información de afiliados, secretaría o ADEMACOR
+            </p>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+            <div class="action-buttons d-flex gap-2 justify-content-md-end">
+                <a href="{% url 'afiliados:afiliados_main' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver
+                </a>
+                <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-outline-info">
+                    <i class="fas fa-list me-2"></i>Ver Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tipos de Importación -->
+<div class="card mb-4">
+    <div class="card-header bg-gradient">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-layer-group me-2"></i>
+            Tipos de Importación Disponibles
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card import-type-card border-primary">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-users fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Afiliados</h5>
+                        <p class="card-text text-muted small">
+                            Información completa de afiliados incluyendo datos profesionales, académicos y de contacto
+                        </p>
+                        <span class="badge bg-primary">Completo</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card import-type-card border-success">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-building fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">Secretaría</h5>
+                        <p class="card-text text-muted small">
+                            Datos básicos de personal: cédula, nombre completo y municipio de adscripción
+                        </p>
+                        <span class="badge bg-success">Básico</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card import-type-card border-warning">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-handshake fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">ADEMACOR</h5>
+                        <p class="card-text text-muted small">
+                            Registro de asociados ADEMACOR con información básica de identificación
+                        </p>
+                        <span class="badge bg-warning text-dark">Asociados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alert alert-info mt-4 mb-0">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <i class="fas fa-file-excel me-2"></i>
+                    <strong>Formato de Archivo:</strong> Excel (.xlsx o .xls) con columnas requeridas según el tipo
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge bg-info text-dark px-3 py-2">
+                        <i class="fas fa-weight me-1"></i>Máximo 10MB
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de Carga -->
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cloud-upload-alt me-2"></i>
+                    Cargar Archivo Excel
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="importForm">
+                    {% csrf_token %}
+                    
+                    <!-- Upload Zone -->
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h5 class="mb-2">Arrastra tu archivo aquí</h5>
+                        <p class="text-muted mb-3">o haz clic para seleccionar</p>
+                        <input type="file" 
+                               class="form-control" 
+                               id="archivo_excel" 
+                               name="archivo_excel" 
+                               accept=".xlsx,.xls"
+                               required>
+                        <button type="button" class="btn btn-primary" onclick="document.getElementById('archivo_excel').click()">
+                            <i class="fas fa-folder-open me-2"></i>Seleccionar Archivo
+                        </button>
+                        <p class="text-muted small mt-3 mb-0">
+                            Formatos soportados: .xlsx, .xls | Tamaño máximo: 10MB
+                        </p>
+                    </div>
+
+                    <!-- File Preview -->
+                    <div id="filePreview" class="d-none">
+                        <div class="file-preview-card">
+                            <div class="file-info">
+                                <div class="file-icon text-success">
+                                    <i class="fas fa-file-excel"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong id="fileName" class="d-block text-success"></strong>
+                                    <small class="text-muted">
+                                        <i class="fas fa-hdd me-1"></i>
+                                        Tamaño: <span id="fileSize"></span>
+                                    </small>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div id="uploadProgress" class="d-none upload-progress-container">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="fw-bold">Procesando archivo...</small>
+                            <small id="progressPercent">0%</small>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" 
+                                 role="progressbar" 
+                                 style="width: 0%"
+                                 id="progressBar">
+                            </div>
+                        </div>
+                        <small class="text-muted mt-2 d-block text-center">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Por favor, no cierres esta ventana
+                        </small>
+                    </div>
+
+                    <!-- Import Buttons -->
+                    <div class="import-btn-container">
+                        <button type="submit" 
+                                name="import_type" 
+                                value="afiliados" 
+                                class="btn btn-primary btn-import">
+                            <i class="fas fa-users me-2"></i>
+                            <span class="d-block">Importar Afiliados</span>
+                        </button>
+                        
+                        <button type="submit" 
+                                name="import_type" 
+                                value="secretaria" 
+                                class="btn btn-success btn-import">
+                            <i class="fas fa-building me-2"></i>
+                            <span class="d-block">Importar Secretaría</span>
+                        </button>
+                        
+                        <button type="submit" 
+                                name="import_type" 
+                                value="ademacor" 
+                                class="btn btn-warning btn-import text-dark">
+                            <i class="fas fa-handshake me-2"></i>
+                            <span class="d-block">Importar ADEMACOR</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Plantillas de Ejemplo -->
+<div class="card mt-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-file-download me-2"></i>
+                Plantillas de Ejemplo
+            </h5>
+            <span class="badge bg-primary">
+                <i class="fas fa-download me-1"></i>Descarga gratuita
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-3">
+            Descarga las plantillas según el tipo de importación que necesites. 
+            Cada plantilla incluye las columnas requeridas con ejemplos.
+        </p>
+
+        <div class="template-table mb-4">
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th><i class="fas fa-id-card me-1"></i>cedula</th>
+                            <th><i class="fas fa-user me-1"></i>nombre_completo</th>
+                            <th><i class="fas fa-map-marker-alt me-1"></i>municipio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>12345678</code></td>
+                            <td>Juan Pérez García</td>
+                            <td>Caracas</td>
+                        </tr>
+                        <tr class="table-light">
+                            <td><code>87654321</code></td>
+                            <td>María González López</td>
+                            <td>Valencia</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <button class="btn btn-outline-primary template-download-btn w-100" 
+                        onclick="downloadTemplate('afiliados')">
+                    <i class="fas fa-download me-2"></i>
+                    <span class="d-block mt-1">Plantilla Afiliados</span>
+                    <small class="d-block text-muted">Con todos los campos</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-outline-success template-download-btn w-100" 
+                        onclick="downloadTemplate('secretaria')">
+                    <i class="fas fa-download me-2"></i>
+                    <span class="d-block mt-1">Plantilla Secretaría</span>
+                    <small class="d-block text-muted">Datos básicos</small>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-outline-warning template-download-btn w-100" 
+                        onclick="downloadTemplate('ademacor')">
+                    <i class="fas fa-download me-2"></i>
+                    <span class="d-block mt-1">Plantilla ADEMACOR</span>
+                    <small class="d-block text-muted">Asociados</small>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Instrucciones Detalladas -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list-ol me-2"></i>
+            Pasos para Importar
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="instruction-item">
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-primary me-3" style="font-size: 1.2rem;">1</div>
+                        <div>
+                            <strong>Descarga la plantilla</strong>
+                            <p class="text-muted small mb-0 mt-1">
+                                Selecciona y descarga la plantilla según tu necesidad
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="instruction-item">
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-primary me-3" style="font-size: 1.2rem;">2</div>
+                        <div>
+                            <strong>Completa los datos</strong>
+                            <p class="text-muted small mb-0 mt-1">
+                                Llena el archivo con la información requerida
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="instruction-item">
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-primary me-3" style="font-size: 1.2rem;">3</div>
+                        <div>
+                            <strong>Carga el archivo</strong>
+                            <p class="text-muted small mb-0 mt-1">
+                                Arrastra o selecciona el archivo Excel completado
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="instruction-item">
+                    <div class="d-flex align-items-start">
+                        <div class="badge bg-primary me-3" style="font-size: 1.2rem;">4</div>
+                        <div>
+                            <strong>Procesa la importación</strong>
+                            <p class="text-muted small mb-0 mt-1">
+                                Haz clic en el botón correspondiente al tipo de datos
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resultados de Importación -->
+{% if import_results %}
+<div class="card mt-4 border-success results-card">
+    <div class="card-header bg-success text-white">
+        <h5 class="card-title mb-0">
+            <i class="fas fa-check-circle me-2"></i>
+            Resultados de la Importación
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3 text-center mb-4">
+            <div class="col-md-3">
+                <div class="result-stat border rounded">
+                    <div class="result-number text-primary">
+                        {{ import_results.total_procesados }}
+                    </div>
+                    <small class="text-muted text-uppercase">
+                        <i class="fas fa-database me-1"></i>Procesados
+                    </small>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="result-stat border rounded">
+                    <div class="result-number text-success">
+                        {{ import_results.creados }}
+                    </div>
+                    <small class="text-muted text-uppercase">
+                        <i class="fas fa-plus-circle me-1"></i>Creados
+                    </small>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="result-stat border rounded">
+                    <div class="result-number text-warning">
+                        {{ import_results.actualizados }}
+                    </div>
+                    <small class="text-muted text-uppercase">
+                        <i class="fas fa-edit me-1"></i>Actualizados
+                    </small>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="result-stat border rounded">
+                    <div class="result-number text-danger">
+                        {{ import_results.errores }}
+                    </div>
+                    <small class="text-muted text-uppercase">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Errores
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        {% if import_results.errores > 0 %}
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Atención:</strong> {{ import_results.errores }} registro{{ import_results.errores|pluralize }} no pudo{{ import_results.errores|pluralize:"," }} procesarse. 
+            Verifica los datos y vuelve a intentar.
+        </div>
+        {% endif %}
+        
+        <div class="d-flex gap-2 justify-content-center flex-wrap">
+            <a href="{% url 'afiliados:afiliado_list' %}" class="btn btn-primary">
+                <i class="fas fa-list me-2"></i>Ver Registros Importados
+            </a>
+            <button class="btn btn-outline-success" 
+                    onclick="if(confirm('¿Deseas recalcular los sueldos ahora?')) alert('Ejecuta: python manage.py recalcular_sueldos')">
+                <i class="fas fa-calculator me-2"></i>Calcular Sueldos
+            </button>
+            <button class="btn btn-outline-info" onclick="location.reload()">
+                <i class="fas fa-redo me-2"></i>Nueva Importación
+            </button>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ===================================================================
+// JAVASCRIPT CORREGIDO PARA IMPORTAR EXCEL
+// Elimina el spinner que aparece al cargar la página
+// ===================================================================
+
+// Initialize page elements
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página de importación cargada correctamente');
+    
+    // CRÍTICO: Asegurar que el progress bar está oculto al cargar
+    const progress = document.getElementById('uploadProgress');
+    if (progress) {
+        progress.classList.add('d-none');
+        progress.style.display = 'none'; // Doble seguridad
+    }
+    
+    // CRÍTICO: Asegurar que el spinner overlay está oculto
+    const spinner = document.getElementById('loadingSpinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+    
+    // Reset cualquier botón en estado de carga
+    const buttons = document.querySelectorAll('.btn-import');
+    buttons.forEach(btn => {
+        btn.disabled = false;
+        const icon = btn.querySelector('i');
+        if (icon && icon.classList.contains('fa-spinner')) {
+            icon.classList.remove('fa-spinner', 'fa-spin');
+            icon.classList.add('fa-users'); // o el ícono correspondiente
+        }
+    });
+    
+    // Reset progress bar
+    const progressBarElement = document.getElementById('progressBar');
+    if (progressBarElement) {
+        progressBarElement.style.width = '0%';
+        progressBarElement.classList.remove('progress-bar-animated');
+    }
+    
+    // Mostrar notificación de bienvenida después de 1 segundo
+    setTimeout(() => {
+        showNotification('Arrastra un archivo Excel o haz clic para seleccionar', 'info');
+    }, 1000);
+});
+
+// Variables globales
+let selectedFile = null;
+
+// ===================================================================
+// DRAG AND DROP
+// ===================================================================
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('archivo_excel');
+
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, preventDefaults, false);
+});
+
+function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}
+
+['dragenter', 'dragover'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, () => {
+        uploadZone.classList.add('dragover');
+    });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+    uploadZone.addEventListener(eventName, () => {
+        uploadZone.classList.remove('dragover');
+    });
+});
+
+uploadZone.addEventListener('drop', (e) => {
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect({ target: fileInput });
+    }
+});
+
+// ===================================================================
+// FILE INPUT HANDLING
+// ===================================================================
+fileInput.addEventListener('change', handleFileSelect);
+
+function handleFileSelect(e) {
+    const file = e.target.files[0];
+    const preview = document.getElementById('filePreview');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    
+    if (file) {
+        // Validar tipo de archivo
+        const validTypes = ['.xlsx', '.xls'];
+        const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+        
+        if (!validTypes.includes(fileExtension)) {
+            showNotification('Por favor seleccione un archivo Excel válido (.xlsx o .xls)', 'error');
+            e.target.value = '';
+            preview.classList.add('d-none');
+            return;
+        }
+        
+        // Validar tamaño (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+            showNotification('El archivo es demasiado grande. Máximo 10MB permitido.', 'error');
+            e.target.value = '';
+            preview.classList.add('d-none');
+            return;
+        }
+        
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        preview.classList.remove('d-none');
+        
+        showNotification('Archivo cargado correctamente', 'success');
+    } else {
+        preview.classList.add('d-none');
+        selectedFile = null;
+    }
+}
+
+function clearFile() {
+    fileInput.value = '';
+    document.getElementById('filePreview').classList.add('d-none');
+    selectedFile = null;
+    showNotification('Archivo removido', 'info');
+}
+
+// ===================================================================
+// FORM SUBMISSION CON PROGRESS
+// ===================================================================
+document.getElementById('importForm').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevenir envío por defecto
+    
+    if (!selectedFile) {
+        showNotification('Por favor seleccione un archivo antes de continuar', 'error');
+        return false;
+    }
+    
+    const clickedButton = e.submitter;
+    const importType = clickedButton ? clickedButton.value : 'afiliados';
+    
+    const form = this;
+    const progress = document.getElementById('uploadProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressPercent = document.getElementById('progressPercent');
+    const buttons = document.querySelectorAll('.btn-import');
+    
+    // Deshabilitar botones y mostrar estado de procesamiento
+    buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+    });
+    
+    // Mostrar barra de progreso
+    progress.classList.remove('d-none');
+    progress.style.display = 'block';
+    progressBar.classList.add('progress-bar-animated');
+    
+    // Crear FormData
+    const formData = new FormData(form);
+    const xhr = new XMLHttpRequest();
+    
+    // Configurar seguimiento de progreso
+    xhr.upload.onprogress = function(e) {
+        if (e.lengthComputable) {
+            const percentComplete = Math.round((e.loaded / e.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            progressPercent.textContent = percentComplete + '%';
+        }
+    };
+    
+    // Manejar completado exitoso
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const successMessages = {
+                'afiliados': 'Importación de afiliados completada exitosamente',
+                'secretaria': 'Importación de datos de secretaría completada exitosamente',
+                'ademacor': 'Importación de datos de ADEMACOR completada exitosamente'
+            };
+            
+            showNotification(successMessages[importType] || 'Importación completada exitosamente', 'success');
+            
+            // Redirigir después de pequeña pausa
+            setTimeout(() => {
+                window.location.href = '/afiliados/';
+            }, 1000);
+        } else {
+            handleError('Error al procesar el archivo. Por favor intente nuevamente.');
+        }
+    };
+    
+    // Manejar errores de red
+    xhr.onerror = function() {
+        handleError('Error de conexión. Por favor verifique su conexión e intente nuevamente.');
+    };
+    
+    // Manejar timeout
+    xhr.ontimeout = function() {
+        handleError('La solicitud ha tardado demasiado tiempo. Por favor intente nuevamente.');
+    };
+    
+    // Función auxiliar para manejar errores
+    function handleError(message) {
+        showNotification(message, 'error');
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            const originalIcon = btn.querySelector('i');
+            if (originalIcon) {
+                originalIcon.classList.remove('fa-spinner', 'fa-spin');
+                originalIcon.classList.add('fa-upload');
+            }
+            btn.innerHTML = btn.getAttribute('data-original-text') || 'Importar';
+        });
+        progress.classList.add('d-none');
+        progress.style.display = 'none';
+        progressBar.classList.remove('progress-bar-animated');
+    }
+    
+    // Configurar y enviar solicitud
+    xhr.open('POST', form.action, true);
+    xhr.timeout = 300000; // 5 minutos
+    
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    
+    xhr.send(formData);
+    
+    // Mostrar progreso inicial
+    progressBar.style.width = '5%';
+    progressPercent.textContent = '5%';
+    
+    return false;
+});
+
+// ===================================================================
+// UTILITY FUNCTIONS
+// ===================================================================
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+function downloadTemplate(importType) {
+    let csvContent = '';
+    let filename = '';
+
+    switch(importType) {
+        case 'afiliados':
+            csvContent = "cedula,nombre_completo,grado_escalafon,cargo_desempenado,anos_servicio,titulo_posgrado,email,telefono,municipio\n" +
+                       "12345678,Juan Pérez García,10,Docente,5,Magíster en Educación,juan@ejemplo.com,300-123-4567,Caracas";
+            filename = 'plantilla_afiliados.csv';
+            break;
+
+        case 'secretaria':
+            csvContent = "cedula,nombre_completo,municipio\n" +
+                       "12345678,Juan Pérez García,Caracas";
+            filename = 'plantilla_secretaria.csv';
+            break;
+
+        case 'ademacor':
+            csvContent = "cedula,nombre_completo,municipio\n" +
+                       "11223344,Carlos Rodríguez Mendoza,Maracaibo";
+            filename = 'plantilla_ademacor.csv';
+            break;
+
+        default:
+            csvContent = "cedula,nombre_completo,municipio\n" +
+                       "12345678,Juan Pérez García,Caracas";
+            filename = 'plantilla_general.csv';
+    }
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    showNotification(`Plantilla ${importType} descargada correctamente`, 'success');
+}
+
+// ===================================================================
+// SISTEMA DE NOTIFICACIONES
+// ===================================================================
+function showNotification(message, type = 'info') {
+    const colors = {
+        success: '#198754',
+        error: '#dc3545',
+        warning: '#ffc107',
+        info: '#0dcaf0'
+    };
+    
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        warning: 'fa-exclamation-triangle',
+        info: 'fa-info-circle'
+    };
+    
+    // Remover notificaciones existentes
+    const existing = document.querySelectorAll('.custom-notification');
+    existing.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = 'custom-notification';
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${colors[type]};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        animation: slideInRight 0.3s ease-out;
+        max-width: 400px;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    `;
+    
+    notification.innerHTML = `
+        <i class="fas ${icons[type]} fa-lg"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notification.remove(), 300);
+    }, 4000);
+}
+
+// ===================================================================
+// ANIMACIONES CSS
+// ===================================================================
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// ===================================================================
+// KEYBOARD SHORTCUTS
+// ===================================================================
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + U para abrir selector de archivos
+    if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+        e.preventDefault();
+        fileInput.click();
+    }
+    
+    // ESC para limpiar archivo
+    if (e.key === 'Escape' && selectedFile) {
+        clearFile();
+    }
+});
+
+// ===================================================================
+// INITIALIZE TOOLTIPS
+// ===================================================================
+if (typeof bootstrap !== 'undefined') {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+}
+
+console.log('✅ JavaScript de importación inicializado correctamente');
+</script>
+{% endblock %}

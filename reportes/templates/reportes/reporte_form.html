@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if reporte %}Editar{% else %}Nuevo{% endif %} Reporte - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reportes_main' %}">Reportes</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reporte_list' %}">Lista</a>
+</li>
+<li class="breadcrumb-item active">
+    {% if reporte %}Editar{% else %}Nuevo{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-1">
+            <i class="fas fa-{% if reporte %}edit{% else %}file-plus{% endif %} me-2"></i>
+            {% if reporte %}Editar Reporte{% else %}Nuevo Reporte{% endif %}
+        </h1>
+        {% if reporte %}
+        <p class="text-muted mb-0">Modificando reporte: {{ reporte.titulo }}</p>
+        {% else %}
+        <p class="text-muted mb-0">Complete la información del nuevo reporte</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="{% url 'reportes:reporte_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Lista
+        </a>
+        {% if reporte %}
+        <a href="{% url 'reportes:reporte_detail' reporte.pk %}" class="btn btn-outline-info">
+            <i class="fas fa-eye me-2"></i>Ver Detalles
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<form method="post" id="reporteForm" novalidate>
+    {% csrf_token %}
+    
+    <!-- Basic Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Información Básica
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8 mb-3">
+                    <label for="titulo" class="form-label">
+                        Título del Reporte <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="titulo" name="titulo" 
+                           value="{{ reporte.titulo|default:'' }}" required
+                           placeholder="Ej: Reporte Mensual de Aportes">
+                    <div class="invalid-feedback">
+                        Por favor ingrese el título del reporte.
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="tipo" class="form-label">
+                        Tipo de Reporte <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-select" id="tipo" name="tipo" required>
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="aportes" {% if reporte.tipo == 'aportes' %}selected{% endif %}>Aportes</option>
+                        <option value="liquidacion" {% if reporte.tipo == 'liquidacion' %}selected{% endif %}>Liquidación</option>
+                        <option value="afiliados" {% if reporte.tipo == 'afiliados' %}selected{% endif %}>Afiliados</option>
+                        <option value="general" {% if reporte.tipo == 'general' %}selected{% endif %}>General</option>
+                    </select>
+                    <div class="invalid-feedback">
+                        Por favor seleccione el tipo de reporte.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="descripcion" class="form-label">Descripción</label>
+                <textarea class="form-control" id="descripcion" name="descripcion" rows="3"
+                          placeholder="Descripción detallada del reporte...">{{ reporte.descripcion|default:'' }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Parameters -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-sliders-h me-2"></i>
+                Parámetros del Reporte
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="fecha_inicio" class="form-label">
+                        Fecha de Inicio <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                           value="{{ reporte.fecha_inicio|date:'Y-m-d'|default:'' }}" required>
+                    <div class="invalid-feedback">
+                        Por favor seleccione la fecha de inicio.
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="fecha_fin" class="form-label">
+                        Fecha de Fin <span class="text-danger">*</span>
+                    </label>
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                           value="{{ reporte.fecha_fin|date:'Y-m-d'|default:'' }}" required>
+                    <div class="invalid-feedback">
+                        Por favor seleccione la fecha de fin.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="formato" class="form-label">Formato de Salida</label>
+                    <select class="form-select" id="formato" name="formato">
+                        <option value="pdf" {% if reporte.formato == 'pdf' %}selected{% endif %}>PDF</option>
+                        <option value="excel" {% if reporte.formato == 'excel' %}selected{% endif %}>Excel</option>
+                        <option value="csv" {% if reporte.formato == 'csv' %}selected{% endif %}>CSV</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="periodicidad" class="form-label">Periodicidad</label>
+                    <select class="form-select" id="periodicidad" name="periodicidad">
+                        <option value="unico" {% if reporte.periodicidad == 'unico' %}selected{% endif %}>Único</option>
+                        <option value="mensual" {% if reporte.periodicidad == 'mensual' %}selected{% endif %}>Mensual</option>
+                        <option value="trimestral" {% if reporte.periodicidad == 'trimestral' %}selected{% endif %}>Trimestral</option>
+                        <option value="anual" {% if reporte.periodicidad == 'anual' %}selected{% endif %}>Anual</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Options -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-cogs me-2"></i>
+                Opciones Avanzadas
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="incluir_graficos" name="incluir_graficos" 
+                               {% if reporte.incluir_graficos %}checked{% endif %}>
+                        <label class="form-check-label" for="incluir_graficos">
+                            <strong>Incluir Gráficos</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Agregar gráficos estadísticos al reporte
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="incluir_detalles" name="incluir_detalles" 
+                               {% if reporte.incluir_detalles %}checked{% endif %}>
+                        <label class="form-check-label" for="incluir_detalles">
+                            <strong>Incluir Detalles</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Mostrar información detallada por afiliado
+                    </small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="enviar_email" name="enviar_email" 
+                               {% if reporte.enviar_email %}checked{% endif %}>
+                        <label class="form-check-label" for="enviar_email">
+                            <strong>Enviar por Email</strong>
+                        </label>
+                    </div>
+                    <small class="form-text text-muted">
+                        Enviar automáticamente cuando esté listo
+                    </small>
+                </div>
+            </div>
+            
+            <div class="mb-3" id="email_recipients" style="display: none;">
+                <label for="destinatarios" class="form-label">Destinatarios de Email</label>
+                <input type="email" class="form-control" id="destinatarios" name="destinatarios" 
+                       value="{{ reporte.destinatarios|default:'' }}" multiple
+                       placeholder="email1@ejemplo.com, email2@ejemplo.com">
+                <small class="form-text text-muted">
+                    Separar múltiples emails con comas
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <a href="{% url 'reportes:reporte_list' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Cancelar
+                    </a>
+                </div>
+                <div>
+                    {% if reporte %}
+                    <button type="submit" name="action" value="save" class="btn btn-warning me-2">
+                        <i class="fas fa-save me-2"></i>Actualizar Reporte
+                    </button>
+                    <button type="submit" name="action" value="generate" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Actualizar y Generar
+                    </button>
+                    {% else %}
+                    <button type="submit" name="action" value="save" class="btn btn-warning me-2">
+                        <i class="fas fa-save me-2"></i>Guardar Reporte
+                    </button>
+                    <button type="submit" name="action" value="generate" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Crear y Generar
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Initialize form validation
+    validateForm('reporteForm');
+    
+    // Show/hide email recipients based on checkbox
+    document.getElementById('enviar_email').addEventListener('change', function() {
+        const emailDiv = document.getElementById('email_recipients');
+        emailDiv.style.display = this.checked ? 'block' : 'none';
+        
+        const emailInput = document.getElementById('destinatarios');
+        emailInput.required = this.checked;
+    });
+    
+    // Validate date range
+    document.getElementById('fecha_fin').addEventListener('change', function() {
+        const fechaInicio = document.getElementById('fecha_inicio').value;
+        const fechaFin = this.value;
+        
+        if (fechaInicio && fechaFin && fechaFin < fechaInicio) {
+            this.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+    
+    // Initialize email recipients visibility
+    document.getElementById('enviar_email').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

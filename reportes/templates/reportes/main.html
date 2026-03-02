@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Reportes - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'reportes:reportes_main' %}">Reportes</a>
+</li>
+<li class="breadcrumb-item active">Panel Principal</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-chart-bar me-3"></i>
+            Panel de Reportes
+        </h1>
+        <p class="lead mb-0">Sistema integral de reportes y análisis de datos</p>
+    </div>
+</div>
+
+<!-- Statistics Row -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);">
+            <div class="card-body text-center">
+                <i class="fas fa-file-alt fa-2x mb-3"></i>
+                <div class="stats-number" style="font-size: 2.5rem; font-weight: bold;">{{ total_reportes|default:0 }}</div>
+                <div class="text-light">Total Reportes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-2x mb-3"></i>
+                <div class="stats-number">{{ reportes_activos|default:0 }}</div>
+                <div class="text-light">Reportes Activos</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+            <div class="card-body text-center">
+                <i class="fas fa-download fa-2x mb-3"></i>
+                <div class="stats-number">{{ exportaciones_mes|default:0 }}</div>
+                <div class="text-light">Exportaciones del Mes</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <div class="stats-number">{{ reportes_pendientes|default:0 }}</div>
+                <div class="text-light">Reportes Pendientes</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'reportes:reporte_create' %}" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-plus fa-2x d-block mb-2"></i>
+                            Nuevo Reporte
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'reportes:reporte_list' %}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-list fa-2x d-block mb-2"></i>
+                            Ver Reportes
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <button class="btn btn-success btn-lg w-100" onclick="alert('Funcionalidad de exportación próximamente')">
+                            <i class="fas fa-file-excel fa-2x d-block mb-2"></i>
+                            Exportar Excel
+                        </button>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <button class="btn btn-warning btn-lg w-100" onclick="alert('Funcionalidad de análisis próximamente')">
+                            <i class="fas fa-chart-pie fa-2x d-block mb-2"></i>
+                            Análisis Avanzado
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Features -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Gestión de Reportes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Cree, edite y gestione reportes personalizados del sistema:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Reportes de afiliados y sueldos</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Análisis de aportes y bonificaciones</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Estadísticas por departamento</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Reportes históricos y comparativos</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Filtros avanzados y personalización</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'reportes:reporte_list' %}" class="btn btn-primary">
+                        <i class="fas fa-eye me-2"></i>Ver Todos los Reportes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header text-white" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B);">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-download me-2"></i>
+                    Exportación de Datos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Exporte información del sistema en diferentes formatos:
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-star text-warning me-2"></i>Exportación a Excel (.xlsx)</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Reportes en PDF</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Datos en formato CSV</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Programación de exportaciones</li>
+                    <li><i class="fas fa-star text-warning me-2"></i>Envío automático por email</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" onclick="alert('Funcionalidad de exportación próximamente')">
+                        <i class="fas fa-file-excel me-2"></i>Exportar Datos
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Reportes Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if reportes_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre del Reporte</th>
+                                <th>Tipo</th>
+                                <th>Fecha Creación</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for reporte in reportes_recientes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ reporte.nombre }}</strong>
+                                    <br><small class="text-muted">{{ reporte.descripcion|truncatechars:50 }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info">{{ reporte.tipo|default:"General" }}</span>
+                                </td>
+                                <td>{{ reporte.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    {% if reporte.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'reportes:reporte_detail' reporte.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{% url 'reportes:reporte_update' reporte.pk %}" class="btn btn-sm btn-outline-warning">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay reportes registrados aún.</p>
+                    <a href="{% url 'reportes:reporte_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Crear Primer Reporte
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

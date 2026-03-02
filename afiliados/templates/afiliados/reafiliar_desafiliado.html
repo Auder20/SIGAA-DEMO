@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reafiliar Desafiliado - SIGAA{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Reafiliar Desafiliado</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{% url 'afiliados:afiliados_main' %}">Inicio</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'afiliados:desafiliado_list' %}">Desafiliados</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'afiliados:desafiliado_detail' desafiliado.pk %}">{{ desafiliado.nombre_completo|truncatechars:20 }}</a></li>
+        <li class="breadcrumb-item active">Reafiliar</li>
+    </ol>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-success mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-user-plus me-1"></i>
+                    Confirmar Reafiliación
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success" role="alert">
+                        <h5 class="alert-heading">Reafiliación de Desafiliado</h5>
+                        <p class="mb-0">Está a punto de reafiliar al siguiente desafiliado. Esta acción moverá al desafiliado de vuelta a la lista de afiliados activos.</p>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Datos del Desafiliado</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Nombre:</strong> {{ desafiliado.nombre_completo }}</p>
+                                    <p><strong>Cédula:</strong> {{ desafiliado.cedula }}</p>
+                                    <p><strong>Municipio:</strong> {{ desafiliado.municipio|default:"No especificado" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Cargo:</strong> {{ desafiliado.cargo_desempenado|default:"No especificado" }}</p>
+                                    <p><strong>Grado de Escalafón:</strong> {{ desafiliado.grado_escalafon|default:"No especificado" }}</p>
+                                    <p><strong>Fecha de Desafiliación:</strong> {{ desafiliado.fecha_desafiliacion|date:"d/m/Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 p-3 bg-light rounded">
+                                <h6>Motivo de la Desafiliación Anterior:</h6>
+                                <p class="mb-0">{{ desafiliado.motivo_desafiliacion|linebreaksbr }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form method="post" id="reafiliarForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="comentario_reafiliacion" class="form-label fw-bold">
+                                Comentario (Opcional)
+                            </label>
+                            <textarea class="form-control" id="comentario_reafiliacion" name="comentario_reafiliacion" 
+                                     rows="3" placeholder="Puede agregar un comentario sobre la reafiliación..."></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'afiliados:desafiliado_detail' desafiliado.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-user-plus me-1"></i> Confirmar Reafiliación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('reafiliarForm');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('¿Está seguro de que desea reafiliar a este desafiliado?\n\n' +
+                             'El desafiliado será movido de vuelta a la lista de afiliados activos.')) {
+                    e.preventDefault();
+                    return false;
+                }
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}

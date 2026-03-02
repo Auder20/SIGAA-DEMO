@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comparación Afiliados vs ADEMACOR{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Comparación Afiliados (General) vs ADEMACOR</h1>
+        <a href="{% url 'afiliados:datos_ademacor_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <label class="mr-2">Municipio:</label>
+                <select name="municipio" class="form-control mr-2">
+                    <option value="">Todos</option>
+                    {% for m in municipios %}
+                    <option value="{{ m }}" {% if municipio_actual == m %}selected{% endif %}>{{ m }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-primary">Filtrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Solo en General</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.solo_general|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Solo en ADEMACOR</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.solo_ademacor|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-tag fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Diferencias de Datos</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.diferencias_datos|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Coincidencias Exactas</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.coincidencias|length }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tablas de Detalles -->
+    <div class="row">
+        <!-- Solo General -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">Solo en General (No en ADEMACOR)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered table-sm" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th>Municipio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in resultados.solo_general %}
+                                <tr>
+                                    <td>{{ item.cedula }}</td>
+                                    <td>{{ item.nombre }}</td>
+                                    <td>{{ item.municipio }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">No hay registros</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Solo ADEMACOR -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-warning text-white">
+                    <h6 class="m-0 font-weight-bold">Solo en ADEMACOR (No en General)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-bordered table-sm" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre</th>
+                                    <th>Municipio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in resultados.solo_ademacor %}
+                                <tr>
+                                    <td>{{ item.cedula }}</td>
+                                    <td>{{ item.nombre }}</td>
+                                    <td>{{ item.municipio }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="3" class="text-center">No hay registros</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Diferencias de Datos -->
+        <div class="col-lg-12 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">Mismo Docente en Diferentes Municipios</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Cédula</th>
+                                    <th>Nombre General</th>
+                                    <th>Nombre ADEMACOR</th>
+                                    <th>Municipio General</th>
+                                    <th>Municipio ADEMACOR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in resultados.diferencias_datos %}
+                                <tr>
+                                    <td>{{ item.cedula }}</td>
+                                    <td>{{ item.nombre_general }}</td>
+                                    <td>{{ item.nombre_ademacor }}</td>
+                                    <td class="text-danger">{{ item.municipio_general }}</td>
+                                    <td class="text-danger">{{ item.municipio_ademacor }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center">No hay diferencias encontradas</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

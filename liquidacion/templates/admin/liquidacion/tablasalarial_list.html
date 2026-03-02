@@ -1,0 +1,1253 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static humanize %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    /* ============================================
+       VARIABLES GLOBALES - Paleta ADEMACOR
+       ============================================ */
+    :root {
+        /* COLORES PRINCIPALES */
+        --primary-color: #FF6B35;           /* ADEMACOR naranja principal */
+        --primary-hover: #E55A2B;           /* Hover más oscuro */
+        --primary-light: #FF8A5B;           /* Variante clara */
+        --primary-ultralight: #FFF4F0;      /* Fondo suave */
+        
+        /* COLORES SECUNDARIOS */
+        --secondary-color: #2ecc71;         /* Verde éxito */
+        --danger-color: #e74c3c;            /* Rojo peligro */
+        --warning-color: #f39c12;           /* Amarillo advertencia */
+        --info-color: #3498db;              /* Azul información */
+        
+        /* TONOS NEUTROS */
+        --light-gray: #f8f9fa;
+        --medium-gray: #e0e0e0;
+        --dark-gray: #6c757d;
+        --border-color: #dee2e6;
+        --text-muted: #6c757d;
+        
+        /* SOMBRAS */
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+        --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+        
+        /* GRADIENTES */
+        --orange-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8A5B 100%);
+        --orange-gradient-hover: linear-gradient(135deg, #E55A2B 0%, #FF6B35 100%);
+        
+        /* TRANSICIONES */
+        --transition-fast: all 0.2s ease;
+        --transition-medium: all 0.3s ease;
+        --transition-slow: all 0.5s ease;
+    }
+
+    /* ============================================
+       ESTILOS GENERALES
+       ============================================ */
+    body {
+        background-color: var(--light-gray);
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #content-main {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    /* ============================================
+       MÓDULO PRINCIPAL (CONTENEDOR)
+       ============================================ */
+    .module {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: none;
+        transition: var(--transition-medium);
+    }
+
+    .module:hover {
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* ============================================
+       BARRA DE ACCIONES (HEADER)
+       ============================================ */
+    .actions {
+        background: var(--orange-gradient);
+        padding: 1.75rem 2rem;
+        margin: 0;
+        border: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.15);
+    }
+
+    .actions h1 {
+        margin: 0;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .actions h1 i {
+        font-size: 1.5rem;
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* ============================================
+       BOTONES
+       ============================================ */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition-fast);
+        border: 2px solid transparent;
+        font-size: 0.95rem;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn i {
+        margin-right: 0.5rem;
+        font-size: 1em;
+        transition: var(--transition-fast);
+    }
+
+    /* Botón Primario */
+    .btn-primary {
+        background: white;
+        color: var(--primary-color);
+        border-color: white;
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(255, 255, 255, 0.4);
+    }
+
+    .btn-primary:hover i {
+        transform: scale(1.15) rotate(5deg);
+    }
+
+    /* Botón Secundario */
+    .btn-outline-secondary {
+        background: white;
+        border: 2px solid var(--border-color);
+        color: var(--dark-gray);
+    }
+
+    .btn-outline-secondary:hover {
+        background: var(--light-gray);
+        color: #495057;
+        border-color: var(--medium-gray);
+        transform: translateY(-2px);
+    }
+
+    /* Botón Peligro */
+    .btn-outline-danger {
+        background: white;
+        color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .btn-outline-danger:hover {
+        background: var(--danger-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    /* ============================================
+       SECCIÓN POR AÑO
+       ============================================ */
+    .year-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--transition-medium);
+        border: 2px solid transparent;
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
+
+    /* Animación escalonada para cada sección */
+    .year-section:nth-child(1) { animation-delay: 0.1s; }
+    .year-section:nth-child(2) { animation-delay: 0.2s; }
+    .year-section:nth-child(3) { animation-delay: 0.3s; }
+    .year-section:nth-child(4) { animation-delay: 0.4s; }
+
+    .year-section:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+        border-color: rgba(255, 107, 53, 0.2);
+    }
+
+    /* ============================================
+       HEADER DE AÑO
+       ============================================ */
+    .year-header {
+        background: linear-gradient(135deg, 
+                    var(--primary-ultralight) 0%, 
+                    rgba(255, 138, 91, 0.08) 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 3px solid rgba(255, 107, 53, 0.15);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Efecto de brillo en el header */
+    .year-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            45deg,
+            transparent 30%,
+            rgba(255, 255, 255, 0.3) 50%,
+            transparent 70%
+        );
+        transform: rotate(45deg);
+        animation: shine 3s ease-in-out infinite;
+    }
+
+    .year-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: var(--orange-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .year-title i {
+        font-size: 1.3em;
+        background: var(--orange-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .year-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================
+       BADGE (ETIQUETA)
+       ============================================ */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.45em 1em;
+        font-size: 0.8em;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(46, 204, 113, 0.3);
+        animation: bounce 2s ease-in-out infinite;
+    }
+
+    .bg-success {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+    }
+
+    /* ============================================
+       TABLA
+       ============================================ */
+    .table-responsive {
+        overflow-x: auto;
+        padding: 1.5rem 2rem 2rem;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0;
+        font-size: 0.95rem;
+        overflow: hidden;
+        border-radius: 10px;
+    }
+
+    /* Encabezado de tabla */
+    .table thead th {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        color: #495057;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.8px;
+        padding: 1rem 1.25rem;
+        border-bottom: 3px solid var(--primary-color);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        transition: var(--transition-fast);
+    }
+
+    .table thead th:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    }
+
+    /* Celdas de tabla */
+    .table td {
+        padding: 1.25rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        transition: var(--transition-fast);
+    }
+
+    .table tbody tr {
+        transition: var(--transition-fast);
+        position: relative;
+    }
+
+    /* Efecto hover en filas */
+    .table tbody tr:hover {
+        background: linear-gradient(90deg, 
+                    rgba(255, 107, 53, 0.03) 0%, 
+                    rgba(255, 138, 91, 0.05) 50%, 
+                    rgba(255, 107, 53, 0.03) 100%);
+        transform: scale(1.01);
+        box-shadow: 0 2px 8px rgba(255, 107, 53, 0.1);
+    }
+
+    .table tbody tr:hover td {
+        border-bottom-color: rgba(255, 107, 53, 0.2);
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    /* Alineación de texto */
+    .text-end {
+        text-align: right;
+    }
+
+    /* ============================================
+       FOOTER DE SECCIÓN
+       ============================================ */
+    .p-3 {
+        padding: 1.25rem 2rem;
+    }
+
+    .bg-light {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .text-muted {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .text-muted i {
+        color: var(--primary-color);
+    }
+
+    /* ============================================
+       ESTADO VACÍO
+       ============================================ */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+        color: var(--text-muted);
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: var(--orange-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    .empty-state h3 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        font-size: 1.5rem;
+    }
+
+    .empty-state p {
+        margin: 0.75rem 0 1.5rem;
+        font-size: 1.05rem;
+        color: var(--dark-gray);
+    }
+
+    .mt-3 {
+        margin-top: 1.5rem;
+    }
+
+    /* ============================================
+       CAMPO DE BÚSQUEDA
+       ============================================ */
+    .form-control {
+        border: 2px solid var(--border-color);
+        border-radius: 10px;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.95rem;
+        transition: var(--transition-fast);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.15);
+        outline: none;
+    }
+
+    .mb-3 {
+        margin-bottom: 1.5rem;
+    }
+
+    /* ============================================
+       ANIMACIONES
+       ============================================ */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    @keyframes bounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-5px);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    @keyframes shine {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    /* ============================================
+       DISEÑO RESPONSIVO
+       ============================================ */
+    @media (max-width: 768px) {
+        /* Ajustes para móviles */
+        .actions {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 1.5rem;
+        }
+
+        .actions h1 {
+            font-size: 1.4rem;
+            justify-content: center;
+        }
+
+        .year-header {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 1.25rem 1.5rem;
+        }
+
+        .year-title {
+            font-size: 1.3rem;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .year-actions {
+            width: 100%;
+            margin-top: 1rem;
+            justify-content: center;
+        }
+
+        .table-responsive {
+            padding: 1rem 1.5rem 1.5rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.875rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .empty-state {
+            padding: 3rem 1.5rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        /* Ajustes para pantallas muy pequeñas */
+        .actions h1 {
+            font-size: 1.2rem;
+        }
+
+        .year-title {
+            font-size: 1.15rem;
+        }
+
+        .table th,
+        .table td {
+            padding: 0.625rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+
+        .year-actions {
+            flex-direction: column;
+        }
+    }
+
+    /* ============================================
+       MODO OSCURO
+       ============================================ */
+    @media (prefers-color-scheme: dark) {
+        body {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .module {
+            background: #2a2a2a;
+            border: 1px solid #404040;
+        }
+
+        .year-section {
+            background: #2a2a2a;
+            border-color: #404040;
+        }
+
+        .year-section:hover {
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        .year-header {
+            background: linear-gradient(135deg, 
+                        rgba(255, 107, 53, 0.15) 0%, 
+                        rgba(255, 138, 91, 0.1) 100%);
+            border-bottom-color: rgba(255, 107, 53, 0.25);
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #333 0%, #3a3a3a 100%);
+            color: #e0e0e0;
+            border-bottom-color: var(--primary-color);
+        }
+
+        .table td {
+            border-bottom-color: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(90deg, 
+                        rgba(255, 107, 53, 0.08) 0%, 
+                        rgba(255, 138, 91, 0.12) 50%, 
+                        rgba(255, 107, 53, 0.08) 100%);
+        }
+
+        .btn-outline-secondary {
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border-color: #404040;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #3a3a3a;
+            border-color: #505050;
+        }
+
+        .btn-outline-danger {
+            background: #2a2a2a;
+        }
+
+        .bg-light {
+            background: linear-gradient(135deg, #2a2a2a 0%, #333 100%);
+            border-top-color: #404040;
+        }
+
+        .text-muted {
+            color: #b0b0b0;
+        }
+
+        .empty-state {
+            color: #b0b0b0;
+        }
+
+        .empty-state h3 {
+            color: #e0e0e0;
+        }
+
+        .form-control {
+            background: #2a2a2a;
+            border-color: #404040;
+            color: #e0e0e0;
+        }
+
+        .form-control:focus {
+            background: #2a2a2a;
+            border-color: var(--primary-color);
+        }
+    }
+
+    /* ============================================
+       MEJORAS DE ACCESIBILIDAD
+       ============================================ */
+    *:focus {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    .btn:focus {
+        outline-offset: 4px;
+    }
+
+    /* Modo de alto contraste */
+    @media (prefers-contrast: high) {
+        .year-section {
+            border: 3px solid var(--primary-color);
+        }
+
+        .table thead th {
+            border-bottom-width: 4px;
+        }
+
+        .btn {
+            border-width: 3px;
+        }
+    }
+
+    /* Reducción de movimiento */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module">
+        <div class="actions">
+            <h1>
+                <i class="fas fa-table"></i> Tablas Salariales
+            </h1>
+            <div>
+                <a href="{% url 'liquidacion:tablasalarial_crear_anual' %}" class="btn btn-primary">
+                    <i class="fas fa-plus-circle"></i> Nueva Tabla Anual
+                </a>
+            </div>
+        </div>
+        
+        {% if tablas_por_anio %}
+            {% for anio_data in tablas_por_anio %}
+            <div class="year-section">
+                <div class="year-header">
+                    <h2 class="year-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        Tabla Salarial {{ anio_data.anio }}
+                        {% if anio_data.es_ultimo_anio %}
+                            <span class="badge bg-success">Vigente</span>
+                        {% endif %}
+                    </h2>
+                    <div class="year-actions">
+                        <a href="{% url 'liquidacion:tablasalarial_editar_anual' anio=anio_data.anio %}" 
+                           class="btn btn-outline-secondary" 
+                           title="Editar tabla del año {{ anio_data.anio }}">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        {% if not anio_data.es_ultimo_anio %}
+                        <a href="{% url 'liquidacion:tablasalarial_eliminar_anual' anio=anio_data.anio %}" 
+                           class="btn btn-outline-danger" 
+                           title="Eliminar tabla del año {{ anio_data.anio }}"
+                           onclick="return confirm('¿Está seguro de que desea eliminar la tabla del año {{ anio_data.anio }}?\n\nEsta acción no se puede deshacer y eliminará todos los registros asociados.');">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Grado</th>
+                                <th>Salario Base</th>
+                                <th>Aumento por Grado</th>
+                                <th class="text-end">Sueldo Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tabla in anio_data.tablas %}
+                            <tr>
+                                <td><strong>{{ tabla.grado }}</strong></td>
+                                <td>Gs. {{ tabla.salario_base|floatformat:0|intcomma }}</td>
+                                <td>Gs. {{ tabla.calcular_aumento_por_grado|floatformat:0|intcomma }}</td>
+                                <td class="text-end">
+                                    <strong>Gs. {{ tabla.calcular_sueldo_con_bonificacion|floatformat:0|intcomma }}</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-3 bg-light text-end">
+                    <span class="text-muted">
+                        <i class="fas fa-info-circle"></i> 
+                        {{ anio_data.tablas|length }} registro{{ anio_data.tablas|length|pluralize }} en total
+                    </span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-table"></i>
+                <h3>No hay tablas salariales registradas</h3>
+                <p>Comience creando una nueva tabla salarial para gestionar los salarios de los afiliados</p>
+                <a href="{% url 'liquidacion:tablasalarial_crear_anual' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-plus-circle"></i> Crear Primera Tabla
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{{ block.super }}
+<script>
+    // ============================================
+    // FUNCIONALIDAD DE BÚSQUEDA EN TABLA
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Crear input de búsqueda
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.className = 'form-control mb-3';
+        searchInput.placeholder = '🔍 Buscar por grado...';
+        searchInput.setAttribute('aria-label', 'Buscar por grado');
+        
+        // Insertar después de .actions
+        const actionsDiv = document.querySelector('.actions');
+        if (actionsDiv && actionsDiv.parentNode) {
+            const searchContainer = document.createElement('div');
+            searchContainer.style.padding = '0 2rem 1.5rem';
+            searchContainer.appendChild(searchInput);
+            actionsDiv.parentNode.insertBefore(searchContainer, actionsDiv.nextSibling);
+        }
+        
+        // Implementar búsqueda con debounce
+        let searchTimeout;
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            searchTimeout = setTimeout(() => {
+                const tables = document.querySelectorAll('.table tbody');
+                let totalVisible = 0;
+                let totalHidden = 0;
+                
+                tables.forEach(function(table) {
+                    const rows = table.getElementsByTagName('tr');
+                    let sectionVisible = 0;
+                    
+                    for (let row of rows) {
+                        const gradoCell = row.cells[0];
+                        if (gradoCell) {
+                            const text = (gradoCell.textContent || gradoCell.innerText).toLowerCase();
+                            
+                            if (searchTerm === '' || text.indexOf(searchTerm) > -1) {
+                                row.style.display = '';
+                                row.style.animation = 'fadeIn 0.3s ease-out';
+                                sectionVisible++;
+                                totalVisible++;
+                            } else {
+                                row.style.display = 'none';
+                                totalHidden++;
+                            }
+                        }
+                    }
+                    
+                    // Ocultar sección completa si no hay coincidencias
+                    const yearSection = table.closest('.year-section');
+                    if (yearSection) {
+                        if (sectionVisible === 0 && searchTerm !== '') {
+                            yearSection.style.display = 'none';
+                        } else {
+                            yearSection.style.display = '';
+                        }
+                    }
+                });
+                
+                // Mostrar mensaje si no hay resultados
+                showSearchResults(totalVisible, totalHidden, searchTerm);
+            }, 300); // Debounce de 300ms
+        });
+        
+        // Función para mostrar resultados de búsqueda
+        function showSearchResults(visible, hidden, term) {
+            // Eliminar mensaje anterior si existe
+            const oldMessage = document.getElementById('search-results-message');
+            if (oldMessage) {
+                oldMessage.remove();
+            }
+            
+            if (term === '') return;
+            
+            const message = document.createElement('div');
+            message.id = 'search-results-message';
+            message.style.cssText = `
+                padding: 1rem 2rem;
+                background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+                border-left: 4px solid #2196f3;
+                border-radius: 8px;
+                margin: 0 2rem 1.5rem;
+                animation: slideInDown 0.4s ease-out;
+            `;
+            
+            if (visible === 0) {
+                message.innerHTML = `
+                    <i class="fas fa-search" style="color: #1976d2; margin-right: 0.5rem;"></i>
+                    <strong>No se encontraron resultados para "${term}"</strong>
+                    <p style="margin: 0.5rem 0 0; font-size: 0.9rem; color: #555;">
+                        Intente con otro término de búsqueda
+                    </p>
+                `;
+            } else {
+                message.innerHTML = `
+                    <i class="fas fa-check-circle" style="color: #2ecc71; margin-right: 0.5rem;"></i>
+                    <strong>Se encontraron ${visible} registro${visible !== 1 ? 's' : ''}</strong>
+                    ${hidden > 0 ? `<span style="color: #666;"> (${hidden} oculto${hidden !== 1 ? 's' : ''})</span>` : ''}
+                `;
+            }
+            
+            const moduleContent = document.querySelector('.module');
+            const firstYearSection = document.querySelector('.year-section');
+            if (firstYearSection && moduleContent) {
+                moduleContent.insertBefore(message, firstYearSection);
+            }
+        }
+        
+        // ============================================
+        // ANIMACIÓN DE ENTRADA PARA TABLAS
+        // ============================================
+        const yearSections = document.querySelectorAll('.year-section');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+        
+        yearSections.forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+        
+        // ============================================
+        // TOOLTIP PARA BOTONES
+        // ============================================
+        const buttons = document.querySelectorAll('.btn[title]');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function(e) {
+                const title = this.getAttribute('title');
+                if (title) {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'custom-tooltip';
+                    tooltip.textContent = title;
+                    tooltip.style.cssText = `
+                        position: absolute;
+                        background: rgba(0, 0, 0, 0.85);
+                        color: white;
+                        padding: 0.5rem 0.75rem;
+                        border-radius: 6px;
+                        font-size: 0.85rem;
+                        z-index: 1000;
+                        white-space: nowrap;
+                        pointer-events: none;
+                        animation: fadeIn 0.2s ease;
+                    `;
+                    
+                    document.body.appendChild(tooltip);
+                    
+                    const rect = this.getBoundingClientRect();
+                    tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+                    tooltip.style.top = (rect.top - tooltip.offsetHeight - 8) + 'px';
+                    
+                    this.addEventListener('mouseleave', function() {
+                        tooltip.remove();
+                    }, { once: true });
+                }
+            });
+        });
+        
+        // ============================================
+        // COPIAR AL PORTAPAPELES
+        // ============================================
+        const tableCells = document.querySelectorAll('.table td');
+        tableCells.forEach(cell => {
+            cell.addEventListener('dblclick', function() {
+                const text = this.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    // Mostrar feedback visual
+                    const originalBg = this.style.background;
+                    this.style.background = 'rgba(46, 204, 113, 0.2)';
+                    this.style.transition = 'background 0.3s ease';
+                    
+                    setTimeout(() => {
+                        this.style.background = originalBg;
+                    }, 500);
+                    
+                    // Mostrar mensaje temporal
+                    showTemporaryMessage('✓ Copiado al portapapeles', 'success');
+                }).catch(() => {
+                    showTemporaryMessage('✗ Error al copiar', 'error');
+                });
+            });
+        });
+        
+        // Función para mostrar mensajes temporales
+        function showTemporaryMessage(text, type) {
+            const message = document.createElement('div');
+            message.textContent = text;
+            message.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${type === 'success' ? '#2ecc71' : '#e74c3c'};
+                color: white;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                z-index: 10000;
+                animation: slideInRight 0.3s ease;
+                font-weight: 600;
+            `;
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.animation = 'slideOutRight 0.3s ease';
+                setTimeout(() => message.remove(), 300);
+            }, 2000);
+        }
+        
+        // ============================================
+        // ESTADÍSTICAS DINÁMICAS
+        // ============================================
+        function updateStatistics() {
+            const totalTables = document.querySelectorAll('.year-section').length;
+            const totalRows = document.querySelectorAll('.table tbody tr').length;
+            
+            console.log(`📊 Estadísticas: ${totalTables} año(s) | ${totalRows} registros totales`);
+        }
+        
+        updateStatistics();
+        
+        // ============================================
+        // CONFIRMACIÓN MEJORADA PARA ELIMINAR
+        // ============================================
+        const deleteButtons = document.querySelectorAll('.btn-outline-danger');
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const anio = this.href.match(/anio=(\d+)/)?.[1];
+                const confirmMessage = `
+                    ⚠️ ADVERTENCIA DE ELIMINACIÓN
+                    
+                    Está a punto de eliminar la tabla salarial del año ${anio}.
+                    
+                    Esta acción:
+                    • Eliminará TODOS los registros de este año
+                    • NO se puede deshacer
+                    • Puede afectar cálculos relacionados
+                    
+                    ¿Está absolutamente seguro de continuar?
+                `;
+                
+                if (confirm(confirmMessage)) {
+                    // Mostrar spinner de carga
+                    const spinner = document.createElement('div');
+                    spinner.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.7);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 9999;
+                    `;
+                    spinner.innerHTML = `
+                        <div style="
+                            background: white;
+                            padding: 2rem 3rem;
+                            border-radius: 12px;
+                            text-align: center;
+                            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+                        ">
+                            <div class="spinner-border text-danger" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Eliminando...</span>
+                            </div>
+                            <p style="margin-top: 1rem; font-weight: 600; color: #333;">
+                                Eliminando tabla...
+                            </p>
+                        </div>
+                    `;
+                    document.body.appendChild(spinner);
+                    
+                    // Redirigir después de mostrar el spinner
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 500);
+                }
+            });
+        });
+        
+        // ============================================
+        // EXPORTAR TABLA A CSV (OPCIONAL)
+        // ============================================
+        function addExportButton() {
+            const actionsDiv = document.querySelector('.actions > div');
+            if (actionsDiv && document.querySelectorAll('.year-section').length > 0) {
+                const exportBtn = document.createElement('a');
+                exportBtn.href = '#';
+                exportBtn.className = 'btn btn-outline-secondary';
+                exportBtn.innerHTML = '<i class="fas fa-file-download"></i> Exportar';
+                exportBtn.style.marginLeft = '0.5rem';
+                
+                exportBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    exportToCSV();
+                });
+                
+                actionsDiv.appendChild(exportBtn);
+            }
+        }
+        
+        function exportToCSV() {
+            let csv = 'Año,Grado,Salario Base,Aumento por Grado,Sueldo Total\n';
+            
+            document.querySelectorAll('.year-section').forEach(section => {
+                const anio = section.querySelector('.year-title').textContent.match(/\d{4}/)?.[0];
+                const rows = section.querySelectorAll('.table tbody tr');
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        const data = [
+                            anio,
+                            cells[0].textContent.trim(),
+                            cells[1].textContent.trim().replace(/\./g, '').replace('Gs. ', ''),
+                            cells[2].textContent.trim().replace(/\./g, '').replace('Gs. ', ''),
+                            cells[3].textContent.trim().replace(/\./g, '').replace('Gs. ', '')
+                        ];
+                        csv += data.join(',') + '\n';
+                    }
+                });
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `tablas_salariales_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showTemporaryMessage('✓ Archivo CSV descargado', 'success');
+        }
+        
+        // Agregar botón de exportación
+        addExportButton();
+        
+        // ============================================
+        // ANIMACIONES CSS ADICIONALES
+        // ============================================
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            
+            @keyframes slideInRight {
+                from {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+            
+            @keyframes slideOutRight {
+                from {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translateX(100px);
+                }
+            }
+            
+            .spinner-border {
+                display: inline-block;
+                width: 2rem;
+                height: 2rem;
+                vertical-align: text-bottom;
+                border: 0.25em solid currentColor;
+                border-right-color: transparent;
+                border-radius: 50%;
+                animation: spinner-border-spin 0.75s linear infinite;
+            }
+            
+            @keyframes spinner-border-spin {
+                to { transform: rotate(360deg); }
+            }
+            
+            .visually-hidden {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border-width: 0;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+{% endblock %}

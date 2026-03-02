@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Registro de ADEMACOR - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:afiliados_main' %}">Afiliados</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'afiliados:datos_ademacor_list' %}">Datos ADEMACOR</a>
+</li>
+<li class="breadcrumb-item active">Editar</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card card-ademacor">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    Editar Registro de ADEMACOR
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="cedula" class="form-label">Cédula *</label>
+                        <input type="text" class="form-control" id="cedula" name="cedula"
+                               value="{{ registro.cedula }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="nombre_completo" class="form-label">Nombre Completo *</label>
+                        <input type="text" class="form-control" id="nombre_completo" name="nombre_completo"
+                               value="{{ registro.nombre_completo }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="municipio" class="form-label">Municipio</label>
+                        <input type="text" class="form-control" id="municipio" name="municipio"
+                               value="{{ registro.municipio|default:'' }}">
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'afiliados:datos_ademacor_detail' registro.pk %}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-save me-2"></i>Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

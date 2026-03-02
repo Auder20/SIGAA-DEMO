@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Liquidación - SIGAA{% endblock %}
+
+{% block breadcrumb_items %}
+<li class="breadcrumb-item">
+    <a href="{% url 'liquidacion:liquidacion_main' %}">Liquidación</a>
+</li>
+<li class="breadcrumb-item active">Panel Principal</li>
+{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header text-center">
+    <div class="container">
+        <h1 class="display-4 mb-3">
+            <i class="fas fa-calculator me-3"></i>
+            Panel de Liquidación
+        </h1>
+        <p class="lead mb-0">Sistema automatizado de cálculo de sueldos y aportes</p>
+    </div>
+</div>
+
+<!-- Statistics Row -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card" style="background: linear-gradient(135deg, #FF6B35, #FF8A5B); color: white; border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-2x mb-3"></i>
+                <div class="stats-number" style="font-size: 2.5rem; font-weight: bold;">{{ sueldos_calculados|default:0 }}</div>
+                <div class="text-light">Sueldos Calculados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #198754, #146c43);">
+            <div class="card-body text-center">
+                <i class="fas fa-percentage fa-2x mb-3"></i>
+                <div class="stats-number">{{ aportes_registrados|default:0 }}</div>
+                <div class="text-light">Aportes Registrados</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+            <div class="card-body text-center">
+                <i class="fas fa-coins fa-2x mb-3"></i>
+                <div class="stats-number">${{ total_bonificaciones|floatformat:0|default:0 }}</div>
+                <div class="text-light">Total Bonificaciones</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #dc3545, #b02a37);">
+            <div class="card-body text-center">
+                <i class="fas fa-minus-circle fa-2x mb-3"></i>
+                <div class="stats-number">${{ total_descuentos|floatformat:0|default:0 }}</div>
+                <div class="text-light">Total Descuentos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-bolt me-2"></i>
+                    Acciones Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <button class="btn btn-primary btn-lg w-100" 
+                                onclick="alert('Use: python manage.py recalcular_sueldos')">
+                            <i class="fas fa-sync fa-2x d-block mb-2"></i>
+                            Recalcular Sueldos
+                        </button>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-list fa-2x d-block mb-2"></i>
+                            Ver Sueldos
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-warning btn-lg w-100">
+                            <i class="fas fa-percentage fa-2x d-block mb-2"></i>
+                            Ver Aportes
+                        </a>
+                    </div>
+                    <div class="col-lg-3 col-md-6 mb-3">
+                        <a href="{% url 'admin:liquidacion_tablasalarial_changelist' %}" class="btn btn-info btn-lg w-100">
+                            <i class="fas fa-table fa-2x d-block mb-2"></i>
+                            Tabla Salarial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Salary Calculation System -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    Sistema de Cálculo de Sueldos
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-star text-warning me-2"></i>Componentes del Cálculo:</h6>
+                        <ul class="list-unstyled ms-3">
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Grado de Escalafón:</strong> Sueldo base según tabla salarial</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Cargo Desempeñado:</strong> Rector (25%), Decano (15%), Director (10%)</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Años de Servicio:</strong> 2% a 12% según antigüedad</li>
+                            <li><i class="fas fa-check text-success me-2"></i><strong>Nivel Educativo:</strong> Doctorado (15%), Maestría (10%), Especialización (5%)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calculator text-info me-2"></i>Proceso Automatizado:</h6>
+                        <ul class="list-unstyled ms-3">
+                            <li><i class="fas fa-robot text-info me-2"></i>Detección automática de cargos y títulos</li>
+                            <li><i class="fas fa-chart-line text-info me-2"></i>Cálculo basado en parámetros configurables</li>
+                            <li><i class="fas fa-history text-info me-2"></i>Historial completo de cálculos</li>
+                            <li><i class="fas fa-sync text-info me-2"></i>Recálculo masivo con comando de gestión</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Comando de Recálculo:</strong> 
+                    <code>python manage.py recalcular_sueldos</code> - Recalcula todos los sueldos automáticamente
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Features -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-money-bill-wave me-2"></i>
+                    Gestión de Sueldos
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Administre los sueldos calculados automáticamente para todos los afiliados activos.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Cálculo automático basado en parámetros</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Desglose detallado de componentes</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Historial de cambios</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Exportación de reportes</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'liquidacion:sueldo_list' %}" class="btn btn-success">
+                        <i class="fas fa-eye me-2"></i>Ver Todos los Sueldos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-percentage me-2"></i>
+                    Control de Aportes
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Gestione los aportes y descuentos aplicados a cada sueldo calculado.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-warning me-2"></i>Aportes de salud y pensión</li>
+                    <li><i class="fas fa-check text-warning me-2"></i>Descuentos por préstamos</li>
+                    <li><i class="fas fa-check text-warning me-2"></i>Bonificaciones especiales</li>
+                    <li><i class="fas fa-check text-warning me-2"></i>Cálculo automático de porcentajes</li>
+                </ul>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'liquidacion:aporte_list' %}" class="btn btn-warning">
+                        <i class="fas fa-percentage me-2"></i>Ver Todos los Aportes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Sueldos Recientes
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if sueldos_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Afiliado</th>
+                                <th>Grado</th>
+                                <th>Sueldo Base</th>
+                                <th>Bonificaciones</th>
+                                <th>Sueldo Neto</th>
+                                <th>Fecha Cálculo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sueldo in sueldos_recientes %}
+                            <tr>
+                                <td>
+                                    <strong>{{ sueldo.afiliado.nombre_completo }}</strong>
+                                    <br><small class="text-muted">{{ sueldo.afiliado.cedula }}</small>
+                                </td>
+                                <td>
+                                    {% if sueldo.afiliado.grado_escalafon %}
+                                        <span class="badge bg-primary">{{ sueldo.afiliado.grado_escalafon }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-info fw-bold">${{ sueldo.sueldo_base|floatformat:0 }}</td>
+                                <td class="text-success">${{ sueldo.bonificaciones|floatformat:0 }}</td>
+                                <td class="text-primary fw-bold">${{ sueldo.sueldo_neto|floatformat:0 }}</td>
+                                <td>{{ sueldo.fecha_calculo|date:"d/m/Y" }}</td>
+                                <td>
+                                    <a href="{% url 'liquidacion:sueldo_detail' sueldo.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-calculator fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No hay sueldos calculados aún.</p>
+                    <button class="btn btn-primary" 
+                            onclick="alert('Use: python manage.py recalcular_sueldos')">
+                        <i class="fas fa-sync me-2"></i>Calcular Sueldos
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
