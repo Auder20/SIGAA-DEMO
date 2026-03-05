@@ -35,14 +35,14 @@ def liquidacion_main(request):
 	)
 
 	# Organizar aportes por tipo
-	ademacor_total = 0
-	famecor_total = 0
+	organizacion_total = 0
+	fondo_total = 0
 
 	for aporte in aportes_por_tipo:
-		if 'ADEMACOR' in aporte['nombre'].upper():
-			ademacor_total += aporte['total'] or 0
-		elif 'FAMECOR' in aporte['nombre'].upper():
-			famecor_total += aporte['total'] or 0
+		if 'ORGANIZACIÓN' in aporte['nombre'].upper() or 'ADEMACOR' in aporte['nombre'].upper():
+			organizacion_total += aporte['total'] or 0
+		elif 'FONDO' in aporte['nombre'].upper() or 'FAMECOR' in aporte['nombre'].upper():
+			fondo_total += aporte['total'] or 0
 
 	context = {
 		'sueldos_calculados': sueldos_stats['total_sueldos'] or 0,
@@ -51,8 +51,8 @@ def liquidacion_main(request):
 		'total_descuentos': 0,      # Calcular si tienes descuentos
 		'total_nomina': sueldos_stats['total_nomina'] or 0,
 		'promedio': sueldos_stats['promedio'] or 0,
-		'ademacor_total': ademacor_total,
-		'famecor_total': famecor_total,
+		'organizacion_total': organizacion_total,
+		'fondo_total': fondo_total,
 		'valor_total_aportes': aportes_stats['valor_total'] or 0,
 	}
 
@@ -209,7 +209,7 @@ class AporteListView(ListView):
 				Q(sueldo__afiliado__cedula__icontains=search)
 			)
 
-		# FILTRO 2: Tipo de aporte (ADEMACOR, FAMECOR, OTROS)
+		# FILTRO 2: Tipo de aporte (ORGANIZACIÓN, FONDO, OTROS)
 		tipo_aporte = self.request.GET.get('tipo_aporte', '').strip()
 		if tipo_aporte:
 			queryset = queryset.filter(nombre=tipo_aporte)
@@ -252,23 +252,23 @@ class AporteListView(ListView):
 		context['total_aportes'] = stats['total_aportes'] or 0
 		context['valor_total'] = stats['valor_total'] or 0
 
-		# ESTADÍSTICAS POR TIPO: Totales de ADEMACOR y FAMECOR
+		# ESTADÍSTICAS POR TIPO: Totales de ORGANIZACIÓN y FONDO
 		aportes_por_tipo = queryset.values('nombre').annotate(
 			total=Sum('valor')
 		)
 
-		ademacor_total = 0
-		famecor_total = 0
+		organizacion_total = 0
+		fondo_total = 0
 
 		for aporte in aportes_por_tipo:
 			nombre_upper = aporte['nombre'].upper()
-			if 'ADEMACOR' in nombre_upper:
-				ademacor_total += aporte['total'] or 0
-			elif 'FAMECOR' in nombre_upper:
-				famecor_total += aporte['total'] or 0
+			if 'ORGANIZACIÓN' in nombre_upper or 'ADEMACOR' in nombre_upper:
+				organizacion_total += aporte['total'] or 0
+			elif 'FONDO' in nombre_upper or 'FAMECOR' in nombre_upper:
+				fondo_total += aporte['total'] or 0
 
-		context['ademacor_total'] = ademacor_total
-		context['famecor_total'] = famecor_total
+		context['organizacion_total'] = organizacion_total
+		context['fondo_total'] = fondo_total
 
 		# OPCIONES DE FILTROS: Años disponibles (CONFIGURABLE)
 		import datetime
@@ -331,8 +331,8 @@ def aporte_list(request):
 def aporte_totales(request):
 	# Sumar valores por nombre de aporte
 	totals = Aporte.objects.values('nombre').annotate(total=Sum('valor'))
-	# Normalizar salida para ADEMACOR y FAMECOR (si no existen, suman 0)
-	resumen = {'ADEMACOR': 0, 'FAMECOR': 0}
+	# Normalizar salida para ORGANIZACIÓN y FONDO (si no existen, suman 0)
+	resumen = {'ORGANIZACIÓN': 0, 'FONDO': 0}
 	for t in totals:
 		nombre = t['nombre']
 		valor = t['total'] or 0

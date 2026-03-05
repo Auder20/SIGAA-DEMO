@@ -1,4 +1,4 @@
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 from typing import List, Any
 from ..core.logger_manager import ImportLoggerManager
 

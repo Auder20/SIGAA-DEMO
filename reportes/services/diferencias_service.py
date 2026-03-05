@@ -3,7 +3,7 @@ Servicios para generar reportes de diferencias entre sistemas
 Versión mejorada con diseño profesional
 """
 
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import io
 import os
 from datetime import datetime

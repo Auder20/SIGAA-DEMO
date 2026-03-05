@@ -24,14 +24,14 @@ urlpatterns = [
 
 
 
-	# URLs para datos de ADEMACOR
-	path('ademacor/', views.datos_ademacor_list, name='datos_ademacor_list'),
-	path('ademacor/<int:pk>/', views.datos_ademacor_detail, name='datos_ademacor_detail'),
-	path('ademacor/<int:pk>/editar/', views.datos_ademacor_edit, name='datos_ademacor_edit'),
-	path('ademacor/<int:pk>/eliminar/', views.datos_ademacor_delete, name='datos_ademacor_delete'),
-	path('ademacor/exportar/', views.datos_ademacor_export, name='datos_ademacor_export'),
-	path('ademacor/exportar-pdf/', views.datos_ademacor_export_pdf, name='datos_ademacor_export_pdf'),
-	path('ademacor/comparacion/', views.comparacion_afiliados_ademacor, name='comparacion_afiliados_ademacor'),
+	# URLs para datos de organización externa
+	path('organizacion/', views.datos_organizacion_list, name='datos_organizacion_list'),
+	path('organizacion/<int:pk>/', views.datos_organizacion_detail, name='datos_organizacion_detail'),
+	path('organizacion/<int:pk>/editar/', views.datos_organizacion_edit, name='datos_organizacion_edit'),
+	path('organizacion/<int:pk>/eliminar/', views.datos_organizacion_delete, name='datos_organizacion_delete'),
+	path('organizacion/exportar/', views.datos_organizacion_export, name='datos_organizacion_export'),
+	path('organizacion/exportar-pdf/', views.datos_organizacion_export_pdf, name='datos_organizacion_export_pdf'),
+	path('organizacion/comparacion/', views.comparacion_afiliados_organizacion, name='comparacion_afiliados_organizacion'),
 
 	# URLs para gestión de desafiliados
 	path('desafiliados/', desafiliado_list, name='desafiliado_list'),

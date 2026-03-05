@@ -1,6 +1,6 @@
 from .core.importador_service import ExcelImportService
 from .excel_import_clean import ExcelImportClean, importar_ademacor_desde_excel
-from afiliados.models import Afiliado
+from afiliados.models import Afiliado, DatosOrganizacion
 
 # Función principal para mantener compatibilidad con código existente
 def importar_afiliados_desde_excel(archivo_excel):
@@ -36,6 +36,50 @@ def importar_afiliados_desde_excel(archivo_excel):
         }
     except Exception as e:
         logger.error(f" Error en la importación: {str(e)}", exc_info=True)
+        return {
+            'success': False,
+            'error': str(e),
+            'rows_processed': 0,
+            'created': 0,
+            'updated': 0,
+            'ignored': 0,
+            'errors': [str(e)]
+        }
+
+
+def importar_organizacion_desde_excel(archivo_excel):
+    """
+    Función para importar datos de organización externa usando el importador optimizado.
+    
+    Args:
+        archivo_excel: Archivo Excel a procesar (path o file object)
+        
+    Returns:
+        Dict con resumen de la importación
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    logger.info(" Iniciando importación de datos de organización externa...")
+    
+    try:
+        # Crear instancia del importador con la clase de modelo DatosOrganizacion
+        importador = ExcelImportClean(model_class=DatosOrganizacion, batch_size=1000)
+        
+        # Procesar el archivo Excel
+        resultado = importador.import_excel_clean(archivo_excel, DatosOrganizacion)
+        
+        logger.info(f" Importación de organización completada. {resultado.get('rows_processed', 0)} filas procesadas")
+        return {
+            'success': True,
+            'rows_processed': resultado.get('rows_processed', 0),
+            'created': resultado.get('created', 0),
+            'updated': resultado.get('updated', 0),
+            'ignored': resultado.get('ignored', 0),
+            'errors': resultado.get('errors', [])
+        }
+    except Exception as e:
+        logger.error(f" Error en la importación de organización: {str(e)}", exc_info=True)
         return {
             'success': False,
             'error': str(e),
@@ -93,6 +137,7 @@ from .core.importador_service import ExcelImportService
 __all__ = [
     'ExcelImportService',
     'importar_afiliados_desde_excel',
+    'importar_organizacion_desde_excel',
     'importar_ademacor_desde_excel_original',
     'importar_afiliados_desde_excel_original'
 ]

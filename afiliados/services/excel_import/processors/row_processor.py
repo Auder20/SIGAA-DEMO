@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 from django.db import transaction
 
 from afiliados.models import Afiliado

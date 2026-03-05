@@ -28,6 +28,6 @@ urlpatterns = [
     path('tablas-salariales/eliminar/<int:anio>/', admin_tablas_salariales.EliminarTablaSalarialView.as_view(), name='tablasalarial_eliminar_anual'),
     path('tablas-salariales/editar-registro/<int:pk>/', admin_tablas_salariales.EditarTablaSalarialView.as_view(), name='tablasalarial_editar_registro'),
 
-    # URLs para ADEMACOR
-    path('ademacor/', include('liquidacion.urls_ademacor')),
+    # URLs para Organización Externa
+    path('organizacion/', include('liquidacion.urls_organizacion')),
 ]

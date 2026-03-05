@@ -12,7 +12,7 @@ Características:
 - ✅ Batch processing optimizado
 """
 
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import logging
 import time
 from typing import Dict, Any

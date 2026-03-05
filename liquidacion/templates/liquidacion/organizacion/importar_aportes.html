@@ -1,0 +1,166 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Importar Aportes - Organización Externa{% endblock %} {% block content %}
+<div class="container-fluid mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 text-gray-800">
+      <i class="fas fa-file-import"></i> Importar Aportes - Organización Externa
+    </h1>
+    <a
+      href="{% url 'liquidacion:aporte_organizacion_list' %}"
+      class="btn btn-secondary"
+    >
+      <i class="fas fa-arrow-left"></i> Volver a Aportes
+    </a>
+  </div>
+
+  <!-- Información -->
+  <div class="alert alert-info">
+    <i class="fas fa-info-circle"></i>
+    <strong>Información:</strong> Puede importar aportes desde un archivo Excel
+    (.xlsx, .xls) o CSV (.csv) con el formato especificado.
+  </div>
+
+  <!-- Formulario de Importación -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">
+        <i class="fas fa-upload"></i> Cargar Archivo
+      </h6>
+    </div>
+    <div class="card-body">
+      <form method="post" enctype="multipart/form-data" id="formularioImportar">
+        {% csrf_token %}
+
+        <div class="form-group">
+          <label for="anio">
+            <i class="fas fa-calendar-alt"></i> Año
+            <span class="text-danger">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            id="anio"
+            name="anio"
+            value="{{ anio_actual }}"
+            min="2020"
+            max="2030"
+            required
+          />
+          <small class="form-text text-muted"
+            >Año para el cual se importarán los aportes</small
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="archivo">
+            <i class="fas fa-file-excel"></i> Seleccione el Archivo
+            <span class="text-danger">*</span>
+          </label>
+          <div class="custom-file">
+            <input
+              type="file"
+              class="custom-file-input"
+              id="archivo"
+              name="archivo"
+              accept=".xlsx,.xls,.csv"
+              required
+            />
+            <label class="custom-file-label" for="archivo"
+              >Seleccionar archivo...</label
+            >
+          </div>
+          <small class="form-text text-muted"
+            >Formatos: Excel (.xlsx, .xls). El sistema detectará automáticamente
+            si es ADEMACOR o FAMECOR</small
+          >
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between mt-4">
+          <a
+            href="{% url 'liquidacion:aporte_ademacor_list' %}"
+            class="btn btn-secondary"
+          >
+            <i class="fas fa-times"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary btn-lg" id="btnImportar">
+            <i class="fas fa-upload"></i> Importar Aportes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+    <!-- Información del Proceso -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-info">
+            <h6 class="m-0 font-weight-bold text-white">
+                <i class="fas fa-info-circle"></i> ¿Cómo Funciona?
+            </h6>
+        </div>
+        <div class="card-body">
+            <ol class="mb-0">
+                <li><strong>Seleccione el archivo Excel</strong> con los datos de aportes de ADEMACOR o FAMECOR.</li>
+                <li>El sistema <strong>detectará automáticamente</strong>:
+                    <ul>
+                        <li>Las columnas de cédula y valor</li>
+                        <li>Si es ADEMACOR o FAMECOR (basado en los montos)</li>
+                        <li>Registros duplicados o inválidos</li>
+                    </ul>
+                </li>
+                <li>Si algún afiliado no tiene sueldo para el año, <strong>se creará automáticamente</strong>.</li>
+                <li>Los aportes existentes serán <strong>actualizados</strong>, los nuevos serán <strong>creados</strong>.</li>
+                <li>Al finalizar verá un <strong>reporte completo</strong> con estadísticas.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Advertencias -->
+    <div class="card shadow">
+        <div class="card-header py-3 bg-warning">
+            <h6 class="m-0 font-weight-bold text-white">
+                <i class="fas fa-exclamation-triangle"></i> Información Importante
+            </h6>
+        </div>
+        <div class="card-body">
+            <h6 class="font-weight-bold text-success"><i class="fas fa-magic"></i> Detección Automática</h6>
+            <ul class="mb-3">
+                <li><strong>El sistema detecta automáticamente</strong> si el archivo contiene aportes de ADEMACOR o FAMECOR basándose en los valores.</li>
+                <li>No necesita formatear el archivo con columnas específicas - el sistema identifica automáticamente las columnas de cédula y valor.</li>
+                <li>Soporta diferentes formatos de Excel sin necesidad de plantilla específica.</li>
+            </ul>
+
+            <h6 class="font-weight-bold text-info"><i class="fas fa-cog"></i> Procesamiento Automático</h6>
+            <ul class="mb-3">
+                <li><strong>Creación automática de sueldos:</strong> Si un afiliado ADEMACOR no tiene sueldo para el año, se creará automáticamente con valor $0.</li>
+                <li><strong>Actualización inteligente:</strong> Si el aporte ya existe, será actualizado con los nuevos valores.</li>
+                <li><strong>Procesamiento por lotes:</strong> El sistema procesa miles de registros de forma optimizada y rápida.</li>
+            </ul>
+
+            <h6 class="font-weight-bold text-danger"><i class="fas fa-shield-alt"></i> Validaciones</h6>
+            <ul class="mb-0">
+                <li>El afiliado ADEMACOR con la cédula indicada debe existir en el sistema y estar activo.</li>
+                <li>Los valores de aportes deben estar en el rango válido ($1,000 - $500,000).</li>
+                <li>Las cédulas deben tener entre 6 y 10 dígitos.</li>
+                <li>Registros con errores serán omitidos y reportados al final del proceso.</li>
+            </ul>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Actualizar nombre del archivo seleccionado
+document.getElementById('archivo').addEventListener('change', function(e) {
+    var fileName = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo...';
+    var label = e.target.nextElementSibling;
+    label.innerText = fileName;
+});
+
+// Deshabilitar botón durante la carga
+document.getElementById('formularioImportar').addEventListener('submit', function(e) {
+    var btn = document.getElementById('btnImportar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
+});
+</script>
+{% endblock %}

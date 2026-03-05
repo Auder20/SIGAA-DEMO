@@ -1,4 +1,4 @@
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 from typing import Dict, List, Tuple, Any, Optional
 from ..utils.alias_definitions import AliasDefinitions
 from ..processors.data_validator import DataValidator

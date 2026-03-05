@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
-{% block title %}Lista de Datos ADEMACOR - SIGAA{% endblock %}
+{% block title %}Lista de Datos de Organización - SIGAA{% endblock %}
 
 {% block extra_css %}
 <style>
     /* Variables CSS para tematización consistente */
     :root {
-        --ademacor-primary: #ffc107;
-        --ademacor-secondary: #fd7e14;
-        --ademacor-dark: #f39c12;
-        --ademacor-light: rgba(255, 193, 7, 0.1);
+        --organizacion-primary: #17a2b8;
+        --organizacion-secondary: #138496;
+        --organizacion-dark: #0c5460;
+        --organizacion-light: rgba(23, 162, 184, 0.1);
         --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
         --shadow-md: 0 4px 6px rgba(0,0,0,.1);
         --shadow-lg: 0 8px 16px rgba(255, 193, 7, 0.2);
@@ -26,7 +26,7 @@
         text-transform: uppercase;
         letter-spacing: 0.8px;
         font-weight: 600;
-        background: linear-gradient(to bottom, var(--ademacor-light), transparent);
+        background: linear-gradient(to bottom, var(--organizacion-light), transparent);
         position: sticky;
         top: 0;
         z-index: 10;
@@ -55,8 +55,8 @@
         padding: 0.35em 0.65em;
     }
 
-    .badge-ademacor {
-        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+    .badge-organizacion {
+        background: linear-gradient(135deg, var(--organizacion-primary), var(--organizacion-secondary));
         color: #212529;
         font-weight: 600;
     }
@@ -76,8 +76,8 @@
         box-shadow: var(--shadow-sm);
     }
 
-    .btn-ademacor {
-        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+    .btn-organizacion {
+        background: linear-gradient(135deg, var(--organizacion-primary), var(--organizacion-secondary));
         border: none;
         color: #212529;
         font-weight: 600;
@@ -85,8 +85,8 @@
         box-shadow: var(--shadow-sm);
     }
 
-    .btn-ademacor:hover {
-        background: linear-gradient(135deg, var(--ademacor-dark), var(--ademacor-secondary));
+    .btn-organizacion:hover {
+        background: linear-gradient(135deg, var(--organizacion-dark), var(--organizacion-secondary));
         transform: translateY(-2px);
         box-shadow: var(--shadow-lg);
         color: #212529;
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchValue = searchInput.value.trim();
             if (!searchValue) {
                 e.preventDefault();
-                window.location.href = '{% url "afiliados:datos_ademacor_list" %}';
+                window.location.href = '{% url "afiliados:datos_organizacion_list" %}';
             }
         });
     }
@@ -498,7 +498,7 @@ function showNotification(message, type = 'info') {
 <li class="breadcrumb-item">
     <a href="{% url 'afiliados:importar_excel' %}"><i class="fas fa-file-import me-1"></i>Importar Excel</a>
 </li>
-<li class="breadcrumb-item active" aria-current="page">Datos ADEMACOR</li>
+<li class="breadcrumb-item active" aria-current="page">Datos de Organización</li>
 {% endblock %}
 
 {% block content %}
@@ -508,11 +508,11 @@ function showNotification(message, type = 'info') {
         <div class="col-md-8">
             <h1 class="h2 mb-2 fw-bold">
                 <i class="fas fa-handshake me-2 text-warning"></i>
-                Gestión de Datos ADEMACOR
+                Gestión de Datos de Organización
             </h1>
             <p class="text-muted mb-0">
                 <i class="fas fa-database me-1"></i>
-                <strong>{{ total_ademacor|default:0 }}</strong> registro{{ total_ademacor|pluralize }}
+                <strong>{{ total_organizacion|default:0 }}</strong> registro{{ total_organizacion|pluralize }}
                 {% if search_query %}
                     <span class="mx-2">|</span>
                     <i class="fas fa-filter me-1"></i>
@@ -531,12 +531,12 @@ function showNotification(message, type = 'info') {
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li>
-                            <a class="dropdown-item" href="{% url 'afiliados:datos_ademacor_export' %}">
+                            <a class="dropdown-item" href="{% url 'afiliados:datos_organizacion_export' %}">
                                 <i class="fas fa-file-excel me-2 text-success"></i>Excel (.xlsx)
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="/afiliados/ademacor/exportar-pdf/">
+                            <a class="dropdown-item" href="/afiliados/organizacion/exportar-pdf/">
                                 <i class="fas fa-file-pdf me-2 text-danger"></i>PDF
                             </a>
                         </li>
@@ -559,7 +559,7 @@ function showNotification(message, type = 'info') {
     <div class="col-md-3 mb-3 mb-md-0">
         <div class="stats-card text-center">
             <i class="fas fa-users fa-2x mb-2"></i>
-            <h3 class="h2 mb-0 fw-bold">{{ total_ademacor }}</h3>
+            <h3 class="h2 mb-0 fw-bold">{{ total_organizacion }}</h3>
             <small class="text-dark">Total Registros</small>
         </div>
     </div>

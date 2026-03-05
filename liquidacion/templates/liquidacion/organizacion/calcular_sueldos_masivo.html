@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Calcular Sueldos Masivamente - Organización Externa{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">
+            <i class="fas fa-calculator"></i> Calcular Sueldos Masivamente - Organización Externa
+        </h1>
+        <a href="{% url 'liquidacion:sueldo_organizacion_list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Sueldos
+        </a>
+    </div>
+
+    <!-- Información -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Información:</strong> Este proceso calculará los sueldos de todos los afiliados de Organización Externa activos para el año seleccionado.
+        Los aportes se calcularán automáticamente.
+    </div>
+
+    <!-- Formulario de Cálculo Masivo -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-sliders-h"></i> Parámetros de Cálculo
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="post" id="formularioCalculoMasivo">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="anio">
+                                <i class="fas fa-calendar-alt"></i> Año para el Cálculo
+                                <span class="text-danger">*</span>
+                            </label>
+                            <select name="anio" id="anio" class="form-control" required>
+                                {% for a in anios %}
+                                <option value="{{ a }}" {% if a == request.GET.anio %}selected{% endif %}>{{ a }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Seleccione el año para el cual se calcularán los sueldos</small>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="grado">
+                                <i class="fas fa-layer-group"></i> Grado de Escalafón (Opcional)
+                            </label>
+                            <select name="grado" id="grado" class="form-control">
+                                <option value="">Todos los grados</option>
+                                {% for grado in grados %}
+                                <option value="{{ grado }}">Grado {{ grado }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">Deje en blanco para calcular todos los grados</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen -->
+                <div class="alert alert-light border">
+                    <h6><i class="fas fa-users"></i> Información del Proceso</h6>
+                    <p class="mb-1">
+                        <strong>Total de afiliados ADEMACOR activos:</strong> {{ total_afiliados }}
+                    </p>
+                    <p class="mb-0 text-muted">
+                        <small>Este proceso puede tardar varios minutos dependiendo de la cantidad de afiliados.</small>
+                    </p>
+                </div>
+
+                <!-- Confirmación -->
+                <div class="custom-control custom-checkbox mb-3">
+                    <input type="checkbox" class="custom-control-input" id="confirmarCalculo" required>
+                    <label class="custom-control-label" for="confirmarCalculo">
+                        Confirmo que deseo calcular los sueldos de forma masiva.
+                        <strong class="text-danger">Esta acción sobrescribirá los sueldos existentes.</strong>
+                    </label>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'liquidacion:sueldo_ademacor_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg" id="btnCalcular">
+                        <i class="fas fa-calculator"></i> Calcular Sueldos
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ayuda -->
+    <div class="card shadow">
+        <div class="card-header py-3 bg-warning">
+            <h6 class="m-0 font-weight-bold text-white">
+                <i class="fas fa-exclamation-triangle"></i> Advertencias Importantes
+            </h6>
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>Este proceso calculará automáticamente los sueldos basándose en:
+                    <ul>
+                        <li>Grado de escalafón (según tabla salarial)</li>
+                        <li>Años de servicio (bonificación por antigüedad)</li>
+                        <li>Cargo desempeñado (bonificación por cargo directivo)</li>
+                        <li>Nivel educativo (bonificación por estudios de posgrado)</li>
+                    </ul>
+                </li>
+                <li class="text-danger"><strong>Los sueldos existentes para el año seleccionado serán actualizados.</strong></li>
+                <li>Los aportes (ADEMACOR 1% y FAMECOR 0.2%) se calcularán automáticamente.</li>
+                <li>Si un afiliado no tiene grado de escalafón o no hay tabla salarial, se generará un error.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('formularioCalculoMasivo').addEventListener('submit', function(e) {
+    var btn = document.getElementById('btnCalcular');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Calculando...';
+});
+</script>
+{% endblock %}

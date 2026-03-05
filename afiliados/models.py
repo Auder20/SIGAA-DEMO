@@ -235,12 +235,12 @@ class Afiliado(models.Model):
 
 
 
-class DatosAdemacor(models.Model):
+class DatosOrganizacion(models.Model):
     """
-    Modelo para almacenar datos completos de afiliados ADEMACOR.
+    Modelo para almacenar datos completos de afiliados de organización externa.
 
     Contiene la misma estructura que el modelo Afiliado, permitiendo
-    mantener una base de datos paralela para ADEMACOR con información
+    mantener una base de datos paralela para organización externa con información
     completa de identificación, profesional, académica y personal.
     """
     # Información de identificación
@@ -368,14 +368,14 @@ class DatosAdemacor(models.Model):
     # Campo constante para identificación del tipo de datos
     descripcion = models.CharField(
         max_length=50,
-        default="ademacor",
-        help_text="Tipo de datos - constante: ademacor"
+        default="organizacion",
+        help_text="Tipo de datos - constante: organizacion"
     )
     
     # Campos de control
     activo = models.BooleanField(
         default=True,
-        help_text="Indica si el afiliado ADEMACOR está activo en el sistema"
+        help_text="Indica si el afiliado de organización externa está activo en el sistema"
     )
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,
@@ -389,23 +389,23 @@ class DatosAdemacor(models.Model):
 
     def __str__(self):
         """
-        Representación en cadena del registro de ADEMACOR.
+        Representación en cadena del registro de organización externa.
 
         Returns:
             str: Nombre completo y cédula, o ID si no hay datos
         """
         if self.nombre_completo:
             if self.cedula:
-                return f"ADEMACOR: {self.nombre_completo} ({self.cedula})"
-            return f"ADEMACOR: {self.nombre_completo}"
-        return f"ADEMACOR ID: {self.pk}"
+                return f"Organización: {self.nombre_completo} ({self.cedula})"
+            return f"Organización: {self.nombre_completo}"
+        return f"Organización ID: {self.pk}"
 
     class Meta:
         """
-        Metadatos del modelo DatosAdemacor.
+        Metadatos del modelo DatosOrganizacion.
         """
-        verbose_name = "Dato de ADEMACOR"
-        verbose_name_plural = "Datos de ADEMACOR"
+        verbose_name = "Dato de Organización"
+        verbose_name_plural = "Datos de Organización"
         ordering = ['nombre_completo']
         indexes = [
             models.Index(fields=['cedula']),
@@ -415,9 +415,9 @@ class DatosAdemacor(models.Model):
     
     def calcular_sueldo_neto(self, anio=None, cargo_especifico=None, bonificaciones_adicionales=None):
         """
-        Calcula el sueldo neto del afiliado ADEMACOR usando el servicio de cálculo.
+        Calcula el sueldo neto del afiliado de organización externa usando el servicio de cálculo.
         
-        Similar a la función en Afiliado, permite calcular sueldos para afiliados ADEMACOR
+        Similar a la función en Afiliado, permite calcular sueldos para afiliados de organización externa
         basado en su grado de escalafón, cargo, años de servicio y nivel educativo.
         
         Args:
@@ -428,16 +428,16 @@ class DatosAdemacor(models.Model):
         Returns:
             dict: Resultado completo del cálculo con desglose de montos y porcentajes
         """
-        from liquidacion.services.calculo_sueldo_ademacor import CalculadorSueldoAdemacor
-        calculadora = CalculadorSueldoAdemacor(self, anio)
+        from liquidacion.services.calculo_sueldo_organizacion import CalculadorSueldoOrganizacion
+        calculadora = CalculadorSueldoOrganizacion(self, anio)
         return calculadora.calcular_sueldo_neto(cargo_especifico, bonificaciones_adicionales)
     
     def crear_o_actualizar_sueldo(self, anio=None, cargo_especifico=None, bonificaciones_adicionales=None):
         """
-        Crea o actualiza el registro de sueldo ADEMACOR en la base de datos.
+        Crea o actualiza el registro de sueldo de organización externa en la base de datos.
         
         Realiza el cálculo del sueldo y luego persiste el resultado en la tabla
-        SueldoAdemacor. Si ya existe un registro para el afiliado y año, lo actualiza.
+        SueldoOrganizacion. Si ya existe un registro para el afiliado y año, lo actualiza.
         
         Args:
             anio (int, optional): Año para el cálculo
@@ -445,10 +445,10 @@ class DatosAdemacor(models.Model):
             bonificaciones_adicionales (dict, optional): Bonificaciones extra
             
         Returns:
-            tuple: (SueldoAdemacor instance, created boolean, calculo dict)
+            tuple: (SueldoOrganizacion instance, created boolean, calculo dict)
         """
-        from liquidacion.services.calculo_sueldo_ademacor import CalculadorSueldoAdemacor
-        calculadora = CalculadorSueldoAdemacor(self, anio)
+        from liquidacion.services.calculo_sueldo_organizacion import CalculadorSueldoOrganizacion
+        calculadora = CalculadorSueldoOrganizacion(self, anio)
         return calculadora.crear_o_actualizar_sueldo(cargo_especifico, bonificaciones_adicionales)
 
 

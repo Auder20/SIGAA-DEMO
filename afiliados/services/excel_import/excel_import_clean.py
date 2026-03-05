@@ -3,7 +3,7 @@
 NUEVO IMPORTADOR DE EXCEL COMPLETAMENTE LIMPIO Y FUNCIONAL
 Versión mejorada que maneja archivos con y sin encabezados correctamente
 """
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import logging
 import time
 from typing import Dict, Any, List, Set

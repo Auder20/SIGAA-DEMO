@@ -4,7 +4,7 @@ from django.contrib import messages
 from .models import Reporte, ReporteAportesTotales
 from django.http import HttpResponse
 from django.core.files.base import ContentFile
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 from afiliados.models import Afiliado
 from liquidacion.models import Sueldo, TablaSalarial, Bonificacion, Aporte
 import io

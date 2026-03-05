@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """
-IMPORTADOR ULTRA-OPTIMIZADO ESPECÍFICO PARA ADEMACOR
+IMPORTADOR ULTRA-OPTIMIZADO PARA ORGANIZACIÓN EXTERNA
 Versión completamente optimizada que maneja archivos con y sin encabezados correctamente
-Adaptado específicamente para el modelo DatosAdemacor
+Adaptado específicamente para el modelo DatosOrganizacion (antes ADEMACOR)
 """
 
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import logging
 import time
 from typing import Dict, Any, List, Set
@@ -15,13 +15,13 @@ import os
 
 # Configurar logging básico
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('ademacor_ultra_optimized')
+logger = logging.getLogger('organizacion_ultra_optimized')
 
-class AdemacorUltraOptimized:
+class OrganizacionUltraOptimized:
     """
-    Importador ultra-optimizado específico para datos de ADEMACOR.
+    Importador ultra-optimizado específico para datos de Organización Externa.
     Maneja automáticamente archivos con y sin encabezados.
-    Adaptado para trabajar con el modelo DatosAdemacor.
+    Adaptado para trabajar con el modelo DatosOrganizacion.
     """
 
     def __init__(self, batch_size: int = 5000):
@@ -35,7 +35,7 @@ class AdemacorUltraOptimized:
             'ignored': 0,
             'errors': 0
         }
-        self.logger.info("🚀 AdemacorUltraOptimized inicializado correctamente")
+        self.logger.info("🚀 OrganizacionUltraOptimized inicializado correctamente")
 
     def ensure_connection(self) -> bool:
         """Asegura que la conexión a BD esté activa"""
@@ -212,7 +212,7 @@ class AdemacorUltraOptimized:
     def _create_column_mapping(self, columns) -> Dict[str, str]:
         """
         Crea un mapeo inteligente de nombres de columnas basado en patrones
-        Específico para datos de ADEMACOR
+        Específico para datos de Organización Externa
         """
         mapping = {}
 
@@ -247,7 +247,7 @@ class AdemacorUltraOptimized:
         """
         Detecta automáticamente las posiciones de las columnas importantes
         analizando patrones típicos de cada tipo de dato
-        Específicamente adaptado para datos de ADEMACOR
+        Específicamente adaptado para datos de Organización Externa
         """
         positions = {
             'cedula': -1,
@@ -367,10 +367,10 @@ class AdemacorUltraOptimized:
         self.logger.info(f"🔍 Columnas detectadas automáticamente: {positions}")
         return positions
 
-    def import_ademacor_excel(self, excel_file, model_class) -> Dict[str, Any]:
-        """Importa Excel manejando encabezados automáticamente para ADEMACOR"""
+    def import_organizacion_excel(self, excel_file, model_class) -> Dict[str, Any]:
+        """Importa Excel manejando encabezados automáticamente para Organización Externa"""
         self.logger.info("=" * 80)
-        self.logger.info("🚀 INICIANDO IMPORTACIÓN ULTRA-OPTIMIZADA DE ADEMACOR")
+        self.logger.info(f"✅ IMPORTACIÓN COMPLETADA - ORGANIZACIÓN EXTERNA")
         self.logger.info("=" * 80)
 
         start_time = time.time()
@@ -493,9 +493,9 @@ class AdemacorUltraOptimized:
             }
 
 
-def importar_ademacor_desde_excel(excel_file) -> Dict[str, Any]:
+def importar_organizacion_desde_excel(excel_file) -> Dict[str, Any]:
     """
-    Función principal para importar datos de ADEMACOR desde Excel.
+    Función principal para importar datos de Organización Externa desde Excel.
 
     Usa el importador ultra-optimizado que detecta automáticamente si hay encabezados
     y procesa múltiples hojas con operaciones bulk.
@@ -506,6 +506,6 @@ def importar_ademacor_desde_excel(excel_file) -> Dict[str, Any]:
     Returns:
         dict: Resumen de la importación con estadísticas
     """
-    from afiliados.models import DatosAdemacor
-    importer = AdemacorUltraOptimized(batch_size=5000)
-    return importer.import_ademacor_excel(excel_file, DatosAdemacor)
+    from afiliados.models import DatosOrganizacion
+    importer = OrganizacionUltraOptimized(batch_size=5000)
+    return importer.import_organizacion_excel(excel_file, DatosOrganizacion)

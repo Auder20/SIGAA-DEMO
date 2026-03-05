@@ -14,8 +14,8 @@ from django.contrib import messages
 from django.urls import reverse
 import os
 import tempfile
-from .models import Afiliado, DatosAdemacor
-from .services.excel_import import importar_afiliados_desde_excel, importar_ademacor_desde_excel
+from .models import Afiliado, DatosOrganizacion
+from .services.excel_import import importar_afiliados_desde_excel, importar_organizacion_desde_excel
 from .services.excel_import.aportes_import import importar_aportes_desde_excel
 from afiliados.services.export import DynamicExportService
 import logging
@@ -144,8 +144,8 @@ def importar_excel_view(request):
 
     Maneja diferentes tipos de importación:
     - afiliados: Información completa de afiliados
-    - secretaria: Datos básicos de secretaría
-    - ademacor: Datos básicos de ADEMACOR
+    - sistema_externo: Datos básicos de sistema externo (antes secretaría)
+    - organizacion: Datos básicos de organización externa (antes ADEMACOR)
 
     Soporta tanto solicitudes AJAX como formularios regulares.
 
@@ -170,12 +170,12 @@ def importar_excel_view(request):
 
         try:
             # Procesar según el tipo de importación
-            if import_type == 'secretaria':
-                summary = importar_secretaria_desde_excel(archivo)
-                model_name = 'Datos de Secretaría'
-            elif import_type == 'ademacor':
-                summary = importar_ademacor_desde_excel(archivo)
-                model_name = 'Datos de ADEMACOR'
+            if import_type == 'sistema_externo':
+                summary = importar_sistema_externo_desde_excel(archivo)
+                model_name = 'Datos de Sistema Externo'
+            elif import_type == 'organizacion':
+                summary = importar_organizacion_desde_excel(archivo)
+                model_name = 'Datos de Organización Externa'
             else:  # afiliados por defecto
                 summary = importar_afiliados_desde_excel(archivo)
                 model_name = 'Afiliados'
@@ -242,9 +242,9 @@ def importar_excel_view(request):
     return render(request, 'afiliados/importar_excel.html')
 
 
-def importar_secretaria_desde_excel(excel_file):
+def importar_sistema_externo_desde_excel(excel_file):
     """
-    Importa datos de secretaría desde archivo Excel usando importador ORIGINAL.
+    Importa datos de sistema externo desde archivo Excel usando importador ORIGINAL.
 
     Usa el importador complejo que funcionaba correctamente.
 
@@ -254,13 +254,13 @@ def importar_secretaria_desde_excel(excel_file):
     Returns:
         dict: Resumen de la importación con estadísticas
     """
-    from .services.excel_import.secretaria_complex_import import importar_secretaria_desde_excel as secretaria_importer
-    return secretaria_importer(excel_file)
+    from .services.excel_import.secretaria_complex_import import importar_secretaria_desde_excel as sistema_externo_importer
+    return sistema_externo_importer(excel_file)
 
 
-def importar_ademacor_desde_excel(excel_file):
+def importar_organizacion_desde_excel(excel_file):
     """
-    Importa datos de ADEMACOR desde archivo Excel usando importador ORIGINAL.
+    Importa datos de organización externa desde archivo Excel usando importador ORIGINAL.
 
     Usa el importador complejo que funcionaba correctamente.
 
@@ -270,8 +270,8 @@ def importar_ademacor_desde_excel(excel_file):
     Returns:
         dict: Resumen de la importación con estadísticas
     """
-    from .services.excel_import.ademacor_complex_import import importar_ademacor_desde_excel as ademacor_importer
-    return ademacor_importer(excel_file)
+    from .services.excel_import.ademacor_complex_import import importar_organizacion_desde_excel as organizacion_importer
+    return organizacion_importer(excel_file)
 
 
 from django.db.models import Q
@@ -1017,7 +1017,7 @@ def datos_secretaria_list(request):
 
 
 @cache_page(300)
-def datos_ademacor_list(request):
+def datos_organizacion_list(request):
     """
     Vista para mostrar y buscar datos de ADEMACOR.
 
@@ -1069,7 +1069,7 @@ def datos_ademacor_list(request):
 
 
 
-def datos_ademacor_detail(request, pk):
+def datos_organizacion_detail(request, pk):
     """
     Vista para mostrar los detalles de un registro de ADEMACOR.
 
@@ -1084,7 +1084,7 @@ def datos_ademacor_detail(request, pk):
     return render(request, 'afiliados/datos_ademacor_detail.html', {'registro': registro})
 
 
-def datos_ademacor_edit(request, pk):
+def datos_organizacion_edit(request, pk):
     """
     Vista para editar un registro de ADEMACOR.
 
@@ -1109,7 +1109,7 @@ def datos_ademacor_edit(request, pk):
     return render(request, 'afiliados/datos_ademacor_form.html', {'registro': registro})
 
 
-def datos_ademacor_delete(request, pk):
+def datos_organizacion_delete(request, pk):
     """
     Vista para eliminar un registro de ADEMACOR.
 
@@ -1130,22 +1130,23 @@ def datos_ademacor_delete(request, pk):
     return render(request, 'afiliados/datos_ademacor_confirm_delete.html', {'registro': registro})
 
 
-
-def datos_ademacor_export(request):
+@cache_page(300)
+def datos_organizacion_list(request):
     """
-    Vista para exportar datos de ADEMACOR a Excel.
+    Vista para mostrar y buscar datos de organización externa.
 
     Args:
         request: HttpRequest object
 
     Returns:
-        HttpResponse: Archivo Excel para descarga
+        HttpResponse: Página de lista de datos de organización externa
     """
     try:
         # Obtener término de búsqueda de la sesión
         search_query = request.session.get('search_query_ademacor', '')
 
-        # Obtener datos de ADEMACOR según filtros
+        # Obtener datos de organización externa según filtros
+        datos_organizacion = DatosOrganizacion.objects.all()
         datos_ademacor = DatosAdemacor.objects.all()
 
         if search_query:
@@ -1208,7 +1209,75 @@ def datos_ademacor_export(request):
 
 
 
-def datos_ademacor_export_pdf(request):
+def datos_organizacion_export(request):
+    """
+    Vista para exportar datos de organización externa a Excel.
+
+    Args:
+        request: HttpRequest object
+
+    Returns:
+        HttpResponse: Archivo Excel para descarga
+    """
+    try:
+        # Obtener término de búsqueda de la sesión
+        search_query = request.session.get('search_query_organizacion', '')
+
+        # Obtener datos de organización externa según filtros
+        datos_organizacion = DatosOrganizacion.objects.all()
+
+        if search_query:
+            datos_organizacion = datos_organizacion.filter(
+                Q(cedula__icontains=search_query) |
+                Q(nombre_completo__icontains=search_query) |
+                Q(municipio__icontains=search_query)
+            )
+
+        # Preparar datos para exportación
+        data = []
+        for registro in datos_organizacion:
+            data.append({
+                'cedula': registro.cedula,
+                'nombre_completo': registro.nombre_completo,
+                'municipio': registro.municipio or '',
+                'descripcion': registro.descripcion,
+            })
+
+        if not data:
+            messages.warning(request, 'No hay datos de organización externa para exportar.')
+            return redirect('afiliados:datos_organizacion_list')
+
+        # Crear servicio dinámico con los datos preparados
+        from afiliados.services.export import DynamicExportService
+        export_service = DynamicExportService(data, "Datos de Organización - SIGAA")
+
+        # Obtener estadísticas
+        stats = export_service.get_export_stats()
+
+        # Generar nombre del archivo con fecha y hora
+        from datetime import datetime
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"datos_organizacion_{timestamp}"
+
+        # Exportar a Excel
+        response = export_service.export_excel(filename)
+
+        # Log de la exportación
+        logger.info(f"Exportación Excel de organización realizada: {stats['total_registros']} registros, "
+                   f"Columnas: {stats['columnas_exportadas']}")
+
+        # Mensaje de éxito
+        messages.success(request, f'Se exportaron exitosamente {stats["total_registros"]} registros.')
+
+        return response
+
+    except Exception as e:
+        logger.exception("Error al exportar datos de organización a Excel")
+        messages.error(request, f'Error al generar la exportación: {str(e)}')
+        return redirect('afiliados:datos_organizacion_list')
+
+
+def datos_organizacion_export_pdf(request):
     """
     Vista para exportar datos de ADEMACOR a PDF.
 
@@ -1281,7 +1350,7 @@ def datos_ademacor_export_pdf(request):
         return redirect('afiliados:datos_ademacor_list')
 
 
-def comparacion_afiliados_ademacor(request):
+def comparacion_afiliados_organizacion(request):
     """
     Vista para comparar datos entre Afiliados (General) y ADEMACOR.
     """

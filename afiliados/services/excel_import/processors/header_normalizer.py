@@ -1,6 +1,6 @@
 import re
 import unicodedata
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 from typing import Any, Dict, List
 from ..core.logger_manager import ImportLoggerManager
 

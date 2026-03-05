@@ -3,28 +3,28 @@ from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from liquidacion.models import SueldoAdemacor, AporteAdemacor, BonificacionPagoAdemacor
-from afiliados.models import DatosAdemacor
-from liquidacion.services.calculo_sueldo_ademacor import CalculadorSueldoAdemacor
+from liquidacion.models import SueldoOrganizacion, AporteOrganizacion, BonificacionPagoOrganizacion
+from afiliados.models import DatosOrganizacion
+from liquidacion.services.calculo_sueldo_organizacion import CalculadorSueldoOrganizacion
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-def sueldo_ademacor_list(request):
+def sueldo_organizacion_list(request):
     """
-    Lista de sueldos de ADEMACOR con búsqueda y filtros.
+    Lista de sueldos de Organización Externa con búsqueda y filtros.
     """
     search_query = request.GET.get('search', '').strip()
     anio = request.GET.get('anio', '')
     mes = request.GET.get('mes', '')
 
-    sueldos = SueldoAdemacor.objects.select_related('afiliado_ademacor').all().order_by('-anio', 'afiliado_ademacor__nombre_completo')
+    sueldos = SueldoOrganizacion.objects.select_related('afiliado_organizacion').all().order_by('-anio', 'afiliado_organizacion__nombre_completo')
 
     if search_query:
         sueldos = sueldos.filter(
-            Q(afiliado_ademacor__cedula__icontains=search_query) |
-            Q(afiliado_ademacor__nombre_completo__icontains=search_query)
+            Q(afiliado_organizacion__cedula__icontains=search_query) |
+            Q(afiliado_organizacion__nombre_completo__icontains=search_query)
         )
 
     if anio:
@@ -41,9 +41,9 @@ def sueldo_ademacor_list(request):
         sueldos_page = paginator.page(paginator.num_pages)
 
     # Obtener años disponibles para filtro
-    anios_disponibles = SueldoAdemacor.objects.values_list('anio', flat=True).distinct().order_by('-anio')
+    anios_disponibles = SueldoOrganizacion.objects.values_list('anio', flat=True).distinct().order_by('-anio')
 
-    return render(request, 'liquidacion/ademacor/sueldo_list.html', {
+    return render(request, 'liquidacion/organizacion/sueldo_list.html', {
         'sueldos': sueldos_page,
         'search_query': search_query,
         'anio_actual': anio,
@@ -52,66 +52,66 @@ def sueldo_ademacor_list(request):
     })
 
 
-def sueldo_ademacor_detail(request, pk):
+def sueldo_organizacion_detail(request, pk):
     """
-    Detalle de un sueldo de ADEMACOR con sus bonificaciones y aportes.
+    Detalle de un sueldo de Organización Externa con sus bonificaciones y aportes.
     """
-    sueldo = get_object_or_404(SueldoAdemacor, pk=pk)
-    bonificaciones = BonificacionPagoAdemacor.objects.filter(sueldo_ademacor=sueldo)
-    aportes = AporteAdemacor.objects.filter(sueldo_ademacor=sueldo)
+    sueldo = get_object_or_404(SueldoOrganizacion, pk=pk)
+    bonificaciones = BonificacionPagoOrganizacion.objects.filter(sueldo_organizacion=sueldo)
+    aportes = AporteOrganizacion.objects.filter(sueldo_organizacion=sueldo)
 
-    return render(request, 'liquidacion/ademacor/sueldo_detail.html', {
+    return render(request, 'liquidacion/organizacion/sueldo_detail.html', {
         'sueldo': sueldo,
         'bonificaciones': bonificaciones,
         'aportes': aportes
     })
 
 
-def sueldo_ademacor_recalcular(request, pk):
+def sueldo_organizacion_recalcular(request, pk):
     """
-    Recalcula un sueldo específico de ADEMACOR.
+    Recalcula un sueldo específico de Organización Externa.
     """
-    sueldo = get_object_or_404(SueldoAdemacor, pk=pk)
+    sueldo = get_object_or_404(SueldoOrganizacion, pk=pk)
 
     try:
-        calculador = CalculadorSueldoAdemacor(sueldo.afiliado_ademacor, sueldo.anio)
+        calculador = CalculadorSueldoOrganizacion(sueldo.afiliado_organizacion, sueldo.anio)
         calculador.crear_o_actualizar_sueldo()
-        messages.success(request, f'Sueldo de {sueldo.afiliado_ademacor.nombre_completo} recalculado exitosamente.')
+        messages.success(request, f'Sueldo de {sueldo.afiliado_organizacion.nombre_completo} recalculado exitosamente.')
     except Exception as e:
         messages.error(request, f'Error al recalcular sueldo: {str(e)}')
 
-    return redirect('liquidacion:sueldo_ademacor_detail', pk=pk)
+    return redirect('liquidacion:sueldo_organizacion_detail', pk=pk)
 
 
-def aporte_ademacor_list(request):
+def aporte_organizacion_list(request):
     """
-    Lista de aportes de ADEMACOR.
+    Lista de aportes de Organización Externa.
     """
     search_query = request.GET.get('search', '').strip()
 
-    aportes = AporteAdemacor.objects.select_related('sueldo_ademacor', 'sueldo_ademacor__afiliado_ademacor').all().order_by('-sueldo_ademacor__anio')
+    aportes = AporteOrganizacion.objects.select_related('sueldo_organizacion', 'sueldo_organizacion__afiliado_organizacion').all().order_by('-sueldo_organizacion__anio')
 
     if search_query:
         aportes = aportes.filter(
             Q(nombre__icontains=search_query) |
-            Q(sueldo_ademacor__afiliado_ademacor__nombre_completo__icontains=search_query)
+            Q(sueldo_organizacion__afiliado_organizacion__nombre_completo__icontains=search_query)
         )
 
     paginator = Paginator(aportes, 20)
     page = request.GET.get('page')
     aportes_page = paginator.get_page(page)
 
-    return render(request, 'liquidacion/ademacor/aporte_list.html', {
+    return render(request, 'liquidacion/organizacion/aporte_list.html', {
         'aportes': aportes_page,
         'search_query': search_query
     })
 
 
-def calcular_sueldos_ademacor_masivo(request):
+def calcular_sueldos_organizacion_masivo(request):
     """
-    Vista para calcular sueldos de todos los afiliados ADEMACOR masivamente.
+    Vista para calcular sueldos de todos los afiliados de Organización Externa masivamente.
     """
-    from liquidacion.services.calculo_sueldo_ademacor import recalcular_sueldos_ademacor_masivo
+    from liquidacion.services.calculo_sueldo_organizacion import recalcular_sueldos_ademacor_masivo
     from datetime import date
 
     if request.method == 'POST':
@@ -142,31 +142,31 @@ def calcular_sueldos_ademacor_masivo(request):
         except Exception as e:
             messages.error(request, f'Error al calcular sueldos: {str(e)}')
 
-        return redirect('liquidacion:sueldo_ademacor_list')
+        return redirect('liquidacion:sueldo_organizacion_list')
 
     # GET: Mostrar formulario
-    from afiliados.models import DatosAdemacor
+    from afiliados.models import DatosOrganizacion
     from datetime import date
 
     # Obtener años disponibles
     anios_disponibles = range(2020, date.today().year + 2)
 
     # Obtener grados disponibles
-    grados_disponibles = DatosAdemacor.objects.filter(activo=True).values_list('grado_escalafon', flat=True).distinct().order_by('grado_escalafon')
+    grados_disponibles = DatosOrganizacion.objects.filter(activo=True).values_list('grado_escalafon', flat=True).distinct().order_by('grado_escalafon')
 
     # Contar afiliados activos
-    total_afiliados = DatosAdemacor.objects.filter(activo=True).count()
+    total_afiliados = DatosOrganizacion.objects.filter(activo=True).count()
 
-    return render(request, 'liquidacion/ademacor/calcular_sueldos_masivo.html', {
+    return render(request, 'liquidacion/organizacion/calcular_sueldos_masivo.html', {
         'anios': anios_disponibles,
         'grados': grados_disponibles,
         'total_afiliados': total_afiliados
     })
 
 
-def importar_aportes_ademacor(request):
+def importar_aportes_organizacion(request):
     """
-    Vista para importar aportes ADEMACOR desde un archivo Excel usando servicio optimizado.
+    Vista para importar aportes de Organización Externa desde un archivo Excel usando servicio optimizado.
     """
     import os
     import tempfile
@@ -175,7 +175,7 @@ def importar_aportes_ademacor(request):
     if request.method == 'POST' and request.FILES.get('archivo'):
         archivo = request.FILES['archivo']
         anio = request.POST.get('anio')
-        tipo_aporte = request.POST.get('tipo_aporte', None)  # Opcional: ADEMACOR, FAMECOR o auto-detectar
+        tipo_aporte = request.POST.get('tipo_aporte', None)  # Opcional: ORGANIZACIÓN, FONDO o auto-detectar
 
         try:
             # Guardar archivo temporalmente
@@ -247,12 +247,12 @@ def importar_aportes_ademacor(request):
 
         except Exception as e:
             messages.error(request, f'❌ Error al importar aportes: {str(e)}')
-            logger.exception("Error en importación de aportes ADEMACOR")
+            logger.exception("Error en importación de aportes de Organización Externa")
 
-        return redirect('liquidacion:aporte_ademacor_list')
+        return redirect('liquidacion:aporte_organizacion_list')
 
     # GET: Mostrar formulario
     from datetime import date
-    return render(request, 'liquidacion/ademacor/importar_aportes.html', {
+    return render(request, 'liquidacion/organizacion/importar_aportes.html', {
         'anio_actual': date.today().year
     })

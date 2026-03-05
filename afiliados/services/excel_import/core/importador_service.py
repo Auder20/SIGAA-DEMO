@@ -1,4 +1,4 @@
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import tempfile
 import os
 from typing import Dict, Any, List, Optional

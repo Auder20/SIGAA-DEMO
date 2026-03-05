@@ -200,32 +200,37 @@ class Sueldo(models.Model):
    
     def recalculate_aportes(self):
         """
-        Recalcula los aportes ADEMACOR y FAMECOR basados en el sueldo neto.
+        Recalcula los aportes institucionales y de fondo basados en el sueldo neto.
         
         Elimina los aportes existentes y crea nuevos registros con los
-        porcentajes establecidos:
-        - ADEMACOR: 1.00% del sueldo neto
-        - FAMECOR: 0.20% del sueldo neto
+        porcentajes configurados en ParametroLiquidacion:
+        - aporte_institucional: Porcentaje configurable (por defecto 1.00%)
+        - aporte_fondo: Porcentaje configurable (por defecto 0.20%)
         
         Este método se ejecuta automáticamente cuando se guarda un sueldo
         o puede llamarse manualmente para recalcular aportes.
         """
-        from .models import Aporte  # local import para evitar circulares
+        from .models import Aporte, ParametroLiquidacion  # local import para evitar circulares
         # Eliminar aportes anteriores
         Aporte.objects.filter(sueldo=self).delete()
+        
+        # Obtener porcentajes configurables
+        porcentaje_institucional = ParametroLiquidacion.obtener_valor('aporte_institucional', default=1.00)
+        porcentaje_fondo = ParametroLiquidacion.obtener_valor('aporte_fondo', default=0.20)
+        
         # Crear aportes nuevos usando Decimal para precisión monetaria
         value = Decimal(self.sueldo_neto)
         Aporte.objects.create(
             sueldo=self, 
-            nombre='ADEMACOR', 
-            porcentaje=Decimal('1.00'), 
-            valor=(value * Decimal('0.01'))
+            nombre='aporte_institucional', 
+            porcentaje=Decimal(str(porcentaje_institucional)), 
+            valor=(value * Decimal(str(porcentaje_institucional)) / Decimal('100'))
         )
         Aporte.objects.create(
             sueldo=self, 
-            nombre='FAMECOR', 
-            porcentaje=Decimal('0.20'), 
-            valor=(value * Decimal('0.002'))
+            nombre='aporte_fondo', 
+            porcentaje=Decimal(str(porcentaje_fondo)), 
+            valor=(value * Decimal(str(porcentaje_fondo)) / Decimal('100'))
         )
 
 
@@ -234,8 +239,8 @@ class Aporte(models.Model):
     Registro de aportes calculados sobre el sueldo de un afiliado.
     
     Almacena los aportes obligatorios que se descuentan del sueldo:
-    - ADEMACOR: Aporte a la asociación de docentes (1.00%)
-    - FAMECOR: Aporte familiar (0.20%)
+    - aporte_institucional: Aporte a la institución (configurable, por defecto 1.00%)
+    - aporte_fondo: Aporte al fondo (configurable, por defecto 0.20%)
     
     Los aportes se calculan automáticamente cuando se crea o actualiza
     un registro de sueldo.
@@ -248,7 +253,7 @@ class Aporte(models.Model):
     )
     nombre = models.CharField(
         max_length=50,
-        help_text="Nombre del aporte (ADEMACOR o FAMECOR)"
+        help_text="Nombre del aporte (aporte_institucional o aporte_fondo)"
     )
     porcentaje = models.DecimalField(
         max_digits=6, 
@@ -505,24 +510,24 @@ class ParametroLiquidacion(models.Model):
             return False
 
 
-class SueldoAdemacor(models.Model):
+class SueldoOrganizacion(models.Model):
     """
-    Registro del sueldo calculado para un afiliado ADEMACOR en un año específico.
+    Registro del sueldo calculado para un afiliado de organización externa en un año específico.
     
-    Estructura paralela a Sueldo pero vinculada a DatosAdemacor.
+    Estructura paralela a Sueldo pero vinculada a DatosOrganizacion.
     Almacena el resultado final del cálculo de sueldo que incluye:
     - Salario base según grado de escalafón
     - Bonificaciones por cargo, antigüedad y educación
     - Bonificaciones adicionales si aplican
     
-    Este modelo permite mantener sueldos separados para ADEMACOR
+    Este modelo permite mantener sueldos separados para organización externa
     y comparar con los sueldos generales.
     """
-    afiliado_ademacor = models.ForeignKey(
-        'afiliados.DatosAdemacor',
+    afiliado_organizacion = models.ForeignKey(
+        'afiliados.DatosOrganizacion',
         on_delete=models.CASCADE,
-        related_name='sueldos_ademacor',
-        help_text="Afiliado ADEMACOR al que pertenece este sueldo"
+        related_name='sueldos_organizacion',
+        help_text="Afiliado de organización externa al que pertenece este sueldo"
     )
     anio = models.IntegerField(
         help_text="Año del sueldo calculado"
@@ -541,71 +546,77 @@ class SueldoAdemacor(models.Model):
     )
 
     class Meta:
-        unique_together = ('afiliado_ademacor', 'anio')
-        verbose_name = "Sueldo ADEMACOR"
-        verbose_name_plural = "Sueldos ADEMACOR"
-        ordering = ['-anio', 'afiliado_ademacor__nombre_completo']
+        unique_together = ('afiliado_organizacion', 'anio')
+        verbose_name = "Sueldo Organización"
+        verbose_name_plural = "Sueldos Organización"
+        ordering = ['-anio', 'afiliado_organizacion__nombre_completo']
 
     def __str__(self):
         """
-        Representación en cadena del sueldo ADEMACOR.
+        Representación en cadena del sueldo de organización externa.
         
         Returns:
             str: Afiliado y año del sueldo
         """
-        return f"{self.afiliado_ademacor} - {self.anio}"
+        return f"{self.afiliado_organizacion} - {self.anio}"
 
     def recalculate_aportes(self):
         """
-        Recalcula los aportes ADEMACOR y FAMECOR basados en el sueldo neto.
+        Recalcula los aportes institucionales y de fondo basados en el sueldo neto.
         
         Elimina los aportes existentes y crea nuevos registros con los
-        porcentajes establecidos:
-        - ADEMACOR: 1.00% del sueldo neto
-        - FAMECOR: 0.20% del sueldo neto
+        porcentajes configurados en ParametroLiquidacion:
+        - aporte_institucional: Porcentaje configurable (por defecto 1.00%)
+        - aporte_fondo: Porcentaje configurable (por defecto 0.20%)
         
         Este método se ejecuta automáticamente cuando se guarda un sueldo
         o puede llamarse manualmente para recalcular aportes.
         """
+        from .models import AporteOrganizacion, ParametroLiquidacion
         # Eliminar aportes anteriores
-        AporteAdemacor.objects.filter(sueldo_ademacor=self).delete()
+        AporteOrganizacion.objects.filter(sueldo_organizacion=self).delete()
+        
+        # Obtener porcentajes configurables
+        porcentaje_institucional = ParametroLiquidacion.obtener_valor('aporte_institucional', default=1.00)
+        porcentaje_fondo = ParametroLiquidacion.obtener_valor('aporte_fondo', default=0.20)
+        
         # Crear aportes nuevos usando Decimal para precisión monetaria
         value = Decimal(self.sueldo_neto)
-        AporteAdemacor.objects.create(
-            sueldo_ademacor=self,
-            nombre='ADEMACOR',
-            porcentaje=Decimal('1.00'),
-            valor=(value * Decimal('0.01'))
+        AporteOrganizacion.objects.create(
+            sueldo_organizacion=self,
+            nombre='aporte_institucional',
+            porcentaje=Decimal(str(porcentaje_institucional)),
+            valor=(value * Decimal(str(porcentaje_institucional)) / Decimal('100'))
         )
-        AporteAdemacor.objects.create(
-            sueldo_ademacor=self,
-            nombre='FAMECOR',
-            porcentaje=Decimal('0.20'),
-            valor=(value * Decimal('0.002'))
+        AporteOrganizacion.objects.create(
+            sueldo_organizacion=self,
+            nombre='aporte_fondo',
+            porcentaje=Decimal(str(porcentaje_fondo)),
+            valor=(value * Decimal(str(porcentaje_fondo)) / Decimal('100'))
         )
 
 
-class AporteAdemacor(models.Model):
+class AporteOrganizacion(models.Model):
     """
-    Registro de aportes calculados sobre el sueldo de un afiliado ADEMACOR.
+    Registro de aportes calculados sobre el sueldo de un afiliado de organización externa.
     
-    Estructura paralela a Aporte pero vinculada a SueldoAdemacor.
+    Estructura paralela a Aporte pero vinculada a SueldoOrganizacion.
     Almacena los aportes obligatorios que se descuentan del sueldo:
-    - ADEMACOR: Aporte a la asociación de docentes (1.00%)
-    - FAMECOR: Aporte familiar (0.20%)
+    - aporte_institucional: Aporte a la institución (configurable, por defecto 1.00%)
+    - aporte_fondo: Aporte al fondo (configurable, por defecto 0.20%)
     
     Los aportes se calculan automáticamente cuando se crea o actualiza
-    un registro de SueldoAdemacor.
+    un registro de SueldoOrganizacion.
     """
-    sueldo_ademacor = models.ForeignKey(
-        SueldoAdemacor,
+    sueldo_organizacion = models.ForeignKey(
+        SueldoOrganizacion,
         on_delete=models.CASCADE,
         related_name='aportes',
-        help_text="Sueldo ADEMACOR sobre el cual se calcula el aporte"
+        help_text="Sueldo de organización externa sobre el cual se calcula el aporte"
     )
     nombre = models.CharField(
         max_length=50,
-        help_text="Nombre del aporte (ADEMACOR o FAMECOR)"
+        help_text="Nombre del aporte (aporte_institucional o aporte_fondo)"
     )
     porcentaje = models.DecimalField(
         max_digits=6,
@@ -620,13 +631,13 @@ class AporteAdemacor(models.Model):
     )
 
     class Meta:
-        verbose_name = "Aporte ADEMACOR"
-        verbose_name_plural = "Aportes ADEMACOR"
-        ordering = ['sueldo_ademacor', 'nombre']
+        verbose_name = "Aporte Organización"
+        verbose_name_plural = "Aportes Organización"
+        ordering = ['sueldo_organizacion', 'nombre']
 
     def __str__(self):
         """
-        Representación en cadena del aporte ADEMACOR.
+        Representación en cadena del aporte de organización externa.
         
         Returns:
             str: Nombre del aporte y valor
@@ -634,20 +645,20 @@ class AporteAdemacor(models.Model):
         return f"{self.nombre} - ${self.valor}"
 
 
-class BonificacionPagoAdemacor(models.Model):
+class BonificacionPagoOrganizacion(models.Model):
     """
-    Registro histórico de bonificaciones aplicadas a un sueldo ADEMACOR específico.
+    Registro histórico de bonificaciones aplicadas a un sueldo de organización externa específico.
     
-    Estructura paralela a BonificacionPago pero vinculada a SueldoAdemacor.
+    Estructura paralela a BonificacionPago pero vinculada a SueldoOrganizacion.
     Almacena el detalle de cada bonificación calculada y aplicada a un sueldo,
     incluyendo el porcentaje y monto exacto. Permite mantener un historial
     detallado de cómo se compuso cada sueldo para auditoría y reportes.
     """
-    sueldo_ademacor = models.ForeignKey(
-        SueldoAdemacor,
+    sueldo_organizacion = models.ForeignKey(
+        SueldoOrganizacion,
         on_delete=models.CASCADE,
         related_name='bonificaciones',
-        help_text="Sueldo ADEMACOR al que se aplica esta bonificación"
+        help_text="Sueldo de organización externa al que se aplica esta bonificación"
     )
     anio = models.IntegerField(
         help_text="Año en que se aplicó la bonificación"
@@ -672,14 +683,14 @@ class BonificacionPagoAdemacor(models.Model):
     )
 
     class Meta:
-        verbose_name = "Bonificación de Pago ADEMACOR"
-        verbose_name_plural = "Bonificaciones de Pago ADEMACOR"
-        unique_together = ('sueldo_ademacor', 'descripcion')
-        ordering = ['anio', 'sueldo_ademacor__afiliado_ademacor__nombre_completo']
+        verbose_name = "Bonificación de Pago Organización"
+        verbose_name_plural = "Bonificaciones de Pago Organización"
+        unique_together = ('sueldo_organizacion', 'descripcion')
+        ordering = ['anio', 'sueldo_organizacion__afiliado_organizacion__nombre_completo']
 
     def __str__(self):
         """
-        Representación en cadena de la bonificación de pago ADEMACOR.
+        Representación en cadena de la bonificación de pago de organización externa.
         
         Returns:
             str: Descripción, monto y año de la bonificación

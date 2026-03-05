@@ -14,7 +14,7 @@ Mejoras de rendimiento implementadas:
 Resultado esperado: 50-70% más rápido
 """
 
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import logging
 import time
 from typing import Dict, Any

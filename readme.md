@@ -1,16 +1,80 @@
 # SIGAA — Sistema de Gestión y Análisis de Aportes de Afiliados
 
-Sistema web de gestión desarrollado en Django para centralizar, calcular y reportar la información salarial y de aportes de los afiliados de una organización docente. Integra importación masiva desde Excel, motor de cálculo salarial por escalafón y generación de reportes en múltiples formatos.
+**🎯 VERSIÓN DEMO - Datos Ficticios para Portafolio**
+
+Sistema web de gestión desarrollado en Django para centralizar, calcular y reportar la información salarial y de aportes de afiliados. Esta versión de demostración utiliza datos completamente ficticios y nombres genéricos para ser utilizada como proyecto de portafolio público.
 
 ---
 
-## Descripción General
+## ⚡ Demo Rápida
 
-SIGAA resuelve el problema de gestión manual de datos salariales en organizaciones con cientos de afiliados activos cuyos sueldos dependen de variables cruzadas: grado de escalafón docente, cargo, antigüedad y nivel académico.
+```bash
+# 1. Instalar dependencias
+pip install -r requirements.txt
 
-El sistema recibe archivos Excel emitidos por entidades externas, los procesa automáticamente, calcula los sueldos y aportes correspondientes para cada afiliado y expone toda esta información a través de una interfaz web con filtros, edición y exportación de reportes.
+# 2. Configurar y ejecutar demo
+python manage.py setup_demo
 
-Contexto de uso: organizaciones de educación con afiliados en múltiples municipios, dos fuentes de datos paralelas (Secretaría y ADEMACOR) y necesidad de cruzar y auditar diferencias entre ambas.
+# 3. Iniciar servidor
+python manage.py runserver
+
+# 4. Acceder a http://localhost:8000
+```
+
+### 👤 Usuarios de Demostración
+
+| Rol | Email | Password | Permisos |
+|-----|-------|----------|----------|
+| **Administrador** | admin@demo.com | admin123 | Superusuario |
+| **Analista** | analista@demo.com | analista123 | Staff |
+| **Consultor** | consultor@demo.com | consultor123 | Usuario regular |
+
+---
+
+## 📋 Descripción General
+
+SIGAA es un sistema de gestión salarial diseñado para organizaciones educativas que necesita procesar información de afiliados con cálculos complejos basados en múltiples variables:
+
+- **Grado de escalafón docente** (A, B, 1-14)
+- **Cargo desempeñado** (rector, decano, director, coordinador, docente)
+- **Años de servicio** y **antigüedad**
+- **Nivel educativo** (pregrado, maestría, doctorado)
+
+### 🔄 Sistema Genérico
+
+Esta versión de demostración ha sido refactorizada para eliminar referencias empresariales específicas:
+
+- ✅ **ADEMACOR** → **Organización** (fuente externa genérica)
+- ✅ **FAMECOR** → **Fondo** (aporte de fondo genérico)
+- ✅ **Secretaría** → **Sistema Externo** (fuente de datos externa)
+- ✅ **Aportes configurables** mediante parámetros en base de datos
+- ✅ **Datos totalmente ficticios** para demostración
+
+---
+
+## 🎯 Características de la Versión Demo
+
+### 📊 Datos de Ejemplo Incluidos
+
+- **75 afiliados ficticios** con información realista
+- **25 afiliados de organización externa** para comparación
+- **Sueldos calculados** automáticamente según reglas salariales
+- **Aportes generados** con porcentajes configurables
+- **3 reportes de ejemplo** listos para consultar
+
+### ⚙️ Configuración Flexible
+
+- **Base de datos SQLite** por defecto (fácil para demo local)
+- **Configuración por variables de entorno** (.env)
+- **Porcentajes de aportes configurables** desde admin
+- **Sistema listo para producción** con MySQL/PostgreSQL
+
+### 🎨 Interfaz Limpia
+
+- **Diseño genérico** sin logos empresariales
+- **Modo dark/light** soportado
+- **Mensajes amigables** para usuarios
+- **Dashboard funcional** con contadores reales
 
 ---
 
@@ -32,11 +96,11 @@ Sistema desarrollado individualmente, abarcando todas las capas del stack:
 
 - **Importación masiva desde Excel**: procesamiento de archivos multi-hoja con detección automática de encabezados y posiciones de columnas, usando `bulk_create` y `bulk_update` por lotes de hasta 5 000 registros.
 - **Motor de cálculo salarial**: calcula el sueldo neto de cada afiliado en función de: grado de escalafón (A, B, 1–14), cargo desempeñado (rector, decano, director, coordinador, docente…), años de servicio y nivel de posgrado.
-- **Cálculo automático de aportes**: al crear o actualizar un sueldo, se recalculan automáticamente los aportes ADEMACOR (1 %) y FAMECOR (0,20 %) mediante señales Django.
+- **Cálculo automático de aportes**: al crear o actualizar un sueldo, se recalculan automáticamente los aportes institucionales y de fondo mediante señales Django.
 - **Gestión de afiliados**: registro, edición, búsqueda con filtros avanzados y gestión de desafiliados con motivo y fecha de baja.
-- **Base de datos paralela ADEMACOR**: importación y gestión independiente de datos de afiliados ADEMACOR con motor de cálculo salarial propio.
-- **Reporte de diferencias**: comparación cruzada entre la nómina de la Secretaría y la de ADEMACOR, con estadísticas de intersección y exportación a Excel multi-hoja.
-- **Reportes de totales de aportes**: consolidado mensual de aportes ADEMACOR/FAMECOR, exportable a Excel (con hojas de resumen, detalle y metadatos) y PDF.
+- **Base de datos paralela de organización**: importación y gestión independiente de datos de afiliados externos con motor de cálculo salarial propio.
+- **Reporte de diferencias**: comparación cruzada entre la nómina del sistema y la de organización externa, con estadísticas de intersección y exportación a Excel multi-hoja.
+- **Reportes de totales de aportes**: consolidado mensual de aportes institucionales y de fondo, exportable a Excel (con hojas de resumen, detalle y metadatos) y PDF.
 - **Parámetros configurables**: módulo `ParametroLiquidacion` que permite ajustar porcentajes y valores de cálculo desde la base de datos sin modificar código.
 - **Tablas salariales versionadas**: registro histórico de salarios base por grado y año, con cálculo automático del aumento por grado al guardar.
 - **Panel de administración personalizado**: app `custom_admin` con vistas extendidas del admin Django.
@@ -185,41 +249,131 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Configurar variables de entorno
+### 4. Configurar variables de entorno (Opcional)
 
-Crear un archivo `.env` en la raíz del proyecto:
+Para demo local con SQLite, no se requiere configuración. Para producción, crear un archivo `.env`:
 
 ```env
+# Configuración Demo (por defecto)
 DEBUG=True
-SECRET_KEY=reemplazar_con_clave_segura
+SECRET_KEY=django-insecure-demo-key-change-in-production
+ALLOWED_HOSTS=localhost,127.0.0.1
 
-DB_NAME=sigaa_db
-DB_USER=usuario_mysql
-DB_PASSWORD=contraseña_mysql
-DB_HOST=localhost
-DB_PORT=3306
+# Base de datos SQLite (por defecto para demo)
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=sigaa_demo.db
+
+# Para producción con MySQL/PostgreSQL
+# DB_ENGINE=django.db.backends.mysql
+# DB_NAME=sigaa_prod
+# DB_USER=usuario_db
+# DB_PASSWORD=contraseña_db
+# DB_HOST=localhost
+# DB_PORT=3306
 ```
 
-### 5. Crear la base de datos y aplicar migraciones
+### 5. Ejecutar configuración de demo
 
 ```bash
-# Crear la base de datos en MySQL antes de continuar
-python manage.py migrate
+# Configurar sistema con datos ficticios
+python manage.py setup_demo
+
+# Para limpiar y regenerar datos
+python manage.py setup_demo --reset
 ```
 
-### 6. Crear superusuario
-
-```bash
-python manage.py createsuperuser
-```
-
-### 7. Iniciar el servidor de desarrollo
+### 6. Iniciar el servidor de desarrollo
 
 ```bash
 python manage.py runserver
 ```
 
 La aplicación estará disponible en `http://127.0.0.1:8000`.
+
+---
+
+## 📚 Comandos Útiles
+
+### Comandos de Demostración
+
+```bash
+# Configurar demo completa
+python manage.py setup_demo
+
+# Limpiar y regenerar demo
+python manage.py setup_demo --reset
+
+# Crear superusuario manualmente
+python manage.py createsuperuser
+
+# Ver estadísticas de demo
+python manage.py shell
+>>> from afiliados.models import Afiliado
+>>> from liquidacion.models import Sueldo, Aporte
+>>> print(f"Afiliados: {Afiliado.objects.count()}")
+>>> print(f"Sueldos: {Sueldo.objects.count()}")
+>>> print(f"Aportes: {Aporte.objects.count()}")
+```
+
+### Comandos de Producción
+
+```bash
+# Migraciones
+python manage.py makemigrations
+python manage.py migrate
+
+# Recolectar archivos estáticos
+python manage.py collectstatic --noinput
+
+# Servidor de producción
+gunicorn sigaa.wsgi:application
+```
+
+---
+
+## 🔧 Configuración Avanzada
+
+### Parámetros Configurables
+
+Los porcentajes de aportes y bonificaciones se pueden ajustar desde el admin Django en:
+
+**Parámetros de Liquidación → Parámetro Liquidacion**
+
+Parámetros principales:
+- `aporte_institucional`: Porcentaje de aporte institucional (defecto: 1.00%)
+- `aporte_fondo`: Porcentaje de aporte al fondo (defecto: 0.20%)
+- `bonif_anticiguedad_5`: Bonificación 5 años (defecto: 5.00%)
+- `bonif_anticiguedad_10`: Bonificación 10 años (defecto: 10.00%)
+- `bonif_educacion_maestria`: Bonificación maestría (defecto: 8.00%)
+- `bonif_educacion_doctorado`: Bonificación doctorado (defecto: 12.00%)
+
+### Configuración de Base de Datos
+
+#### SQLite (Demo)
+```env
+DB_ENGINE=django.db.backends.sqlite3
+DB_NAME=sigaa_demo.db
+```
+
+#### MySQL (Producción)
+```env
+DB_ENGINE=django.db.backends.mysql
+DB_NAME=sigaa_prod
+DB_USER=sigaa_user
+DB_PASSWORD=secure_password
+DB_HOST=localhost
+DB_PORT=3306
+```
+
+#### PostgreSQL (Producción)
+```env
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=sigaa_prod
+DB_USER=sigaa_user
+DB_PASSWORD=secure_password
+DB_HOST=localhost
+DB_PORT=5432
+```
 
 ---
 

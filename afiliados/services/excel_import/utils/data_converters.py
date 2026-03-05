@@ -1,4 +1,4 @@
-import pandas as pd
+# import pandas as pd  # Temporalmente comentado para migraciones
 import re
 import unicodedata
 from typing import Any, Optional

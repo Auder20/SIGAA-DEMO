@@ -405,7 +405,7 @@
             </h1>
             <p class="text-muted mb-0">
                 <i class="fas fa-info-circle me-1"></i>
-                Cargue archivos Excel con información de afiliados, secretaría o ADEMACOR
+                Cargue archivos Excel con información de afiliados, sistema externo u organización externa
             </p>
         </div>
         <div class="col-md-4 mt-3 mt-md-0">
@@ -452,9 +452,9 @@
                         <div class="mb-3">
                             <i class="fas fa-building fa-3x text-success"></i>
                         </div>
-                        <h5 class="card-title fw-bold">Secretaría</h5>
+                        <h5 class="card-title fw-bold">Sistema Externo</h5>
                         <p class="card-text text-muted small">
-                            Datos básicos de personal: cédula, nombre completo y municipio de adscripción
+                            Datos básicos de personal externo: cédula, nombre completo y municipio de adscripción
                         </p>
                         <span class="badge bg-success">Básico</span>
                     </div>
@@ -467,11 +467,11 @@
                         <div class="mb-3">
                             <i class="fas fa-handshake fa-3x text-warning"></i>
                         </div>
-                        <h5 class="card-title fw-bold">ADEMACOR</h5>
+                        <h5 class="card-title fw-bold">Organización Externa</h5>
                         <p class="card-text text-muted small">
-                            Registro de asociados ADEMACOR con información básica de identificación
+                            Registro de personal de organización externa con información básica de identificación
                         </p>
-                        <span class="badge bg-warning text-dark">Asociados</span>
+                        <span class="badge bg-warning text-dark">Externo</span>
                     </div>
                 </div>
             </div>
@@ -580,18 +580,18 @@
                         
                         <button type="submit" 
                                 name="import_type" 
-                                value="secretaria" 
+                                value="sistema_externo" 
                                 class="btn btn-success btn-import">
                             <i class="fas fa-building me-2"></i>
-                            <span class="d-block">Importar Secretaría</span>
+                            <span class="d-block">Importar Sistema Externo</span>
                         </button>
                         
                         <button type="submit" 
                                 name="import_type" 
-                                value="ademacor" 
+                                value="organizacion" 
                                 class="btn btn-warning btn-import text-dark">
                             <i class="fas fa-handshake me-2"></i>
-                            <span class="d-block">Importar ADEMACOR</span>
+                            <span class="d-block">Importar Organización</span>
                         </button>
                     </div>
                 </form>
@@ -619,6 +619,11 @@
             Cada plantilla incluye las columnas requeridas con ejemplos.
         </p>
 
+        <div class="alert alert-info mb-4">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Plantilla Completa de Afiliados:</strong> La plantilla incluye todos los campos disponibles en el modelo Afiliado para importación masiva.
+        </div>
+        
         <div class="template-table mb-4">
             <div class="table-responsive">
                 <table class="table table-sm table-bordered mb-0">
@@ -627,6 +632,12 @@
                             <th><i class="fas fa-id-card me-1"></i>cedula</th>
                             <th><i class="fas fa-user me-1"></i>nombre_completo</th>
                             <th><i class="fas fa-map-marker-alt me-1"></i>municipio</th>
+                            <th><i class="fas fa-birthday-cake me-1"></i>fecha_nacimiento</th>
+                            <th><i class="fas fa-heart me-1"></i>estado_civil</th>
+                            <th><i class="fas fa-graduation-cap me-1"></i>grado_escalafon</th>
+                            <th><i class="fas fa-briefcase me-1"></i>cargo_desempenado</th>
+                            <th><i class="fas fa-envelope me-1"></i>email</th>
+                            <th><i class="fas fa-phone me-1"></i>telefono</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -634,40 +645,57 @@
                             <td><code>12345678</code></td>
                             <td>Juan Pérez García</td>
                             <td>Caracas</td>
+                            <td>1985-03-15</td>
+                            <td>casado</td>
+                            <td>10</td>
+                            <td>Docente</td>
+                            <td>juan.perez@ejemplo.com</td>
+                            <td>300-123-4567</td>
                         </tr>
                         <tr class="table-light">
                             <td><code>87654321</code></td>
                             <td>María González López</td>
                             <td>Valencia</td>
+                            <td>1990-07-22</td>
+                            <td>soltera</td>
+                            <td>8</td>
+                            <td>Coordinador</td>
+                            <td>maria.gonzalez@ejemplo.com</td>
+                            <td>400-987-6543</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-
+        
+        <div class="alert alert-warning mb-4">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Campos Opcionales:</strong> Los campos no marcados como requeridos pueden dejarse en blanco. Los campos de fecha usan formato YYYY-MM-DD.
+        </div>
+        
         <div class="row g-3">
             <div class="col-md-4">
                 <button class="btn btn-outline-primary template-download-btn w-100" 
                         onclick="downloadTemplate('afiliados')">
                     <i class="fas fa-download me-2"></i>
                     <span class="d-block mt-1">Plantilla Afiliados</span>
-                    <small class="d-block text-muted">Con todos los campos</small>
+                    <small class="d-block text-muted">Completa (20 campos)</small>
                 </button>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-outline-success template-download-btn w-100" 
-                        onclick="downloadTemplate('secretaria')">
+                        onclick="downloadTemplate('sistema_externo')">
                     <i class="fas fa-download me-2"></i>
-                    <span class="d-block mt-1">Plantilla Secretaría</span>
+                    <span class="d-block mt-1">Plantilla Sistema Externo</span>
                     <small class="d-block text-muted">Datos básicos</small>
                 </button>
             </div>
             <div class="col-md-4">
                 <button class="btn btn-outline-warning template-download-btn w-100" 
-                        onclick="downloadTemplate('ademacor')">
+                        onclick="downloadTemplate('organizacion')">
                     <i class="fas fa-download me-2"></i>
-                    <span class="d-block mt-1">Plantilla ADEMACOR</span>
-                    <small class="d-block text-muted">Asociados</small>
+                    <span class="d-block mt-1">Plantilla Organización</span>
+                    <small class="d-block text-muted">Datos externos</small>
                 </button>
             </div>
         </div>
@@ -1009,8 +1037,8 @@ document.getElementById('importForm').addEventListener('submit', function(e) {
         if (xhr.status >= 200 && xhr.status < 300) {
             const successMessages = {
                 'afiliados': 'Importación de afiliados completada exitosamente',
-                'secretaria': 'Importación de datos de secretaría completada exitosamente',
-                'ademacor': 'Importación de datos de ADEMACOR completada exitosamente'
+                'sistema_externo': 'Importación de datos de sistema externo completada exitosamente',
+                'organizacion': 'Importación de datos de organización externa completada exitosamente'
             };
             
             showNotification(successMessages[importType] || 'Importación completada exitosamente', 'success');
@@ -1084,21 +1112,21 @@ function downloadTemplate(importType) {
 
     switch(importType) {
         case 'afiliados':
-            csvContent = "cedula,nombre_completo,grado_escalafon,cargo_desempenado,anos_servicio,titulo_posgrado,email,telefono,municipio\n" +
-                       "12345678,Juan Pérez García,10,Docente,5,Magíster en Educación,juan@ejemplo.com,300-123-4567,Caracas";
-            filename = 'plantilla_afiliados.csv';
+            csvContent = "cedula,nombre_completo,municipio,ciudad_de_nacimiento,fecha_nacimiento,edad,estado_civil,nombre_conyuge,nombre_hijos,direccion,telefono,email,grado_escalafon,cargo_desempenado,fecha_ingreso,anos_servicio,titulo_pregrado,titulo_posgrado,estudios_posgrado,otros_titulos,activo\n" +
+                       "12345678,Juan Pérez García,Caracas,Maracaibo,1985-03-15,38,casado,María González López,Sofía Pérez González,Av. Bolívar #123,300-123-4567,juan.perez@ejemplo.com,10,Docente,2010-01-15,14,Licenciado en Educación,Magíster en Educación,Especialización en Informática Educativa,Certificado en Gestión Escolar,True";
+            filename = 'plantilla_afiliados_completa.csv';
             break;
 
-        case 'secretaria':
+        case 'sistema_externo':
             csvContent = "cedula,nombre_completo,municipio\n" +
                        "12345678,Juan Pérez García,Caracas";
-            filename = 'plantilla_secretaria.csv';
+            filename = 'plantilla_sistema_externo.csv';
             break;
 
-        case 'ademacor':
+        case 'organizacion':
             csvContent = "cedula,nombre_completo,municipio\n" +
                        "11223344,Carlos Rodríguez Mendoza,Maracaibo";
-            filename = 'plantilla_ademacor.csv';
+            filename = 'plantilla_organizacion.csv';
             break;
 
         default:
