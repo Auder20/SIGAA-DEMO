@@ -165,7 +165,7 @@ AUTHENTICATION_BACKENDS = [
 # Archivos estáticos
 
 # URL base para los archivos estáticos
-STATIC_HOST = os.environ.get('RAILWAY_STATIC_URL', '')
+STATIC_HOST = os.environ.get('RENDER_EXTERNAL_URL', '')
 
 STATIC_URL = STATIC_HOST + '/static/'
 

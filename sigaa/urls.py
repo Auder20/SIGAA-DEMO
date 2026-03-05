@@ -5,6 +5,7 @@ from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.http import JsonResponse
 
 from core import views
 
@@ -17,6 +18,9 @@ admin.site.index_title = 'Bienvenido al Panel de Administración'
 
 # URLs principales
 urlpatterns = [
+    # Health check endpoint para Render
+    path('health/', lambda request: JsonResponse({'status': 'healthy'}), name='health'),
+    
     # Django Admin (original) - Accessible at /admin/
     path('admin/', admin.site.urls),
     
