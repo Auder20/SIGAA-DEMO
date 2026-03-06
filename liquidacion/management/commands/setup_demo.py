@@ -369,40 +369,44 @@ class Command(BaseCommand):
         """Crea reportes de ejemplo"""
         self.stdout.write('📊 Creando reportes de ejemplo...')
         
-        # Crear 3 reportes de ejemplo
+        # Crear reportes de demo
         reportes_data = [
             {
-                'titulo': 'Reporte de Aportes - Enero 2025',
-                'descripcion': 'Reporte mensual de aportes generados',
                 'anio': 2025,
                 'mes': 1,
-                'total_afiliados': 60,
-                'total_sueldos': Decimal('150000000'),
-                'total_aportes': Decimal('1800000'),
+                'cantidad_afiliados': 60,
+                'cantidad_aportes_ademacor': 75,
+                'cantidad_aportes_famecor': 25,
+                'total_ademacor': Decimal('1500000'),
+                'total_famecor': Decimal('300000'),
+                'total_general': Decimal('1800000'),
             },
             {
-                'titulo': 'Reporte de Aportes - Febrero 2025',
-                'descripcion': 'Reporte mensual de aportes generados',
                 'anio': 2025,
                 'mes': 2,
-                'total_afiliados': 62,
-                'total_sueldos': Decimal('155000000'),
-                'total_aportes': Decimal('1860000'),
+                'cantidad_afiliados': 62,
+                'cantidad_aportes_ademacor': 78,
+                'cantidad_aportes_famecor': 26,
+                'total_ademacor': Decimal('1560000'),
+                'total_famecor': Decimal('312000'),
+                'total_general': Decimal('1872000'),
             },
             {
-                'titulo': 'Reporte Consolidado - Primer Trimestre 2025',
-                'descripcion': 'Reporte consolidado del primer trimestre',
                 'anio': 2025,
                 'mes': 3,
-                'total_afiliados': 65,
-                'total_sueldos': Decimal('160000000'),
-                'total_aportes': Decimal('1920000'),
+                'cantidad_afiliados': 65,
+                'cantidad_aportes_ademacor': 80,
+                'cantidad_aportes_famecor': 27,
+                'total_ademacor': Decimal('1600000'),
+                'total_famecor': Decimal('320000'),
+                'total_general': Decimal('1920000'),
             },
         ]
         
         for report_data in reportes_data:
             ReporteAportesTotales.objects.get_or_create(
-                titulo=report_data['titulo'],
+                anio=report_data['anio'],
+                mes=report_data['mes'],
                 defaults=report_data
             )
 
