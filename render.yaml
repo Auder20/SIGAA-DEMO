@@ -2,6 +2,6 @@ services:
   - type: web
     name: sigaa-web
     env: python
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python manage.py collectstatic --noinput
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput
     startCommand: gunicorn sigaa.wsgi:application --bind 0.0.0.0:$PORT --timeout 120
     autoDeploy: true
