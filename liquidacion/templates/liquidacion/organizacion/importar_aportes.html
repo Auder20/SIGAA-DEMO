@@ -70,14 +70,14 @@
           </div>
           <small class="form-text text-muted"
             >Formatos: Excel (.xlsx, .xls). El sistema detectará automáticamente
-            si es ADEMACOR o FAMECOR</small
+            si es Organización o Fondo</small
           >
         </div>
 
         <!-- Botones -->
         <div class="d-flex justify-content-between mt-4">
           <a
-            href="{% url 'liquidacion:aporte_ademacor_list' %}"
+            href="{% url 'liquidacion:aporte_organizacion_list' %}"
             class="btn btn-secondary"
           >
             <i class="fas fa-times"></i> Cancelar
@@ -99,11 +99,11 @@
         </div>
         <div class="card-body">
             <ol class="mb-0">
-                <li><strong>Seleccione el archivo Excel</strong> con los datos de aportes de ADEMACOR o FAMECOR.</li>
+                <li><strong>Seleccione el archivo Excel</strong> con los datos de aportes de Organización o Fondo.</li>
                 <li>El sistema <strong>detectará automáticamente</strong>:
                     <ul>
                         <li>Las columnas de cédula y valor</li>
-                        <li>Si es ADEMACOR o FAMECOR (basado en los montos)</li>
+                        <li>Si es Organización o Fondo (basado en los montos)</li>
                         <li>Registros duplicados o inválidos</li>
                     </ul>
                 </li>
@@ -124,21 +124,21 @@
         <div class="card-body">
             <h6 class="font-weight-bold text-success"><i class="fas fa-magic"></i> Detección Automática</h6>
             <ul class="mb-3">
-                <li><strong>El sistema detecta automáticamente</strong> si el archivo contiene aportes de ADEMACOR o FAMECOR basándose en los valores.</li>
+                <li><strong>El sistema detecta automáticamente</strong> si el archivo contiene aportes de Organización o Fondo basándose en los valores.</li>
                 <li>No necesita formatear el archivo con columnas específicas - el sistema identifica automáticamente las columnas de cédula y valor.</li>
                 <li>Soporta diferentes formatos de Excel sin necesidad de plantilla específica.</li>
             </ul>
 
             <h6 class="font-weight-bold text-info"><i class="fas fa-cog"></i> Procesamiento Automático</h6>
             <ul class="mb-3">
-                <li><strong>Creación automática de sueldos:</strong> Si un afiliado ADEMACOR no tiene sueldo para el año, se creará automáticamente con valor $0.</li>
+                <li><strong>Creación automática de sueldos:</strong> Si un afiliado de Organización no tiene sueldo para el año, se creará automáticamente con valor $0.</li>
                 <li><strong>Actualización inteligente:</strong> Si el aporte ya existe, será actualizado con los nuevos valores.</li>
                 <li><strong>Procesamiento por lotes:</strong> El sistema procesa miles de registros de forma optimizada y rápida.</li>
             </ul>
 
             <h6 class="font-weight-bold text-danger"><i class="fas fa-shield-alt"></i> Validaciones</h6>
             <ul class="mb-0">
-                <li>El afiliado ADEMACOR con la cédula indicada debe existir en el sistema y estar activo.</li>
+                <li>El afiliado de Organización con la cédula indicada debe existir en el sistema y estar activo.</li>
                 <li>Los valores de aportes deben estar en el rango válido ($1,000 - $500,000).</li>
                 <li>Las cédulas deben tener entre 6 y 10 dígitos.</li>
                 <li>Registros con errores serán omitidos y reportados al final del proceso.</li>

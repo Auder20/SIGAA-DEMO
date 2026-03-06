@@ -28,7 +28,7 @@
         />
         <button type="submit" class="btn btn-primary mb-2">Buscar</button>
 
-          <a href="{% url 'liquidacion:aporte_ademacor_list' %}"
+          <a href="{% url 'liquidacion:aporte_organizacion_list' %}"
           class="btn btn-secondary mb-2 ml-2">
         Limpiar</a>
       </form>
@@ -54,10 +54,10 @@
             {% for aporte in aportes %}
             <tr>
               <td>
-                {{ aporte.sueldo_ademacor.afiliado_ademacor.nombre_completo }}<br />
-                <small class="text-muted">{{ aporte.sueldo_ademacor.afiliado_ademacor.cedula }}</small>
+                {{ aporte.sueldo_organizacion.afiliado_organizacion.nombre_completo }}<br />
+                <small class="text-muted">{{ aporte.sueldo_organizacion.afiliado_organizacion.cedula }}</small>
               </td>
-              <td>{{ aporte.sueldo_ademacor.anio }}</td>
+              <td>{{ aporte.sueldo_organizacion.anio }}</td>
               <td>{{ aporte.nombre }}</td>
               <td class="text-center">{{ aporte.porcentaje }}%</td>
               <td class="text-right font-weight-bold">
@@ -65,14 +65,11 @@
               </td>
               <td>
 
-                 <a href="{% url 'liquidacion:sueldo_ademacor_detail' aporte.sueldo_ademacor.pk %}"
+                 <a href="{% url 'liquidacion:sueldo_organizacion_detail' aporte.sueldo_organizacion.pk %}"
                   class="btn btn-info btn-sm"
                   title="Ver Sueldo">
-                  ver sueldo
+                  <i class="fas fa-file-invoice-dollar"></i> ver sueldo
               </a>
-
-                  <i class="fas fa-file-invoice-dollar"></i>
-                </a>
               </td>
             </tr>
             {% empty %}

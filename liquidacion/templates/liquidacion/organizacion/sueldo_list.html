@@ -45,7 +45,7 @@
                 </select>
 
                 <button type="submit" class="btn btn-primary mb-2">Buscar</button>
-                <a href="{% url 'liquidacion:sueldo_ademacor_list' %}" class="btn btn-secondary mb-2 ml-2">Limpiar</a>
+                <a href="{% url 'liquidacion:sueldo_organizacion_list' %}" class="btn btn-secondary mb-2 ml-2">Limpiar</a>
             </form>
         </div>
     </div>
@@ -69,18 +69,18 @@
                         {% for sueldo in sueldos %}
                         <tr>
                             <td>
-                                <strong>{{ sueldo.afiliado_ademacor.nombre_completo }}</strong><br>
-                                <small class="text-muted">{{ sueldo.afiliado_ademacor.cedula }}</small>
+                                <strong>{{ sueldo.afiliado_organizacion.nombre_completo }}</strong><br>
+                                <small class="text-muted">{{ sueldo.afiliado_organizacion.cedula }}</small>
                             </td>
                             <td>{{ sueldo.anio }}</td>
                             <td>Anual</td>
                             <td>${{ sueldo.sueldo_neto|floatformat:2 }}</td>
                             <td class="font-weight-bold text-success">${{ sueldo.sueldo_neto|floatformat:2 }}</td>
                             <td>
-                                <a href="{% url 'liquidacion:sueldo_ademacor_detail' sueldo.pk %}" class="btn btn-info btn-sm" title="Ver Detalle">
+                                <a href="{% url 'liquidacion:sueldo_organizacion_detail' sueldo.pk %}" class="btn btn-info btn-sm" title="Ver Detalle">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{% url 'liquidacion:sueldo_ademacor_recalcular' sueldo.pk %}" class="btn btn-warning btn-sm" title="Recalcular">
+                                <a href="{% url 'liquidacion:sueldo_organizacion_recalcular' sueldo.pk %}" class="btn btn-warning btn-sm" title="Recalcular">
                                     <i class="fas fa-sync-alt"></i>
                                 </a>
                             </td>

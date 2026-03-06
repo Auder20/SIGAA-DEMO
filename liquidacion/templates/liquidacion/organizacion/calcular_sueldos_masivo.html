@@ -68,7 +68,7 @@
                 <div class="alert alert-light border">
                     <h6><i class="fas fa-users"></i> Información del Proceso</h6>
                     <p class="mb-1">
-                        <strong>Total de afiliados ADEMACOR activos:</strong> {{ total_afiliados }}
+                        <strong>Total de afiliados de Organización activos:</strong> {{ total_afiliados }}
                     </p>
                     <p class="mb-0 text-muted">
                         <small>Este proceso puede tardar varios minutos dependiendo de la cantidad de afiliados.</small>
@@ -86,7 +86,7 @@
 
                 <!-- Botones -->
                 <div class="d-flex justify-content-between">
-                    <a href="{% url 'liquidacion:sueldo_ademacor_list' %}" class="btn btn-secondary">
+                    <a href="{% url 'liquidacion:sueldo_organizacion_list' %}" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Cancelar
                     </a>
                     <button type="submit" class="btn btn-success btn-lg" id="btnCalcular">
@@ -115,7 +115,7 @@
                     </ul>
                 </li>
                 <li class="text-danger"><strong>Los sueldos existentes para el año seleccionado serán actualizados.</strong></li>
-                <li>Los aportes (ADEMACOR 1% y FAMECOR 0.2%) se calcularán automáticamente.</li>
+                <li>Los aportes (Organización 1% y Fondo 0.2%) se calcularán automáticamente.</li>
                 <li>Si un afiliado no tiene grado de escalafón o no hay tabla salarial, se generará un error.</li>
             </ul>
         </div>
