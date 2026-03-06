@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from django.http import HttpResponse
 from django.conf import settings
-from afiliados.models import Afiliado, DatosAdemacor
+from afiliados.models import Afiliado, DatosOrganizacion
 
 
 def generar_datos_diferencias(municipio_filtro=None):
@@ -30,12 +30,12 @@ def generar_datos_diferencias(municipio_filtro=None):
         gral_vals = Afiliado.objects.filter(
             municipio=municipio_filtro
         ).values('cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
-        adem_vals = DatosAdemacor.objects.filter(
+        adem_vals = DatosOrganizacion.objects.filter(
             municipio=municipio_filtro
         ).values('cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
     else:
         gral_vals = Afiliado.objects.values('cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
-        adem_vals = DatosAdemacor.objects.values('cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
+        adem_vals = DatosOrganizacion.objects.values('cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
 
     # Indexar por cédula
     general_data = {row['cedula']: row for row in gral_vals}
@@ -93,9 +93,9 @@ def generar_datos_diferencias(municipio_filtro=None):
     # Estadísticas
     diferencias['estadisticas'] = {
         'total_general': len(general_data),
-        'total_ademacor': len(ademacor_data),
+        'total_organizacion': len(ademacor_data),
         'solo_general': len(diferencias['solo_general']),
-        'solo_ademacor': len(diferencias['solo_ademacor']),
+        'solo_organizacion': len(diferencias['solo_ademacor']),
         'ambos': len(diferencias['ambos']),
         'fecha_generacion': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'municipio_filtro': municipio_filtro if municipio_filtro else 'Todos'
@@ -138,12 +138,12 @@ def obtener_municipios_disponibles():
         municipio__isnull=False
     ).exclude(municipio='').values_list('municipio', flat=True).distinct()
 
-    municipios_ademacor = DatosAdemacor.objects.filter(
+    municipios_organizacion = DatosOrganizacion.objects.filter(
         municipio__isnull=False
     ).exclude(municipio='').values_list('municipio', flat=True).distinct()
 
     # Combinar todos los municipios únicos
-    todos_municipios = set(municipios_general) | set(municipios_ademacor)
+    todos_municipios = set(municipios_general) | set(municipios_organizacion)
 
     # Ordenar alfabéticamente
     return sorted(list(todos_municipios))
@@ -336,9 +336,9 @@ def exportar_diferencias_excel_multipage(diferencias):
             ],
             'Valor': [
                 diferencias['estadisticas']['total_general'],
-                diferencias['estadisticas']['total_ademacor'],
+                diferencias['estadisticas']['total_organizacion'],
                 diferencias['estadisticas']['solo_general'],
-                diferencias['estadisticas']['solo_ademacor'],
+                diferencias['estadisticas']['solo_organizacion'],
                 diferencias['estadisticas']['ambos'],
                 diferencias['estadisticas']['fecha_generacion'],
                 diferencias['estadisticas']['municipio_filtro']

@@ -1033,11 +1033,11 @@ def datos_organizacion_list(request):
     # Obtener parámetros de búsqueda
     search_query = request.GET.get('search', '').strip()
 
-    # Filtrar datos de ADEMACOR
-    datos_ademacor = DatosAdemacor.objects.only('id', 'cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
+    # Filtrar datos de organización externa
+    datos_organizacion = DatosOrganizacion.objects.only('id', 'cedula', 'nombre_completo', 'municipio', 'fecha_creacion')
 
     if search_query:
-        datos_ademacor = datos_ademacor.filter(
+        datos_organizacion = datos_organizacion.filter(
             Q(cedula__icontains=search_query) |
             Q(nombre_completo__icontains=search_query) |
             Q(municipio__icontains=search_query)
@@ -1047,55 +1047,55 @@ def datos_organizacion_list(request):
     page_number = request.GET.get('page', 1)
     items_per_page = 20
 
-    paginator = Paginator(datos_ademacor, items_per_page)
+    paginator = Paginator(datos_organizacion, items_per_page)
 
     try:
-        datos_ademacor_page = paginator.page(page_number)
+        datos_organizacion_page = paginator.page(page_number)
     except PageNotAnInteger:
-        datos_ademacor_page = paginator.page(1)
+        datos_organizacion_page = paginator.page(1)
     except EmptyPage:
-        datos_ademacor_page = paginator.page(paginator.num_pages)
+        datos_organizacion_page = paginator.page(paginator.num_pages)
 
     # Almacenar búsqueda en sesión para mantener filtros en exportaciones
     request.session['search_query_ademacor'] = search_query
 
-    return render(request, 'afiliados/datos_ademacor_list.html', {
-        'datos_ademacor': datos_ademacor_page,
+    return render(request, 'afiliados/datos_organizacion_list.html', {
+        'datos_organizacion': datos_organizacion_page,
         'search_query': search_query,
-        'total_ademacor': paginator.count,
+        'total_organizacion': paginator.count,
         'is_paginated': paginator.num_pages > 1,
-        'page_obj': datos_ademacor_page,
+        'page_obj': datos_organizacion_page,
     })
 
 
 
 def datos_organizacion_detail(request, pk):
     """
-    Vista para mostrar los detalles de un registro de ADEMACOR.
+    Vista para mostrar los detalles de un registro de organización externa.
 
     Args:
         request: HttpRequest object
-        pk: Primary key del registro de ADEMACOR
+        pk: Primary key del registro
 
     Returns:
-        HttpResponse: Página de detalles del registro de ADEMACOR
+        HttpResponse: Página de detalles del registro de organización externa
     """
-    registro = get_object_or_404(DatosAdemacor, pk=pk)
-    return render(request, 'afiliados/datos_ademacor_detail.html', {'registro': registro})
+    registro = get_object_or_404(DatosOrganizacion, pk=pk)
+    return render(request, 'afiliados/datos_organizacion_detail.html', {'registro': registro})
 
 
 def datos_organizacion_edit(request, pk):
     """
-    Vista para editar un registro de ADEMACOR.
+    Vista para editar un registro de organización externa.
 
     Args:
         request: HttpRequest object
-        pk: Primary key del registro de ADEMACOR a editar
+        pk: Primary key del registro de organización externa a editar
 
     Returns:
         HttpResponse: Formulario de edición o redirección tras actualizar
     """
-    registro = get_object_or_404(DatosAdemacor, pk=pk)
+    registro = get_object_or_404(DatosOrganizacion, pk=pk)
 
     if request.method == 'POST':
         registro.cedula = request.POST.get('cedula')
@@ -1103,31 +1103,31 @@ def datos_organizacion_edit(request, pk):
         registro.municipio = request.POST.get('municipio')
         registro.save()
 
-        messages.success(request, f'Registro de ADEMACOR actualizado exitosamente.')
-        return redirect('afiliados:datos_ademacor_detail', pk=registro.pk)
+        messages.success(request, f'Registro de organización externa actualizado exitosamente.')
+        return redirect('afiliados:datos_organizacion_detail', pk=registro.pk)
 
-    return render(request, 'afiliados/datos_ademacor_form.html', {'registro': registro})
+    return render(request, 'afiliados/datos_organizacion_form.html', {'registro': registro})
 
 
 def datos_organizacion_delete(request, pk):
     """
-    Vista para eliminar un registro de ADEMACOR.
+    Vista para eliminar un registro de organización externa.
 
     Args:
         request: HttpRequest object
-        pk: Primary key del registro de ADEMACOR a eliminar
+        pk: Primary key del registro de organización externa a eliminar
 
     Returns:
         HttpResponse: Página de confirmación o redirección tras eliminar
     """
-    registro = get_object_or_404(DatosAdemacor, pk=pk)
+    registro = get_object_or_404(DatosOrganizacion, pk=pk)
 
     if request.method == 'POST':
         registro.delete()
-        messages.success(request, f'Registro de ADEMACOR eliminado exitosamente.')
-        return redirect('afiliados:datos_ademacor_list')
+        messages.success(request, f'Registro de organización externa eliminado exitosamente.')
+        return redirect('afiliados:datos_organizacion_list')
 
-    return render(request, 'afiliados/datos_ademacor_confirm_delete.html', {'registro': registro})
+    return render(request, 'afiliados/datos_organizacion_confirm_delete.html', {'registro': registro})
 
 
 @cache_page(300)
@@ -1147,10 +1147,10 @@ def datos_organizacion_list(request):
 
         # Obtener datos de organización externa según filtros
         datos_organizacion = DatosOrganizacion.objects.all()
-        datos_ademacor = DatosAdemacor.objects.all()
+        datos_organizacion_filtered = datos_organizacion.all()
 
         if search_query:
-            datos_ademacor = datos_ademacor.filter(
+            datos_organizacion_filtered = datos_organizacion_filtered.filter(
                 Q(cedula__icontains=search_query) |
                 Q(nombre_completo__icontains=search_query) |
                 Q(municipio__icontains=search_query)
@@ -1158,7 +1158,7 @@ def datos_organizacion_list(request):
 
         # Preparar datos para exportación
         data = []
-        for registro in datos_ademacor:
+        for registro in datos_organizacion_filtered:
             data.append({
                 'cedula': registro.cedula,
                 'nombre_completo': registro.nombre_completo,
@@ -1167,12 +1167,12 @@ def datos_organizacion_list(request):
             })
 
         if not data:
-            messages.warning(request, 'No hay datos de ADEMACOR para exportar.')
-            return redirect('afiliados:datos_ademacor_list')
+            messages.warning(request, 'No hay datos de organización externa para exportar.')
+            return redirect('afiliados:datos_organizacion_list')
 
         # Crear servicio dinámico con los datos preparados
         from afiliados.services.export import DynamicExportService
-        export_service = DynamicExportService(data, "Datos ADEMACOR - SIGAA")
+        export_service = DynamicExportService(data, "Datos de Organización - SIGAA")
 
         # Obtener estadísticas
         stats = export_service.get_export_stats()
@@ -1180,13 +1180,13 @@ def datos_organizacion_list(request):
         # Generar nombre del archivo con fecha y hora
         from datetime import datetime
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"datos_ademacor_{timestamp}"
+        filename = f"datos_organizacion_{timestamp}"
 
         # Exportar a Excel
         response = export_service.export_excel(filename)
 
         # Log de la exportación
-        logger.info(f"Exportación Excel de ADEMACOR realizada: {stats['total_registros']} registros, "
+        logger.info(f"Exportación Excel de Organización realizada: {stats['total_registros']} registros, "
                    f"Columnas: {stats['columnas_exportadas']}")
 
         # Mensaje de éxito
@@ -1199,9 +1199,9 @@ def datos_organizacion_list(request):
         return response
 
     except Exception as e:
-        logger.exception("Error al exportar datos de ADEMACOR a Excel")
+        logger.exception("Error al exportar datos de Organización a Excel")
         messages.error(request, f'Error al generar la exportación: {str(e)}')
-        return redirect('afiliados:datos_ademacor_list')
+        return redirect('afiliados:datos_organizacion_list')
 
 
 
@@ -1291,11 +1291,12 @@ def datos_organizacion_export_pdf(request):
         # Obtener término de búsqueda de la sesión
         search_query = request.session.get('search_query_ademacor', '')
 
-        # Obtener datos de ADEMACOR según filtros
-        datos_ademacor = DatosAdemacor.objects.all()
+        # Obtener datos de organización externa según filtros
+        datos_organizacion = DatosOrganizacion.objects.all()
+        datos_organizacion_filtered = datos_organizacion.all()
 
         if search_query:
-            datos_ademacor = datos_ademacor.filter(
+            datos_organizacion_filtered = datos_organizacion_filtered.filter(
                 Q(cedula__icontains=search_query) |
                 Q(nombre_completo__icontains=search_query) |
                 Q(municipio__icontains=search_query)
@@ -1303,7 +1304,7 @@ def datos_organizacion_export_pdf(request):
 
         # Preparar datos para exportación
         data = []
-        for registro in datos_ademacor:
+        for registro in datos_organizacion_filtered:
             data.append({
                 'cedula': registro.cedula,
                 'nombre_completo': registro.nombre_completo,
@@ -1312,12 +1313,12 @@ def datos_organizacion_export_pdf(request):
             })
 
         if not data:
-            messages.warning(request, 'No hay datos de ADEMACOR para exportar.')
-            return redirect('afiliados:datos_ademacor_list')
+            messages.warning(request, 'No hay datos de organización externa para exportar.')
+            return redirect('afiliados:datos_organizacion_list')
 
         # Crear servicio dinámico con los datos preparados
         from afiliados.services.export import DynamicExportService
-        export_service = DynamicExportService(data, "Datos ADEMACOR - SIGAA")
+        export_service = DynamicExportService(data, "Datos de Organización - SIGAA")
 
         # Obtener estadísticas
         stats = export_service.get_export_stats()
@@ -1325,14 +1326,14 @@ def datos_organizacion_export_pdf(request):
         # Generar nombre del archivo con fecha y hora
         from datetime import datetime
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"datos_ademacor_{timestamp}"
+        filename = f"datos_organizacion_{timestamp}"
 
         # Exportar a PDF con logotipo
         logo_path = "img/logotipo1.png"
         response = export_service.export_pdf(filename, logo_path)
 
         # Log de la exportación
-        logger.info(f"Exportación PDF de ADEMACOR realizada: {stats['total_registros']} registros, "
+        logger.info(f"Exportación PDF de Organización realizada: {stats['total_registros']} registros, "
                    f"Columnas: {stats['columnas_exportadas']}")
 
         # Mensaje de éxito
@@ -1345,9 +1346,9 @@ def datos_organizacion_export_pdf(request):
         return response
 
     except Exception as e:
-        logger.exception("Error al exportar datos de ADEMACOR a PDF")
+        logger.exception("Error al exportar datos de Organización a PDF")
         messages.error(request, f'Error al generar la exportación: {str(e)}')
-        return redirect('afiliados:datos_ademacor_list')
+        return redirect('afiliados:datos_organizacion_list')
 
 
 def comparacion_afiliados_organizacion(request):
@@ -1363,10 +1364,10 @@ def comparacion_afiliados_organizacion(request):
     resultados = comparar_afiliados_ademacor(municipio_filtro)
 
     # Obtener lista de municipios para el filtro
-    from afiliados.models import Afiliado, DatosAdemacor
+    from afiliados.models import Afiliado, DatosOrganizacion
     municipios_gral = Afiliado.objects.values_list('municipio', flat=True).distinct()
-    municipios_adem = DatosAdemacor.objects.values_list('municipio', flat=True).distinct()
-    municipios = sorted(list(set(list(municipios_gral) + list(municipios_adem))))
+    municipios_org = DatosOrganizacion.objects.values_list('municipio', flat=True).distinct()
+    municipios = sorted(list(set(list(municipios_gral) + list(municipios_org))))
     municipios = [m for m in municipios if m] # Filtrar vacíos
 
     return render(request, 'afiliados/comparacion_afiliados_ademacor.html', {

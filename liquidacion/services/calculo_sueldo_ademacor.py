@@ -206,7 +206,7 @@ def recalcular_sueldos_ademacor_masivo(anio=None, filtros=None):
         # Solo afiliados de grado 14
         resultado = recalcular_sueldos_ademacor_masivo(2025, {'grado_escalafon': '14'})
     """
-    from afiliados.models import DatosAdemacor
+    from afiliados.models import DatosOrganizacion
     from datetime import date
     import logging
 
@@ -214,7 +214,7 @@ def recalcular_sueldos_ademacor_masivo(anio=None, filtros=None):
     anio = anio or date.today().year
 
     # Aplicar filtros
-    queryset = DatosAdemacor.objects.filter(activo=True)
+    queryset = DatosOrganizacion.objects.filter(activo=True)
     if filtros:
         queryset = queryset.filter(**filtros)
 

@@ -20,15 +20,15 @@ from decimal import Decimal, InvalidOperation, getcontext
 from datetime import datetime
 
 from django.db import connection, OperationalError, transaction, close_old_connections
-from afiliados.models import DatosAdemacor
-from liquidacion.models import SueldoAdemacor, AporteAdemacor, ParametroLiquidacion
+from afiliados.models import DatosOrganizacion
+from liquidacion.models import SueldoOrganizacion, AporteOrganizacion, ParametroLiquidacion
 
 getcontext().prec = 12
 logger = logging.getLogger('aportes_ademacor_import')
 
 
-class AporteAdemacorImporter:
-    """Importador ultra optimizado para aportes ADEMACOR"""
+class AporteOrganizacionImporter:
+    """Importador ultra optimizado para aportes de Organización"""
 
     # CONFIGURABLES
     BATCH_SIZE = 1000
@@ -37,15 +37,15 @@ class AporteAdemacorImporter:
     MIN_APORTE_VALOR = 1000
     MAX_APORTE_VALOR = 500000
 
-    DEFAULT_PORCENTAJES = {'ADEMACOR': Decimal('1.0'), 'FAMECOR': Decimal('0.2')}
-    CODIGO_PARAM_ADEMACOR = 'APORTE_ADEMACOR'
+    DEFAULT_PORCENTAJES = {'ORGANIZACION': Decimal('1.0'), 'FONDO': Decimal('0.2')}
+    CODIGO_PARAM_ORGANIZACION = 'APORTE_ORGANIZACION'
     CODIGO_PARAM_FAMECOR = 'APORTE_FAMECOR'
 
-    UMBRAL_TIPO = 30000  # < 30k = FAMECOR, >= 30k = ADEMACOR
+    UMBRAL_TIPO = 30000  # < 30k = FONDO, >= 30k = ORGANIZACION
 
     PATRONES_ENCABEZADO = [
-        'TERCEROS', 'CARGOTIPO', 'ADEMACOR LEY', 'FONDO DE AYUDA',
-        '756', 'FAMECOR FONDO', 'LEY 60', 'LEY 715', 'SECRETARÍA DE EDUCACION',
+        'TERCEROS', 'CARGOTIPO', 'ORGANIZACION LEY', 'FONDO DE AYUDA',
+        '756', 'FONDO FONDO', 'LEY 60', 'LEY 715', 'SECRETARÍA DE EDUCACION',
         'Total Planta Nomina', 'CodNomina', 'Página', 'SINDICATO', 'Hoja1'
     ]
 
@@ -85,17 +85,17 @@ class AporteAdemacorImporter:
         start = time.time()
 
         # Afiliados ADEMACOR
-        afiliados = DatosAdemacor.objects.filter(activo=True).only('id', 'cedula')
+        afiliados = DatosOrganizacion.objects.filter(activo=True).only('id', 'cedula')
         self.cache_afiliados = {str(a.cedula).strip(): a for a in afiliados}
 
         # Pre-cargar sueldos ADEMACOR existentes
         afiliado_ids = [a.id for a in self.cache_afiliados.values()]
-        sueldos = SueldoAdemacor.objects.filter(
-            afiliado_ademacor__id__in=afiliado_ids,
+        sueldos = SueldoOrganizacion.objects.filter(
+            afiliado_organizacion__id__in=afiliado_ids,
             anio=self.anio
-        ).select_related('afiliado_ademacor')
+        ).select_related('afiliado_organizacion')
 
-        self.cache_sueldos = {s.afiliado_ademacor.id: s for s in sueldos}
+        self.cache_sueldos = {s.afiliado_organizacion.id: s for s in sueldos}
 
         logger.info(f"✓ {len(self.cache_afiliados)} afiliados ADEMACOR, {len(self.cache_sueldos)} sueldos ({time.time()-start:.2f}s)")
 
@@ -261,8 +261,8 @@ class AporteAdemacorImporter:
                     afiliado = r['afiliado']
                     if afiliado.id not in self.cache_sueldos:
                         afiliados_sin_sueldo.append(afiliado)
-                        nuevo_sueldo = SueldoAdemacor(
-                            afiliado_ademacor=afiliado,
+                        nuevo_sueldo = SueldoOrganizacion(
+                            afiliado_organizacion=afiliado,
                             anio=self.anio,
                             sueldo_neto=Decimal('0'),
                             tabla_salarial=None
@@ -271,28 +271,28 @@ class AporteAdemacorImporter:
 
                 # Crear sueldos en bulk
                 if sueldos_crear:
-                    SueldoAdemacor.objects.bulk_create(sueldos_crear, batch_size=self.batch_size, ignore_conflicts=True)
+                    SueldoOrganizacion.objects.bulk_create(sueldos_crear, batch_size=self.batch_size, ignore_conflicts=True)
                     self.stats['sueldos_creados'] += len(sueldos_crear)
 
                     # Recargar sueldos recién creados
-                    sueldos_nuevos = SueldoAdemacor.objects.filter(
-                        afiliado_ademacor__id__in=[a.id for a in afiliados_sin_sueldo],
+                    sueldos_nuevos = SueldoOrganizacion.objects.filter(
+                        afiliado_organizacion__id__in=[a.id for a in afiliados_sin_sueldo],
                         anio=self.anio
                     )
 
                     # Actualizar caché
                     for s in sueldos_nuevos:
-                        self.cache_sueldos[s.afiliado_ademacor.id] = s
+                        self.cache_sueldos[s.afiliado_organizacion.id] = s
 
                 # 2. OBTENER APORTES EXISTENTES
                 afiliado_ids = [r['afiliado'].id for r in registros if r['afiliado'].id in self.cache_sueldos]
-                aportes_existentes = AporteAdemacor.objects.filter(
-                    sueldo_ademacor__afiliado_ademacor__id__in=afiliado_ids,
+                aportes_existentes = AporteOrganizacion.objects.filter(
+                    sueldo_organizacion__afiliado_organizacion__id__in=afiliado_ids,
                     nombre=self.tipo_aporte,
-                    sueldo_ademacor__anio=self.anio
-                ).select_related('sueldo_ademacor__afiliado_ademacor')
+                    sueldo_organizacion__anio=self.anio
+                ).select_related('sueldo_organizacion__afiliado_organizacion')
 
-                mapa_aportes = {a.sueldo_ademacor.afiliado_ademacor.id: a for a in aportes_existentes}
+                mapa_aportes = {a.sueldo_organizacion.afiliado_organizacion.id: a for a in aportes_existentes}
 
                 # 3. BULK UPDATE Y CREATE APORTES
                 aportes_crear = []
@@ -313,8 +313,8 @@ class AporteAdemacorImporter:
                         aporte_existente.porcentaje = self.porcentaje_aporte
                         aportes_actualizar.append(aporte_existente)
                     else:
-                        aportes_crear.append(AporteAdemacor(
-                            sueldo_ademacor=sueldo,
+                        aportes_crear.append(AporteOrganizacion(
+                            sueldo_organizacion=sueldo,
                             nombre=self.tipo_aporte,
                             valor=valor_aporte,
                             porcentaje=self.porcentaje_aporte
@@ -322,11 +322,11 @@ class AporteAdemacorImporter:
 
                 # Guardar cambios en bulk
                 if aportes_crear:
-                    AporteAdemacor.objects.bulk_create(aportes_crear, batch_size=self.batch_size)
+                    AporteOrganizacion.objects.bulk_create(aportes_crear, batch_size=self.batch_size)
                     self.stats['aportes_creados'] += len(aportes_crear)
 
                 if aportes_actualizar:
-                    AporteAdemacor.objects.bulk_update(aportes_actualizar, ['valor', 'porcentaje'], batch_size=self.batch_size)
+                    AporteOrganizacion.objects.bulk_update(aportes_actualizar, ['valor', 'porcentaje'], batch_size=self.batch_size)
                     self.stats['aportes_actualizados'] += len(aportes_actualizar)
 
                 stats['procesados'] = len(aportes_crear) + len(aportes_actualizar)
@@ -407,7 +407,7 @@ class AporteAdemacorImporter:
 
 def importar_aporte_ademacor(archivo_excel: str, anio: int = None, tipo_aporte: str = None, batch_size: int = None) -> Dict[str, Any]:
     """Importa aportes ADEMACOR desde archivo Excel"""
-    importer = AporteAdemacorImporter(archivo_excel, anio, tipo_aporte, batch_size)
+    importer = AporteOrganizacionImporter(archivo_excel, anio, tipo_aporte, batch_size)
     return importer.procesar_archivo()
 
 

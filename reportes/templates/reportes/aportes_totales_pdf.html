@@ -155,9 +155,9 @@
         <tbody>
             <tr>
                 <td>ADEMACOR</td>
-                <td class="text-right">${{ reporte.total_ademacor|floatformat:2 }}</td>
-                <td class="text-center">{{ reporte.cantidad_aportes_ademacor }}</td>
-                <td class="text-right">{{ reporte.get_porcentaje_ademacor|floatformat:1 }}%</td>
+                <td class="text-right">${{ reporte.total_organizacion|floatformat:2 }}</td>
+                <td class="text-center">{{ reporte.cantidad_aportes_organizacion }}</td>
+                <td class="text-right">{{ reporte.get_porcentaje_organizacion|floatformat:1 }}%</td>
             </tr>
             <tr>
                 <td>FAMECOR</td>
@@ -168,7 +168,7 @@
             <tr class="total-row">
                 <td>TOTAL GENERAL</td>
                 <td class="text-right">${{ reporte.total_general|floatformat:2 }}</td>
-                <td class="text-center">{{ reporte.cantidad_aportes_ademacor|add:reporte.cantidad_aportes_famecor }}</td>
+                <td class="text-center">{{ reporte.cantidad_aportes_organizacion|add:reporte.cantidad_aportes_famecor }}</td>
                 <td class="text-right">100.0%</td>
             </tr>
         </tbody>
@@ -204,8 +204,8 @@
                 <tfoot>
                     <tr style="font-weight: bold; background-color: #f8f9fa;">
                         <td colspan="4">TOTAL ADEMACOR</td>
-                        <td class="text-right">${{ reporte.total_ademacor|floatformat:2 }}</td>
-                        <td class="text-center">{{ reporte.cantidad_aportes_ademacor }} aportes</td>
+                        <td class="text-right">${{ reporte.total_organizacion|floatformat:2 }}</td>
+                        <td class="text-center">{{ reporte.cantidad_aportes_organizacion }} aportes</td>
                     </tr>
                 </tfoot>
             </table>
@@ -262,7 +262,7 @@
         <p><strong>Fecha de Generación:</strong> {{ reporte.fecha_calculo|date:"d/m/Y H:i:s" }}</p>
         <p><strong>Generado por:</strong> {{ reporte.calculado_por|default:'Sistema' }}</p>
         <p><strong>Cantidad de Afiliados:</strong> {{ reporte.cantidad_afiliados }}</p>
-        <p><strong>Total ADEMACOR:</strong> ${{ reporte.total_ademacor|floatformat:2 }}</p>
+        <p><strong>Total ADEMACOR:</strong> ${{ reporte.total_organizacion|floatformat:2 }}</p>
         <p><strong>Total FAMECOR:</strong> ${{ reporte.total_famecor|floatformat:2 }}</p>
         <p><strong>Total General:</strong> ${{ reporte.total_general|floatformat:2 }}</p>
     </div>

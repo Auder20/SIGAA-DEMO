@@ -4,10 +4,10 @@ from . import views
 urlpatterns = [
     path('main/', views.reportes_main, name='reportes_main'),
 
-    # URLs para reporte de diferencias Secretaría vs ADEMACOR
-    path('diferencias-secretaria-ademacor/', views.generar_reporte_diferencias, name='generar_reporte_diferencias'),
-    path('diferencias-secretaria-ademacor/excel/', views.exportar_diferencias_excel_view, name='exportar_diferencias_excel_view'),
-    path('diferencias-secretaria-ademacor/pdf/', views.exportar_diferencias_pdf_view, name='exportar_diferencias_pdf_view'),
+    # URLs para reporte de diferencias Secretaría vs Organización
+    path('diferencias-secretaria-organizacion/', views.generar_reporte_diferencias, name='generar_reporte_diferencias'),
+    path('diferencias-secretaria-organizacion/excel/', views.exportar_diferencias_excel_view, name='exportar_diferencias_excel_view'),
+    path('diferencias-secretaria-organizacion/pdf/', views.exportar_diferencias_pdf_view, name='exportar_diferencias_pdf_view'),
 
     # URLs para exportación con filtro aplicado
     path('exportar_diferencias_excel_filtrado/', views.exportar_diferencias_excel_filtrado, name='exportar_diferencias_excel_filtrado'),

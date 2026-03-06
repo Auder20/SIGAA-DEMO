@@ -23,7 +23,7 @@ class Reporte(models.Model):
         ('sueldos', 'Reporte de Sueldos'),
         ('aportes', 'Reporte de Aportes'),
         ('afiliados', 'Reporte de Afiliados'),
-        ('diferencias_secretaria_ademacor', 'Diferencias Secretaría vs ADEMACOR'),
+        ('diferencias_secretaria_organizacion', 'Diferencias Secretaría vs Organización'),
     ]
     
     tipo = models.CharField(
@@ -110,7 +110,7 @@ class Reporte(models.Model):
 
 class ReporteAportesTotales(models.Model):
     """
-    Modelo para almacenar los totales de aportes de ADEMACOR y FAMECOR.
+    Modelo para almacenar los totales de aportes de Organización y Fondo.
     
     Este modelo calcula y almacena los totales de aportes para reportes
     periódicos, permitiendo exportación a Excel y PDF.
@@ -125,11 +125,11 @@ class ReporteAportesTotales(models.Model):
     )
     
     # Totales calculados
-    total_ademacor = models.DecimalField(
+    total_organizacion = models.DecimalField(
         max_digits=15, 
         decimal_places=2, 
         default=Decimal('0.00'),
-        help_text="Total de aportes ADEMACOR del período"
+        help_text="Total de aportes de Organización del período"
     )
     total_famecor = models.DecimalField(
         max_digits=15, 
@@ -149,9 +149,9 @@ class ReporteAportesTotales(models.Model):
         default=0,
         help_text="Cantidad de afiliados con aportes en el período"
     )
-    cantidad_aportes_ademacor = models.IntegerField(
+    cantidad_aportes_organizacion = models.IntegerField(
         default=0,
-        help_text="Cantidad de aportes ADEMACOR procesados"
+        help_text="Cantidad de aportes de Organización procesados"
     )
     cantidad_aportes_famecor = models.IntegerField(
         default=0,
@@ -197,7 +197,7 @@ class ReporteAportesTotales(models.Model):
         Returns:
             str: Período y totales formateados
         """
-        return f"Reporte {self.mes:02d}/{self.anio} - ADEMACOR: ${self.total_ademacor:,.2f}, FAMECOR: ${self.total_famecor:,.2f}"
+        return f"Reporte {self.mes:02d}/{self.anio} - Organización: ${self.total_organizacion:,.2f}, Fondo: ${self.total_famecor:,.2f}"
     
     def calcular_totales(self):
         """
@@ -209,10 +209,10 @@ class ReporteAportesTotales(models.Model):
         from liquidacion.models import Aporte, Sueldo
         
         # Reiniciar contadores
-        self.total_ademacor = Decimal('0.00')
+        self.total_organizacion = Decimal('0.00')
         self.total_famecor = Decimal('0.00')
         self.cantidad_afiliados = 0
-        self.cantidad_aportes_ademacor = 0
+        self.cantidad_aportes_organizacion = 0
         self.cantidad_aportes_famecor = 0
         
         # Obtener sueldos del período
@@ -225,15 +225,15 @@ class ReporteAportesTotales(models.Model):
             self.cantidad_afiliados += 1
             
             for aporte in sueldo.aportes.all():
-                if aporte.nombre.upper() == 'ADEMACOR':
-                    self.total_ademacor += aporte.valor
-                    self.cantidad_aportes_ademacor += 1
-                elif aporte.nombre.upper() == 'FAMECOR':
+                if aporte.nombre.upper() == 'ORGANIZACION':
+                    self.total_organizacion += aporte.valor
+                    self.cantidad_aportes_organizacion += 1
+                elif aporte.nombre.upper() == 'FONDO':
                     self.total_famecor += aporte.valor
                     self.cantidad_aportes_famecor += 1
         
         # Calcular total general
-        self.total_general = self.total_ademacor + self.total_famecor
+        self.total_general = self.total_organizacion + self.total_famecor
         
         # Guardar cambios
         self.save()
@@ -253,49 +253,49 @@ class ReporteAportesTotales(models.Model):
         return meses.get(self.mes, f'Mes {self.mes}')
     
     @staticmethod
-    def calcular_sueldo_desde_aportes(ademacor_valor=None, famecor_valor=None):
+    def calcular_sueldo_desde_aportes(organizacion_valor=None, fondo_valor=None):
         """
         Calcula el sueldo neto a partir de los valores de los aportes.
         
         Fórmulas:
-        - Sueldo desde ADEMACOR: sueldo = ademacor_valor / 0.01
-        - Sueldo desde FAMECOR: sueldo = famecor_valor / 0.002
+        - Sueldo desde Organización: sueldo = organizacion_valor / 0.01
+        - Sueldo desde Fondo: sueldo = fondo_valor / 0.002
         - Si ambos valores están disponibles, usa el promedio
         
         Args:
-            ademacor_valor (Decimal/float): Valor del aporte ADEMACOR (1% del sueldo)
-            famecor_valor (Decimal/float): Valor del aporte FAMECOR (0.2% del sueldo)
+            organizacion_valor (Decimal/float): Valor del aporte Organización (1% del sueldo)
+            fondo_valor (Decimal/float): Valor del aporte Fondo (0.2% del sueldo)
             
         Returns:
             Decimal: Sueldo neto calculado o None si no hay datos
         """
         from decimal import Decimal, InvalidOperation
         
-        sueldo_ademacor = None
-        sueldo_famecor = None
+        sueldo_organizacion = None
+        sueldo_fondo = None
         
-        # Calcular sueldo desde ADEMACOR (1% = 0.01)
-        if ademacor_valor and ademacor_valor > 0:
+        # Calcular sueldo desde Organización (1% = 0.01)
+        if organizacion_valor and organizacion_valor > 0:
             try:
-                sueldo_ademacor = Decimal(str(ademacor_valor)) / Decimal('0.01')
+                sueldo_organizacion = Decimal(str(organizacion_valor)) / Decimal('0.01')
             except (InvalidOperation, TypeError, ZeroDivisionError):
-                sueldo_ademacor = None
+                sueldo_organizacion = None
         
-        # Calcular sueldo desde FAMECOR (0.2% = 0.002)
-        if famecor_valor and famecor_valor > 0:
+        # Calcular sueldo desde Fondo (0.2% = 0.002)
+        if fondo_valor and fondo_valor > 0:
             try:
-                sueldo_famecor = Decimal(str(famecor_valor)) / Decimal('0.002')
+                sueldo_fondo = Decimal(str(fondo_valor)) / Decimal('0.002')
             except (InvalidOperation, TypeError, ZeroDivisionError):
-                sueldo_famecor = None
+                sueldo_fondo = None
         
         # Determinar el sueldo final
-        if sueldo_ademacor and sueldo_famecor:
+        if sueldo_organizacion and sueldo_fondo:
             # Si ambos valores están disponibles, usar promedio
-            return (sueldo_ademacor + sueldo_famecor) / Decimal('2')
-        elif sueldo_ademacor:
-            return sueldo_ademacor
-        elif sueldo_famecor:
-            return sueldo_famecor
+            return (sueldo_organizacion + sueldo_fondo) / Decimal('2')
+        elif sueldo_organizacion:
+            return sueldo_organizacion
+        elif sueldo_fondo:
+            return sueldo_fondo
         else:
             return None
     
@@ -326,20 +326,20 @@ class ReporteAportesTotales(models.Model):
         sueldos_para_guardar = []
         
         for sueldo in sueldos_a_actualizar:
-            # Obtener aportes ADEMACOR y FAMECOR de este sueldo
-            ademacor_valor = Decimal('0')
-            famecor_valor = Decimal('0')
+            # Obtener aportes Organización y Fondo de este sueldo
+            organizacion_valor = Decimal('0')
+            fondo_valor = Decimal('0')
             
             for aporte in sueldo.aportes.all():
-                if aporte.nombre.upper() == 'ADEMACOR':
-                    ademacor_valor = aporte.valor
-                elif aporte.nombre.upper() == 'FAMECOR':
-                    famecor_valor = aporte.valor
+                if aporte.nombre.upper() == 'ORGANIZACION':
+                    organizacion_valor = aporte.valor
+                elif aporte.nombre.upper() == 'FONDO':
+                    fondo_valor = aporte.valor
             
             # Calcular sueldo desde aportes
             sueldo_calculado = self.calcular_sueldo_desde_aportes(
-                ademacor_valor=ademacor_valor,
-                famecor_valor=famecor_valor
+                organizacion_valor=organizacion_valor,
+                fondo_valor=fondo_valor
             )
             
             if sueldo_calculado and sueldo_calculado > 0:
@@ -360,15 +360,15 @@ class ReporteAportesTotales(models.Model):
             'total_procesados': len(sueldos_a_actualizar)
         }
     
-    def get_porcentaje_ademacor(self):
+    def get_porcentaje_organizacion(self):
         """
-        Calcula el porcentaje que representa ADEMACOR del total.
+        Calcula el porcentaje que representa Organización del total.
         
         Returns:
-            Decimal: Porcentaje de ADEMACOR
+            Decimal: Porcentaje de Organización
         """
         if self.total_general > 0:
-            return (self.total_ademacor / self.total_general) * 100
+            return (self.total_organizacion / self.total_general) * 100
         return Decimal('0.00')
     
     def get_porcentaje_famecor(self):

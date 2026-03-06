@@ -1,4 +1,4 @@
-from afiliados.models import Afiliado, DatosAdemacor
+from afiliados.models import Afiliado, DatosOrganizacion
 from django.db.models import Q
 
 def comparar_afiliados_ademacor(municipio_filtro=None):
@@ -9,7 +9,7 @@ def comparar_afiliados_ademacor(municipio_filtro=None):
 
     # Obtener querysets base
     afiliados_qs = Afiliado.objects.all()
-    ademacor_qs = DatosAdemacor.objects.all()
+    ademacor_qs = DatosOrganizacion.objects.all()
 
     if municipio_filtro:
         afiliados_qs = afiliados_qs.filter(municipio=municipio_filtro)
@@ -31,7 +31,7 @@ def comparar_afiliados_ademacor(municipio_filtro=None):
             'municipio': a.municipio,
             'origen': 'ADEMACOR'
         }
-        for a in ademacor_qs.only('cedula', 'nombre_completo', 'municipio')
+        for a in DatosOrganizacion.objects.only('cedula', 'nombre_completo', 'municipio')
     }
 
     # Identificar diferencias

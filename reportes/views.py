@@ -144,7 +144,7 @@ def reporte_delete(request, pk):
 
 def generar_reporte_diferencias(request):
     """
-    Vista para generar reporte de diferencias entre Secretaría y ADEMACOR
+    Vista para generar reporte de diferencias entre Secretaría y ORGANIZACION
     Ahora genera reporte consolidado sin filtro previo de municipio
     """
     if request.method == 'POST':
@@ -189,11 +189,11 @@ def _generar_y_registrar_diferencias(diferencias, request):
     excel_filename = _get_filename(excel_response, 'diferencias_secretaria_ademacor.xlsx')
 
     descripcion = (
-        f"Diferencias Secretaría vs ADEMACOR. "
+        f"Diferencias Secretaría vs ORGANIZACION. "
         f"Totales - Secretaría: {diferencias['estadisticas']['total_general']}, "
-        f"ADEMACOR: {diferencias['estadisticas']['total_ademacor']}, "
+        f"ORGANIZACION: {diferencias['estadisticas']['total_organizacion']}, "
         f"Solo Secretaría: {diferencias['estadisticas']['solo_general']}, "
-        f"Solo ADEMACOR: {diferencias['estadisticas']['solo_ademacor']}, "
+        f"Solo ORGANIZACION: {diferencias['estadisticas']['solo_ademacor']}, "
         f"En ambos: {diferencias['estadisticas']['ambos']}. "
         f"Generado: {diferencias['estadisticas']['fecha_generacion']}"
         f"{' | Filtro municipio: ' + diferencias['estadisticas']['municipio_filtro'] if diferencias['estadisticas']['municipio_filtro'] != 'Todos' else ''}"
@@ -229,11 +229,11 @@ def _generar_y_registrar_diferencias_filtrado(diferencias_data, filtro_aplicado,
     excel_filename = _get_filename(excel_response, 'diferencias_secretaria_ademacor_filtrado.xlsx')
 
     descripcion = (
-        f"Diferencias Secretaría vs ADEMACOR (Filtrado). "
+        f"Diferencias Secretaría vs ORGANIZACION (Filtrado). "
         f"Totales - Secretaría: {diferencias_data['estadisticas']['total_general']}, "
-        f"ADEMACOR: {diferencias_data['estadisticas']['total_ademacor']}, "
+        f"ORGANIZACION: {diferencias_data['estadisticas']['total_organizacion']}, "
         f"Solo Secretaría: {diferencias_data['estadisticas']['solo_general']}, "
-        f"Solo ADEMACOR: {diferencias_data['estadisticas']['solo_ademacor']}, "
+        f"Solo ORGANIZACION: {diferencias_data['estadisticas']['solo_ademacor']}, "
         f"En ambos: {diferencias_data['estadisticas']['ambos']}. "
         f"Generado: {diferencias_data['estadisticas']['fecha_generacion']}"
         f" | Filtro aplicado: {filtro_aplicado if filtro_aplicado else 'Todos'}"
@@ -411,7 +411,7 @@ def detalle_reporte_aportes_totales(request, pk):
     detalles_aportes = _obtener_detalles_aportes_periodo(reporte.anio, reporte.mes)
 
     # Calcular conteos para evitar usar selectattr
-    detalles_ademacor = [d for d in detalles_aportes if d['aporte_nombre'].upper() == 'ADEMACOR']
+    detalles_ademacor = [d for d in detalles_aportes if d['aporte_nombre'].upper() == 'ORGANIZACION']
     detalles_famecor = [d for d in detalles_aportes if d['aporte_nombre'].upper() == 'FAMECOR']
 
     context = {
@@ -575,19 +575,19 @@ def _exportar_aportes_totales_excel(reporte, request, save_to_db=True):
     try:
         # Crear DataFrame con datos resumidos
         datos_resumen = {
-            'Concepto': ['ADEMACOR', 'FAMECOR', 'TOTAL GENERAL'],
+            'Concepto': ['ORGANIZACION', 'FAMECOR', 'TOTAL GENERAL'],
             'Valor Total': [
-                float(reporte.total_ademacor or 0),
+                float(reporte.total_organizacion or 0),
                 float(reporte.total_famecor or 0),
                 float(reporte.total_general or 0)
             ],
             'Cantidad de Aportes': [
-                reporte.cantidad_aportes_ademacor or 0,
+                reporte.cantidad_aportes_organizacion or 0,
                 reporte.cantidad_aportes_famecor or 0,
-                (reporte.cantidad_aportes_ademacor or 0) + (reporte.cantidad_aportes_famecor or 0)
+                (reporte.cantidad_aportes_organizacion or 0) + (reporte.cantidad_aportes_famecor or 0)
             ],
             'Porcentaje': [
-                float(reporte.get_porcentaje_ademacor() or 0),
+                float(reporte.get_porcentaje_organizacion() or 0),
                 float(reporte.get_porcentaje_famecor() or 0),
                 100.0
             ]
@@ -640,7 +640,7 @@ def _exportar_aportes_totales_excel(reporte, request, save_to_db=True):
                 'Fecha de Generación': [reporte.fecha_calculo.strftime('%Y-%m-%d %H:%M:%S')],
                 'Generado por': [str(reporte.calculado_por) if reporte.calculado_por else 'Sistema'],
                 'Cantidad de Afiliados': [reporte.cantidad_afiliados],
-                'Total ADEMACOR': [f"${reporte.total_ademacor:,.2f}"],
+                'Total ORGANIZACION': [f"${reporte.total_organizacion:,.2f}"],
                 'Total FAMECOR': [f"${reporte.total_famecor:,.2f}"],
                 'Total General': [f"${reporte.total_general:,.2f}"]
             }
@@ -702,7 +702,7 @@ def _exportar_aportes_totales_pdf(reporte, request, save_to_db=True):
         print("DEBUG: Creando título...")
         # Título
         title_style = styles['Title']
-        title_style.textColor = colors.HexColor('#FF6B35')  # Naranja ADEMACOR
+        title_style.textColor = colors.HexColor('#FF6B35')  # Naranja ORGANIZACION
         content.append(Paragraph("REPORTE DE TOTALES DE APORTES", title_style))
         content.append(Spacer(1, 12))
 
@@ -718,9 +718,9 @@ def _exportar_aportes_totales_pdf(reporte, request, save_to_db=True):
         # Tabla de resumen
         resumen_data = [
             ['CONCEPTO', 'VALOR TOTAL', 'CANTIDAD', 'PORCENTAJE'],
-            ['ADEMACOR', f"${float(reporte.total_ademacor or 0):,.2f}", str(reporte.cantidad_aportes_ademacor or 0), f"{float(reporte.get_porcentaje_ademacor() or 0):.2f}%"],
+            ['ORGANIZACION', f"${float(reporte.total_organizacion or 0):,.2f}", str(reporte.cantidad_aportes_organizacion or 0), f"{float(reporte.get_porcentaje_organizacion() or 0):.2f}%"],
             ['FAMECOR', f"${float(reporte.total_famecor or 0):,.2f}", str(reporte.cantidad_aportes_famecor or 0), f"{float(reporte.get_porcentaje_famecor() or 0):.2f}%"],
-            ['TOTAL GENERAL', f"${float(reporte.total_general or 0):,.2f}", str((reporte.cantidad_aportes_ademacor or 0) + (reporte.cantidad_aportes_famecor or 0)), "100.00%"]
+            ['TOTAL GENERAL', f"${float(reporte.total_general or 0):,.2f}", str((reporte.cantidad_aportes_organizacion or 0) + (reporte.cantidad_aportes_famecor or 0)), "100.00%"]
         ]
 
         resumen_table = Table(resumen_data, colWidths=[2*inch, 1.5*inch, 1*inch, 1.2*inch])
@@ -739,19 +739,19 @@ def _exportar_aportes_totales_pdf(reporte, request, save_to_db=True):
         content.append(resumen_table)
         content.append(Spacer(1, 20))
 
-        print("DEBUG: Procesando detalles de ADEMACOR...")
-        # Detalles de ADEMACOR
+        print("DEBUG: Procesando detalles de ORGANIZACION...")
+        # Detalles de ORGANIZACION
         if detalles:
-            detalles_ademacor = [d for d in detalles if d and d.get('aporte_nombre', '').upper() == 'ADEMACOR']
-            print(f"DEBUG: Encontrados {len(detalles_ademacor)} detalles ADEMACOR")
+            detalles_ademacor = [d for d in detalles if d and d.get('aporte_nombre', '').upper() == 'ORGANIZACION']
+            print(f"DEBUG: Encontrados {len(detalles_ademacor)} detalles ORGANIZACION")
 
             if detalles_ademacor:
-                content.append(Paragraph("DETALLES - ADEMACOR", styles['Heading2']))
+                content.append(Paragraph("DETALLES - ORGANIZACION", styles['Heading2']))
                 content.append(Spacer(1, 6))
 
                 ademacor_data = [['CÉDULA', 'NOMBRE', 'CARGO', 'SUELDO NETO', 'APORTE']]
                 for i, d in enumerate(detalles_ademacor):
-                    print(f"DEBUG: Procesando detalle ADEMACOR {i}: {d}")
+                    print(f"DEBUG: Procesando detalle ORGANIZACION {i}: {d}")
                     ademacor_data.append([
                         d.get('cedula', ''),
                         (d.get('nombre_completo', '') or '')[:30] + '...' if len(d.get('nombre_completo', '') or '') > 30 else (d.get('nombre_completo', '') or ''),
