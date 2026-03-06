@@ -6,10 +6,10 @@
 <style>
     /* Variables CSS para tematización consistente */
     :root {
-        --organizacion-primary: #17a2b8;
-        --organizacion-secondary: #138496;
-        --organizacion-dark: #0c5460;
-        --organizacion-light: rgba(23, 162, 184, 0.1);
+        --organizacion-primary: #1e40af;
+        --organizacion-secondary: #3b82f6;
+        --organizacion-dark: #1e3a8a;
+        --organizacion-light: #eff6ff;
         --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
         --shadow-md: 0 4px 6px rgba(0,0,0,.1);
         --shadow-lg: 0 8px 16px rgba(255, 193, 7, 0.2);
@@ -43,7 +43,7 @@
     }
 
     .table tbody tr:hover {
-        background-color: var(--ademacor-light);
+        background-color: var(--organizacion-light);
         transform: translateX(2px);
         box-shadow: var(--shadow-sm);
     }
@@ -100,22 +100,22 @@
         overflow: hidden;
     }
 
-    .card-ademacor {
-        border-left: 4px solid var(--ademacor-primary);
+    .card-organizacion {
+        border-left: 4px solid var(--organizacion-primary);
         transition: all 0.3s ease;
     }
 
-    .card-ademacor:hover {
+    .card-organizacion:hover {
         box-shadow: var(--shadow-lg);
     }
 
     /* Header de página mejorado */
     .page-header {
-        background: linear-gradient(135deg, var(--ademacor-light), transparent);
+        background: linear-gradient(135deg, var(--organizacion-light), transparent);
         padding: 2rem;
         border-radius: 12px;
         margin-bottom: 2rem;
-        border-left: 4px solid var(--ademacor-primary);
+        border-left: 4px solid var(--organizacion-primary);
     }
 
     /* Búsqueda mejorada */
@@ -131,8 +131,8 @@
     }
 
     .search-wrapper .form-control:focus {
-        border-color: var(--ademacor-primary);
-        box-shadow: 0 0 0 0.2rem var(--ademacor-light);
+        border-color: var(--organizacion-primary);
+        box-shadow: 0 0 0 0.2rem var(--organizacion-light);
     }
 
     .search-icon {
@@ -146,7 +146,7 @@
 
     /* Stats cards */
     .stats-card {
-        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        background: linear-gradient(135deg, var(--organizacion-primary), var(--organizacion-secondary));
         color: #212529;
         border-radius: 12px;
         padding: 1.5rem;
@@ -187,13 +187,13 @@
     }
 
     .pagination .page-link:hover {
-        background-color: var(--ademacor-light);
-        color: var(--ademacor-dark);
+        background-color: var(--organizacion-light);
+        color: var(--organizacion-dark);
         transform: translateY(-2px);
     }
 
     .pagination .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--ademacor-primary), var(--ademacor-secondary));
+        background: linear-gradient(135deg, var(--organizacion-primary), var(--organizacion-secondary));
         color: #212529;
         font-weight: 700;
     }
@@ -208,7 +208,7 @@
         width: 120px;
         height: 120px;
         margin: 0 auto 2rem;
-        background: var(--ademacor-light);
+        background: var(--organizacion-light);
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -319,14 +319,14 @@
     /* Accessibility improvements */
     .btn:focus,
     .form-control:focus {
-        outline: 3px solid var(--ademacor-primary);
+        outline: 3px solid var(--organizacion-primary);
         outline-offset: 2px;
     }
 
     /* Dark mode support (opcional) */
     @media (prefers-color-scheme: dark) {
         :root {
-            --ademacor-light: rgba(255, 193, 7, 0.15);
+            --organizacion-light: rgba(30, 64, 175, 0.15);
         }
     }
 
@@ -522,7 +522,7 @@ function showNotification(message, type = 'info') {
         </div>
         <div class="col-md-4 mt-3 mt-md-0">
             <div class="action-buttons d-flex gap-2 justify-content-md-end">
-                <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-ademacor">
+                <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-organizacion">
                     <i class="fas fa-file-excel me-2"></i>Importar Datos
                 </a>
                 <div class="btn-group">
@@ -588,7 +588,7 @@ function showNotification(message, type = 'info') {
 {% endif %}
 
 <!-- Búsqueda y Filtros Mejorados -->
-<div class="card mb-4 card-ademacor">
+<div class="card mb-4 card-organizacion">
     <div class="card-body">
         <form method="GET" id="searchForm" class="row g-3 align-items-end">
             <div class="col-md-10">
@@ -603,7 +603,7 @@ function showNotification(message, type = 'info') {
                            name="search"
                            placeholder="Buscar por nombre, cédula o municipio..."
                            value="{{ search_query|default:'' }}"
-                           aria-label="Buscar registros de ADEMACOR"
+                           aria-label="Buscar registros de Organización"
                            autocomplete="off">
                 </div>
                 <small class="form-text text-muted mt-1">
@@ -628,7 +628,7 @@ function showNotification(message, type = 'info') {
     </div>
 </div>
 
-<!-- Tabla de Datos ADEMACOR -->
+<!-- Tabla de Datos Organización -->
 <div class="card">
     <div class="card-body p-0">
         {% if datos_organizacion %}
@@ -681,7 +681,7 @@ function showNotification(message, type = 'info') {
                                 </div>
                                 <div>
                                     <strong class="d-block" style="color: #212529 !important;">{{ registro.nombre_completo }}</strong>
-                                    <span class="badge badge-ademacor">ADEMACOR</span>
+                                    <span class="badge badge-organizacion">Organización</span>
                                 </div>
                             </div>
                         </td>
@@ -724,7 +724,7 @@ function showNotification(message, type = 'info') {
                                    data-bs-toggle="tooltip"
                                    data-bs-placement="top"
                                    title="Eliminar registro"
-                                   onclick="return confirmDelete('¿Está seguro de eliminar este registro de ADEMACOR?')">
+                                   onclick="return confirmDelete('¿Está seguro de eliminar este registro de Organización?')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>
@@ -738,7 +738,7 @@ function showNotification(message, type = 'info') {
         <!-- Paginación Mejorada -->
         {% if is_paginated %}
         <div class="card-footer bg-light border-top-0">
-            <nav aria-label="Paginación de datos de ADEMACOR">
+            <nav aria-label="Paginación de datos de Organización">
                 <div class="d-flex justify-content-between align-items-center">
                     <small class="text-muted">
                         Mostrando {{ page_obj.start_index }} - {{ page_obj.end_index }} de {{ page_obj.paginator.count }} registros
@@ -797,7 +797,7 @@ function showNotification(message, type = 'info') {
             {% if search_query %}
             <h3 class="mb-3">No se encontraron resultados</h3>
             <p class="text-muted mb-4">
-                No hay registros de ADEMACOR que coincidan con tu búsqueda <strong>"{{ search_query }}"</strong>
+                No hay registros de Organización que coincidan con tu búsqueda <strong>"{{ search_query }}"</strong>
             </p>
             <div class="d-flex gap-2 justify-content-center">
                 <a href="{% url 'afiliados:datos_organizacion_list' %}" class="btn btn-warning">
@@ -808,13 +808,13 @@ function showNotification(message, type = 'info') {
                 </a>
             </div>
             {% else %}
-            <h3 class="mb-3">No hay datos de ADEMACOR</h3>
+            <h3 class="mb-3">No hay datos de Organización</h3>
             <p class="text-muted mb-4">
-                Aún no se han importado registros de ADEMACOR.<br>
+                Aún no se han importado registros de Organización.<br>
                 Comienza importando datos desde un archivo Excel.
             </p>
-            <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-ademacor btn-lg">
-                <i class="fas fa-file-excel me-2"></i>Importar Datos de ADEMACOR
+            <a href="{% url 'afiliados:importar_excel' %}" class="btn btn-organizacion btn-lg">
+                <i class="fas fa-file-excel me-2"></i>Importar Datos de Organización
             </a>
             {% endif %}
         </div>
@@ -824,7 +824,7 @@ function showNotification(message, type = 'info') {
 
 <!-- Acciones en Lote Mejoradas -->
 {% if datos_organizacion %}
-<div class="card mt-4 card-ademacor">
+<div class="card mt-4 card-organizacion">
     <div class="card-header bg-light">
         <div class="d-flex justify-content-between align-items-center">
             <h5 class="card-title mb-0">
@@ -840,7 +840,7 @@ function showNotification(message, type = 'info') {
         <div class="row g-3">
             <!-- Recalcular Sueldos -->
             <div class="col-md-4 col-lg-3">
-                <button class="bulk-action-btn btn btn-outline-success w-100 h-100" onclick="alert('Comando: python manage.py recalcular_sueldos\n\nEsta acción recalculará todos los sueldos de ADEMACOR.');" data-tooltip="Recalcular todos los sueldos">
+                <button class="bulk-action-btn btn btn-outline-success w-100 h-100" onclick="alert('Comando: python manage.py recalcular_sueldos\n\nEsta acción recalculará todos los sueldos de Organización.');" data-tooltip="Recalcular todos los sueldos">
                     <div class="d-flex flex-column align-items-center justify-content-center p-3">
                         <i class="fas fa-calculator fa-3x mb-3 text-success"></i>
                         <span class="fw-bold fs-6">Recalcular Sueldos</span>
@@ -862,7 +862,7 @@ function showNotification(message, type = 'info') {
 
             <!-- Exportar a PDF -->
             <div class="col-md-4 col-lg-3">
-                <button class="bulk-action-btn btn btn-outline-danger w-100 h-100" onclick="window.location.href='/afiliados/ademacor/exportar-pdf/';" data-tooltip="Exportar todos los datos a PDF">
+                <button class="bulk-action-btn btn btn-outline-danger w-100 h-100" onclick="window.location.href='/afiliados/organizacion/exportar-pdf/';" data-tooltip="Exportar todos los datos a PDF">
                     <div class="d-flex flex-column align-items-center justify-content-center p-3">
                         <i class="fas fa-file-pdf fa-3x mb-3 text-danger"></i>
                         <span class="fw-bold fs-6">Exportar PDF</span>
@@ -939,7 +939,7 @@ function showNotification(message, type = 'info') {
 <div class="text-center mt-5 mb-4">
     <small class="text-muted">
         <i class="fas fa-database me-1"></i>
-        Sistema de Gestión de Afiliados ADEMACOR - SIGAA
+        Sistema de Gestión de Afiliados Organización - SIGAA
     </small>
 </div>
 {% endblock %}

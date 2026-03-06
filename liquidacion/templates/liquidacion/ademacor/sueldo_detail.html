@@ -1,17 +1,17 @@
 {% extends 'base.html' %} {% load static %} {% block title %}Detalle Sueldo
-ADEMACOR{% endblock %} {% block content %}
+Organización{% endblock %} {% block content %}
 <div class="container-fluid mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 text-gray-800">Detalle de Liquidación - ADEMACOR</h1>
+    <h1 class="h3 text-gray-800">Detalle de Liquidación - Organización</h1>
     <div>
       <a
-        href="{% url 'liquidacion:sueldo_ademacor_recalcular' sueldo.pk %}"
+        href="{% url 'liquidacion:sueldo_organizacion_recalcular' sueldo.pk %}"
         class="btn btn-warning"
       >
         <i class="fas fa-sync-alt"></i> Recalcular
       </a>
       <a
-        href="{% url 'liquidacion:sueldo_ademacor_list' %}"
+        href="{% url 'liquidacion:sueldo_organizacion_list' %}"
         class="btn btn-secondary"
       >
         <i class="fas fa-arrow-left"></i> Volver
@@ -30,15 +30,15 @@ ADEMACOR{% endblock %} {% block content %}
           <table class="table table-borderless">
             <tr>
               <th style="width: 40%">Afiliado:</th>
-              <td>{{ sueldo.afiliado_ademacor.nombre_completo }}</td>
+              <td>{{ sueldo.afiliado_organizacion.nombre_completo }}</td>
             </tr>
             <tr>
               <th>Cédula:</th>
-              <td>{{ sueldo.afiliado_ademacor.cedula }}</td>
+              <td>{{ sueldo.afiliado_organizacion.cedula }}</td>
             </tr>
             <tr>
               <th>Cargo:</th>
-              <td>{{ sueldo.afiliado_ademacor.cargo_desempenado }}</td>
+              <td>{{ sueldo.afiliado_organizacion.cargo_desempenado }}</td>
             </tr>
             <tr>
               <th>Período:</th>

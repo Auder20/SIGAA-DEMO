@@ -51,8 +51,8 @@
                 <label for="tipo_aporte" class="form-label">Tipo de Aporte</label>
                 <select class="form-select" id="tipo_aporte" name="tipo_aporte">
                     <option value="">Todos los tipos</option>
-                    <option value="ADEMACOR" {% if request.GET.tipo_aporte == 'ADEMACOR' %}selected{% endif %}>ADEMACOR</option>
-                    <option value="FAMECOR" {% if request.GET.tipo_aporte == 'FAMECOR' %}selected{% endif %}>FAMECOR</option>
+                    <option value="ORGANIZACION" {% if request.GET.tipo_aporte == 'ORGANIZACION' %}selected{% endif %}>Organización</option>
+                    <option value="FONDO" {% if request.GET.tipo_aporte == 'FONDO' %}selected{% endif %}>Fondo</option>
                     <option value="OTROS" {% if request.GET.tipo_aporte == 'OTROS' %}selected{% endif %}>Otros</option>
                 </select>
             </div>
@@ -118,8 +118,8 @@
         <div class="card text-white" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
             <div class="card-body text-center">
                 <i class="fas fa-heart fa-2x mb-2"></i>
-                <h4>${{ ademacor_total|floatformat:0|default:0 }}</h4>
-                <small>ADEMACOR</small>
+                <h4>${{ organizacion_total|floatformat:0|default:0 }}</h4>
+                <small>Organización</small>
             </div>
         </div>
     </div>
@@ -127,8 +127,8 @@
         <div class="card text-white" style="background: linear-gradient(135deg, #17a2b8, #6f42c1);">
             <div class="card-body text-center">
                 <i class="fas fa-users fa-2x mb-2"></i>
-                <h4>${{ famecor_total|floatformat:0|default:0 }}</h4>
-                <small>FAMECOR</small>
+                <h4>${{ fondo_total|floatformat:0|default:0 }}</h4>
+                <small>Fondo</small>
             </div>
         </div>
     </div>
@@ -192,9 +192,9 @@
                         </td>
                         <td>
                             <div class="d-flex align-items-center">
-                                {% if aporte.nombre == 'ADEMACOR' %}
-                                    <i class="fas fa-heart text-danger me-2"></i>
-                                {% elif aporte.nombre == 'FAMECOR' %}
+                                {% if aporte.nombre == 'ORGANIZACION' %}
+                                    <i class="fas fa-handshake text-warning me-2"></i>
+                                {% elif aporte.nombre == 'FONDO' %}
                                     <i class="fas fa-users text-primary me-2"></i>
                                 {% else %}
                                     <i class="fas fa-percentage text-info me-2"></i>
