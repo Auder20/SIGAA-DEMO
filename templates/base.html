@@ -19,18 +19,18 @@
     <!-- Custom Styles -->
     <style>
         :root {
-            --primary-color: #FF6B35;
-            --primary-dark: #E55A2B;
-            --primary-light: #FF8A5B;
+            --primary-color: #1e40af;
+            --primary-dark: #1e3a8a;
+            --primary-light: #3b82f6;
             --secondary-color: #6c757d;
             --success-color: #28a745;
             --info-color: #17a2b8;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --orange-gradient: linear-gradient(135deg, #FF6B35, #FF8A5B);
-            --orange-light: #FFF4F0;
+            --light-color: #f3f4f6;
+            --dark-color: #1f2937;
+            --blue-gradient: linear-gradient(135deg, #1e40af, #3b82f6);
+            --blue-light: #eff6ff;
             --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
             --shadow-md: 0 4px 8px rgba(0,0,0,.1);
             --shadow-lg: 0 8px 20px rgba(0,0,0,.15);
@@ -44,7 +44,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f3f4f6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -56,7 +56,7 @@
 
         /* Navbar Mejorado */
         .navbar {
-            background: var(--orange-gradient) !important;
+            background: var(--blue-gradient) !important;
             box-shadow: var(--shadow-lg);
             padding: 0.75rem 0;
         }
@@ -131,7 +131,7 @@
         }
 
         .dropdown-item:hover {
-            background: var(--orange-light);
+            background: var(--blue-light);
             color: var(--primary-color);
             transform: translateX(5px);
         }
@@ -160,7 +160,7 @@
         }
 
         .card-header {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             color: white;
             border: none;
             padding: 1.25rem 1.5rem;
@@ -177,14 +177,14 @@
         }
 
         .btn-primary {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             box-shadow: var(--shadow-sm);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, #E55A2B, #FF6B35);
+            background: linear-gradient(135deg, #1e3a8a, #1e40af);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
         }
 
         .btn-outline-primary {
@@ -193,7 +193,7 @@
         }
 
         .btn-outline-primary:hover {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             color: white;
             border-color: transparent;
         }
@@ -287,7 +287,7 @@
         }
 
         .table thead th {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             color: white;
             border: none;
             font-weight: 600;
@@ -302,7 +302,7 @@
         }
 
         .table tbody tr:hover {
-            background-color: rgba(255, 107, 53, 0.05);
+            background-color: rgba(30, 64, 175, 0.05);
             transform: scale(1.01);
         }
 
@@ -316,7 +316,7 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.25);
         }
 
         .form-label {
@@ -346,7 +346,7 @@
 
         /* Stats Cards */
         .stats-card {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             color: white;
             border-radius: 15px;
             box-shadow: var(--shadow-lg);
@@ -397,12 +397,12 @@
         }
 
         .badge.bg-primary {
-            background: var(--orange-gradient) !important;
+            background: var(--blue-gradient) !important;
         }
 
         /* Page Header */
         .page-header {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             color: white;
             padding: 2.5rem 0;
             margin-bottom: 2rem;
@@ -499,7 +499,7 @@
                 background-color: #2a2a2a;
                 color: #e0e0e0;
                 border-color: var(--primary-color);
-                box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+                box-shadow: 0 0 0 0.2rem rgba(30, 64, 175, 0.25);
             }
 
             .form-label {
@@ -522,13 +522,13 @@
             }
 
             .table thead th {
-                background: var(--orange-gradient);
+                background: var(--blue-gradient);
                 color: white;
                 border-color: #404040;
             }
 
             .table tbody tr:hover {
-                background-color: rgba(255, 107, 53, 0.1);
+                background-color: rgba(30, 64, 175, 0.1);
                 color: #e0e0e0;
             }
 
@@ -574,7 +574,7 @@
             }
 
             .text-primary {
-                color: #FF8A5B !important;
+                color: #3b82f6 !important;
             }
 
             .text-danger {
@@ -635,7 +635,7 @@
             }
 
             .btn-outline-primary:hover {
-                background: var(--orange-gradient);
+                background: var(--blue-gradient);
                 color: white;
                 border-color: transparent;
             }
@@ -648,12 +648,12 @@
 
             /* Page header */
             .page-header {
-                background: var(--orange-gradient);
+                background: var(--blue-gradient);
             }
 
             /* Stats cards */
             .stats-card {
-                background: var(--orange-gradient);
+                background: var(--blue-gradient);
                 color: white;
             }
 
@@ -684,7 +684,7 @@
             }
 
             .dropdown-item:hover {
-                background-color: rgba(255, 107, 53, 0.2);
+                background-color: rgba(30, 64, 175, 0.2);
                 color: var(--primary-color);
             }
 
@@ -712,7 +712,7 @@
 
             /* Navbar (already handled by existing styles) */
             .navbar {
-                background: var(--orange-gradient) !important;
+                background: var(--blue-gradient) !important;
             }
 
             /* Loading spinner */
@@ -751,7 +751,7 @@
         }
 
         .gradient-text {
-            background: var(--orange-gradient);
+            background: var(--blue-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;

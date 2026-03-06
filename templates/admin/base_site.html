@@ -7,20 +7,20 @@
 {{ block.super }}
 <style>
     :root {
-        --primary-color: #FF6B35;
-        --primary-dark: #E55A2B;
-        --primary-light: #FF8A5B;
+        --primary-color: #1e40af;
+        --primary-dark: #1e3a8a;
+        --primary-light: #3b82f6;
         --secondary-color: #6c757d;
-        --light-color: #f8f9fa;
-        --dark-color: #212529;
-        --orange-gradient: linear-gradient(135deg, #FF6B35, #FF8A5B);
-        --orange-light: #FFF4F0;
+        --light-color: #f3f4f6;
+        --dark-color: #1f2937;
+        --blue-gradient: linear-gradient(135deg, #1e40af, #3b82f6);
+        --blue-light: #eff6ff;
         --shadow-sm: 0 2px 4px rgba(0,0,0,.08);
         --shadow-md: 0 4px 8px rgba(0,0,0,.1);
     }
 
     #header {
-        background: var(--orange-gradient) !important;
+        background: var(--blue-gradient) !important;
         color: white !important;
         height: 60px;
     }
@@ -34,7 +34,7 @@
     }
 
     .module h2, .module caption, .inline-group h2 {
-        background: var(--orange-gradient) !important;
+        background: var(--blue-gradient) !important;
         color: white !important;
     }
 
@@ -50,7 +50,7 @@
     .button:hover, input[type=submit]:hover, input[type=button]:hover, .submit-row input:hover, a.button:hover {
         background: var(--primary-dark) !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
     }
 
     .button.default, input[type=submit].default, .submit-row input.default {
@@ -81,7 +81,7 @@
     }
 
     .dashboard .module table td a:hover {
-        background: var(--orange-light);
+        background: var(--blue-light);
         text-decoration: none;
         padding-left: 15px;
     }
@@ -104,7 +104,7 @@
     }
 
     #changelist table tbody tr:hover {
-        background-color: var(--orange-light);
+        background-color: var(--blue-light);
     }
 
     .paginator {
@@ -123,12 +123,12 @@
     .object-tools a:hover {
         background: var(--primary-dark) !important;
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        box-shadow: 0 4px 12px rgba(30, 64, 175, 0.4);
     }
 
     .selector-changelist .selector-available h2,
     .selector-changelist .selector-chosen h2 {
-        background: var(--orange-gradient) !important;
+        background: var(--blue-gradient) !important;
         color: white !important;
     }
 
