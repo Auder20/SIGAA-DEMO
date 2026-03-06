@@ -359,7 +359,7 @@ class Command(BaseCommand):
         # Procesar afiliados de organización externa
         for afiliado_org in DatosOrganizacion.objects.filter(activo=True)[:20]:  # Primeros 20 activos
             try:
-                sueldo, created = afiliado_org.crear_o_actualizar_sueldo(2025)
+                sueldo, created, calculo = afiliado_org.crear_o_actualizar_sueldo(2025)
                 if created:
                     self.stdout.write(f'   ✅ Sueldo organización creado: {afiliado_org.nombre_completo}')
             except Exception as e:
@@ -375,9 +375,9 @@ class Command(BaseCommand):
                 'anio': 2025,
                 'mes': 1,
                 'cantidad_afiliados': 60,
-                'cantidad_aportes_ademacor': 75,
+                'cantidad_aportes_organizacion': 75,
                 'cantidad_aportes_famecor': 25,
-                'total_ademacor': Decimal('1500000'),
+                'total_organizacion': Decimal('1500000'),
                 'total_famecor': Decimal('300000'),
                 'total_general': Decimal('1800000'),
             },
@@ -385,9 +385,9 @@ class Command(BaseCommand):
                 'anio': 2025,
                 'mes': 2,
                 'cantidad_afiliados': 62,
-                'cantidad_aportes_ademacor': 78,
+                'cantidad_aportes_organizacion': 78,
                 'cantidad_aportes_famecor': 26,
-                'total_ademacor': Decimal('1560000'),
+                'total_organizacion': Decimal('1560000'),
                 'total_famecor': Decimal('312000'),
                 'total_general': Decimal('1872000'),
             },
@@ -395,9 +395,9 @@ class Command(BaseCommand):
                 'anio': 2025,
                 'mes': 3,
                 'cantidad_afiliados': 65,
-                'cantidad_aportes_ademacor': 80,
+                'cantidad_aportes_organizacion': 80,
                 'cantidad_aportes_famecor': 27,
-                'total_ademacor': Decimal('1600000'),
+                'total_organizacion': Decimal('1600000'),
                 'total_famecor': Decimal('320000'),
                 'total_general': Decimal('1920000'),
             },
