@@ -1370,7 +1370,7 @@ def comparacion_afiliados_organizacion(request):
     municipios = sorted(list(set(list(municipios_gral) + list(municipios_org))))
     municipios = [m for m in municipios if m] # Filtrar vacíos
 
-    return render(request, 'afiliados/comparacion_afiliados_ademacor.html', {
+    return render(request, 'afiliados/comparacion_afiliados_organizacion.html', {
         'resultados': resultados,
         'municipios': municipios,
         'municipio_actual': municipio_filtro

@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Comparación Afiliados vs ADEMACOR{% endblock %}
+{% block title %}Comparación Afiliados vs Organización{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 text-gray-800">Comparación Afiliados (General) vs ADEMACOR</h1>
-        <a href="{% url 'afiliados:datos_ademacor_list' %}" class="btn btn-secondary">
+        <h1 class="h3 text-gray-800">Comparación Afiliados (General) vs Organización</h1>
+        <a href="{% url 'afiliados:datos_organizacion_list' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Volver
         </a>
     </div>
@@ -54,8 +54,8 @@
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Solo en ADEMACOR</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.solo_ademacor|length }}</div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Solo en Organización</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ resultados.solo_organizacion|length }}</div>
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-user-tag fa-2x text-gray-300"></i>
@@ -104,7 +104,7 @@
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-success text-white">
-                    <h6 class="m-0 font-weight-bold">Solo en General (No en ADEMACOR)</h6>
+                    <h6 class="m-0 font-weight-bold">Solo en General (No en Organización)</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -133,11 +133,11 @@
             </div>
         </div>
 
-        <!-- Solo ADEMACOR -->
+        <!-- Solo Organización -->
         <div class="col-lg-6 mb-4">
             <div class="card shadow mb-4">
                 <div class="card-header py-3 bg-warning text-white">
-                    <h6 class="m-0 font-weight-bold">Solo en ADEMACOR (No en General)</h6>
+                    <h6 class="m-0 font-weight-bold">Solo en Organización (No en General)</h6>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
@@ -150,7 +150,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for item in resultados.solo_ademacor %}
+                                {% for item in resultados.solo_organizacion %}
                                 <tr>
                                     <td>{{ item.cedula }}</td>
                                     <td>{{ item.nombre }}</td>
@@ -181,9 +181,9 @@
                                 <tr>
                                     <th>Cédula</th>
                                     <th>Nombre General</th>
-                                    <th>Nombre ADEMACOR</th>
+                                    <th>Nombre Organización</th>
                                     <th>Municipio General</th>
-                                    <th>Municipio ADEMACOR</th>
+                                    <th>Municipio Organización</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -191,9 +191,9 @@
                                 <tr>
                                     <td>{{ item.cedula }}</td>
                                     <td>{{ item.nombre_general }}</td>
-                                    <td>{{ item.nombre_ademacor }}</td>
+                                    <td>{{ item.nombre_organizacion }}</td>
                                     <td class="text-danger">{{ item.municipio_general }}</td>
-                                    <td class="text-danger">{{ item.municipio_ademacor }}</td>
+                                    <td class="text-danger">{{ item.municipio_organizacion }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr><td colspan="5" class="text-center">No hay diferencias encontradas</td></tr>
