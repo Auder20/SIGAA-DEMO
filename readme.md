@@ -21,7 +21,19 @@ Las organizaciones gremiales y educativas suelen gestionar aportes y sueldos en 
 
 ## Screenshots
 
-screenshots/
+### 🏠 Dashboard Principal
+![Dashboard](screenshots/home.jpeg)
+
+### 🔐 Login y Autenticación
+![Login](screenshots/login.jpeg) ![Registro](screenshots/registro.jpeg)
+
+### 👥 Gestión de Afiliados
+![Lista Afiliados](screenshots/lista%20afiliados.jpeg)
+
+### 💰 Gestión de Sueldos y Aportes
+![Lista Sueldos](screenshots/lista%20sueldos.jpeg) 
+![Lista Aportes](screenshots/lista%20aportes.jpeg)
+![Aportes Organización](screenshots/aportes%20organizacion.jpeg)
 
 ---
 
