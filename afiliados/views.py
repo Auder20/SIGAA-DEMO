@@ -19,14 +19,15 @@ from .services.excel_import import importar_afiliados_desde_excel, importar_orga
 from .services.excel_import.aportes_import import importar_aportes_desde_excel
 from afiliados.services.export import DynamicExportService
 import logging
-from django.views.decorators.cache import cache_page
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from datetime import datetime
 
 # Configurar logger para esta vista
 logger = logging.getLogger(__name__)
 
 
+@login_required
 @cache_page(300)
 def afiliados_main(request):
     """
@@ -67,6 +68,7 @@ def afiliados_main(request):
     return render(request, 'afiliados/main.html', context)
 
 
+@login_required
 def importar_aportes_excel_view(request):
     """
     Vista para importar datos de aportes desde múltiples archivos Excel.
@@ -138,6 +140,7 @@ def importar_aportes_excel_view(request):
     })
 
 
+@login_required
 def importar_excel_view(request):
     """
     Vista para importar datos desde un archivo Excel.
@@ -278,6 +281,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
+@login_required
 def afiliado_list(request):
     """
     Lista y búsqueda de afiliados con paginación, optimizada para lectura.
@@ -323,6 +327,7 @@ def afiliado_list(request):
     return render(request, 'afiliados/afiliado_list.html', context)
 
 
+@login_required
 def exportar_afiliados_excel(request):
     """
     Vista para exportar afiliados a Excel con servicio completamente dinámico.
@@ -384,6 +389,7 @@ def exportar_afiliados_excel(request):
         return redirect('afiliados:afiliado_list')
 
 
+@login_required
 def exportar_afiliados_pdf(request):
     """
     Vista para exportar afiliados a PDF con formato profesional.
@@ -629,6 +635,7 @@ def preparar_datos_afiliados_exportacion(include_inactive: bool = True, search_q
     return data
 
 
+@login_required
 def afiliado_detail(request, pk):
     """
     Vista para mostrar los detalles de un afiliado específico.
@@ -650,6 +657,7 @@ def afiliado_detail(request, pk):
     return render(request, 'afiliados/afiliado_detail.html', {'afiliado': afiliado})
 
 
+@login_required
 def afiliado_create(request):
     """
     Vista para crear un nuevo afiliado.
@@ -743,6 +751,7 @@ def afiliado_create(request):
     # GET request - mostrar formulario vacío
     return render(request, 'afiliados/afiliado_form.html')
 
+@login_required
 def afiliado_delete(request, pk):
     """
     Vista para eliminar un afiliado.
@@ -764,6 +773,7 @@ def afiliado_delete(request, pk):
 
     return render(request, 'afiliados/afiliado_confirm_delete.html', {'afiliado': afiliado})
 
+@login_required
 def afiliado_update(request, pk):
     """
     Vista para actualizar un afiliado existente.
@@ -964,6 +974,7 @@ def recalcular_sueldo(request, pk):
     return redirect('afiliados:afiliado_detail', pk=pk)
 
 
+@login_required
 @cache_page(300)
 def datos_secretaria_list(request):
     """
@@ -1016,6 +1027,7 @@ def datos_secretaria_list(request):
     })
 
 
+@login_required
 @cache_page(300)
 def datos_organizacion_list(request):
     """
@@ -1069,6 +1081,7 @@ def datos_organizacion_list(request):
 
 
 
+@login_required
 def datos_organizacion_detail(request, pk):
     """
     Vista para mostrar los detalles de un registro de organización externa.
@@ -1084,6 +1097,7 @@ def datos_organizacion_detail(request, pk):
     return render(request, 'afiliados/datos_organizacion_detail.html', {'registro': registro})
 
 
+@login_required
 def datos_organizacion_edit(request, pk):
     """
     Vista para editar un registro de organización externa.
@@ -1109,6 +1123,7 @@ def datos_organizacion_edit(request, pk):
     return render(request, 'afiliados/datos_organizacion_form.html', {'registro': registro})
 
 
+@login_required
 def datos_organizacion_delete(request, pk):
     """
     Vista para eliminar un registro de organización externa.
@@ -1130,8 +1145,9 @@ def datos_organizacion_delete(request, pk):
     return render(request, 'afiliados/datos_organizacion_confirm_delete.html', {'registro': registro})
 
 
+@login_required
 @cache_page(300)
-def datos_organizacion_list(request):
+def datos_organizacion_export_list(request):
     """
     Vista para mostrar y buscar datos de organización externa.
 

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.contrib import messages
 from .models import Reporte, ReporteAportesTotales
@@ -13,6 +14,7 @@ from decimal import Decimal
 from decimal import Decimal
 
 
+@login_required
 @cache_page(300)
 def reportes_main(request):
 	"""
@@ -33,7 +35,7 @@ def reportes_main(request):
 
 	return render(request, 'reportes/main.html', context)
 
-# @cache_page(300)
+@login_required
 def reporte_list(request):
     """
     Vista para listar reportes con filtros avanzados:
@@ -115,11 +117,13 @@ def reporte_list(request):
 
     return render(request, 'reportes/reporte_list.html', context)
 
+@login_required
 @cache_page(300)
 def reporte_detail(request, pk):
 	reporte = get_object_or_404(Reporte, pk=pk)
 	return render(request, 'reportes/reporte_detail.html', {'reporte': reporte})
 
+@login_required
 def reporte_create(request):
 	if request.method == 'POST':
 		# Procesar formulario
@@ -127,6 +131,7 @@ def reporte_create(request):
 		return redirect('reporte_list')
 	return render(request, 'reportes/reporte_form.html')
 
+@login_required
 def reporte_update(request, pk):
 	reporte = get_object_or_404(Reporte, pk=pk)
 	if request.method == 'POST':
@@ -135,6 +140,7 @@ def reporte_update(request, pk):
 		return redirect('reporte_detail', pk=reporte.pk)
 	return render(request, 'reportes/reporte_form.html', {'reporte': reporte})
 
+@login_required
 def reporte_delete(request, pk):
 	reporte = get_object_or_404(Reporte, pk=pk)
 	if request.method == 'POST':
@@ -142,6 +148,7 @@ def reporte_delete(request, pk):
 	return render(request, 'reportes/reporte_confirm_delete.html', {'reporte': reporte})
 
 
+@login_required
 def generar_reporte_diferencias(request):
     """
     Vista para generar reporte de diferencias entre Secretaría y ORGANIZACION
@@ -252,6 +259,7 @@ def _generar_y_registrar_diferencias_filtrado(diferencias_data, filtro_aplicado,
 
     return excel_response, pdf_response
 
+@login_required
 def exportar_diferencias_excel_view(request):
     """
     Vista para exportar diferencias directamente a Excel con múltiples hojas
@@ -262,6 +270,7 @@ def exportar_diferencias_excel_view(request):
     return excel_resp
 
 
+@login_required
 def exportar_diferencias_pdf_view(request):
     """
     Vista para exportar diferencias directamente a PDF con múltiples hojas
@@ -272,6 +281,7 @@ def exportar_diferencias_pdf_view(request):
     return pdf_resp
 
 
+@login_required
 def exportar_diferencias_excel_filtrado(request):
     """
     Vista para exportar diferencias a Excel con filtro aplicado
@@ -295,6 +305,7 @@ def exportar_diferencias_excel_filtrado(request):
     return redirect('reportes:generar_reporte_diferencias')
 
 
+@login_required
 def exportar_diferencias_pdf_filtrado(request):
     """
     Vista para exportar diferencias a PDF con filtro aplicado
@@ -320,6 +331,7 @@ def exportar_diferencias_pdf_filtrado(request):
 
 # ==================== VISTAS PARA REPORTES DE TOTALES DE APORTES ====================
 
+@login_required
 def reportes_aportes_totales_main(request):
     """
     Vista principal para reportes de totales de aportes.
@@ -349,6 +361,7 @@ def reportes_aportes_totales_main(request):
     return render(request, 'reportes/aportes_totales_main.html', context)
 
 
+@login_required
 def generar_reporte_aportes_totales(request):
     """
     Vista para generar reporte de totales de aportes.
@@ -401,6 +414,7 @@ def generar_reporte_aportes_totales(request):
     return redirect('reportes:reportes_aportes_totales_main')
 
 
+@login_required
 def detalle_reporte_aportes_totales(request, pk):
     """
     Vista para mostrar el detalle de un reporte de totales de aportes.
@@ -424,6 +438,7 @@ def detalle_reporte_aportes_totales(request, pk):
     return render(request, 'reportes/aportes_totales_detalle.html', context)
 
 
+@login_required
 def exportar_aportes_totales_excel(request, pk):
     """
     Vista para exportar reporte de totales de aportes a Excel.
@@ -439,6 +454,7 @@ def exportar_aportes_totales_excel(request, pk):
     return result
 
 
+@login_required
 def exportar_aportes_totales_pdf(request, pk):
     """
     Vista para exportar reporte de totales de aportes a PDF.
@@ -454,6 +470,7 @@ def exportar_aportes_totales_pdf(request, pk):
     return result
 
 
+@login_required
 def recalcular_reporte_aportes_totales(request, pk):
     """
     Vista para recalcular un reporte de totales de aportes.
@@ -472,6 +489,7 @@ def recalcular_reporte_aportes_totales(request, pk):
     return redirect('reportes:reportes_aportes_totales_main')
 
 
+@login_required
 def actualizar_sueldos_desde_aportes(request, pk):
     """
     Vista para actualizar sueldos basados en los aportes del reporte.

@@ -1,7 +1,9 @@
 
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 
+@login_required
 @cache_page(300)
 def core_main(request):
 	"""
@@ -14,6 +16,7 @@ from afiliados.models import Afiliado
 from liquidacion.models import Sueldo, Aporte
 from reportes.models import Reporte
 
+@login_required
 def home(request):
     """
     Vista principal del sistema SIGAA. Dashboard con acceso a todos los módulos.

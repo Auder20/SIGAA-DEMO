@@ -1,22 +1,27 @@
 
 
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import TablaSalarial, Bonificacion
 
+@login_required
 def tablas_main(request):
 	"""
 	Vista principal de tablas. Muestra enlaces a tablas salariales y bonificaciones.
 	"""
 	return render(request, 'tablas/main.html')
 
+@login_required
 def tabla_list(request):
 	tablas = TablaSalarial.objects.all()
 	return render(request, 'tablas/tabla_list.html', {'tablas': tablas})
 
+@login_required
 def tabla_detail(request, pk):
 	tabla = get_object_or_404(TablaSalarial, pk=pk)
 	return render(request, 'tablas/tabla_detail.html', {'tabla': tabla})
 
+@login_required
 def tabla_create(request):
 	if request.method == 'POST':
 		# Procesar formulario
@@ -24,6 +29,7 @@ def tabla_create(request):
 		return redirect('tabla_list')
 	return render(request, 'tablas/tabla_form.html')
 
+@login_required
 def tabla_update(request, pk):
 	tabla = get_object_or_404(TablaSalarial, pk=pk)
 	if request.method == 'POST':
@@ -32,6 +38,7 @@ def tabla_update(request, pk):
 		return redirect('tabla_detail', pk=tabla.pk)
 	return render(request, 'tablas/tabla_form.html', {'tabla': tabla})
 
+@login_required
 def tabla_delete(request, pk):
 	tabla = get_object_or_404(TablaSalarial, pk=pk)
 	if request.method == 'POST':
@@ -39,14 +46,17 @@ def tabla_delete(request, pk):
 		return redirect('tabla_list')
 	return render(request, 'tablas/tabla_confirm_delete.html', {'tabla': tabla})
 
+@login_required
 def bonificacion_list(request):
 	bonificaciones = Bonificacion.objects.all()
 	return render(request, 'tablas/bonificacion_list.html', {'bonificaciones': bonificaciones})
 
+@login_required
 def bonificacion_detail(request, pk):
 	bonificacion = get_object_or_404(Bonificacion, pk=pk)
 	return render(request, 'tablas/bonificacion_detail.html', {'bonificacion': bonificacion})
 
+@login_required
 def bonificacion_create(request):
 	if request.method == 'POST':
 		# Procesar formulario
@@ -54,6 +64,7 @@ def bonificacion_create(request):
 		return redirect('bonificacion_list')
 	return render(request, 'tablas/bonificacion_form.html')
 
+@login_required
 def bonificacion_update(request, pk):
 	bonificacion = get_object_or_404(Bonificacion, pk=pk)
 	if request.method == 'POST':
@@ -62,6 +73,7 @@ def bonificacion_update(request, pk):
 		return redirect('bonificacion_detail', pk=bonificacion.pk)
 	return render(request, 'tablas/bonificacion_form.html', {'bonificacion': bonificacion})
 
+@login_required
 def bonificacion_delete(request, pk):
 	bonificacion = get_object_or_404(Bonificacion, pk=pk)
 	if request.method == 'POST':

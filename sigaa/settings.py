@@ -12,9 +12,22 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Seguridad
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-demo-key-change-in-production")
-DEBUG = config("DEBUG", default=True, cast=bool)
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-demo-key-change-in-production-immediately")
+DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,app-sigaa-demo.onrender.com").split(",")
+
+# Seguridad en producción (solo activa cuando DEBUG=False)
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 año
+    SECURE_HSTS_PRELOAD = True
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = config("USE_SSL", default=False, cast=bool)
+    SESSION_COOKIE_SECURE = config("USE_SSL", default=False, cast=bool)
+    CSRF_COOKIE_SECURE = config("USE_SSL", default=False, cast=bool)
+    X_FRAME_OPTIONS = 'DENY'
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [

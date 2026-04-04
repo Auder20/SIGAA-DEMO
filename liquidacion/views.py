@@ -1,5 +1,6 @@
 # liquidacion/views.py
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_page
 from django.views.generic import ListView, View
 from django.utils.decorators import method_decorator
@@ -11,6 +12,7 @@ from django.db import transaction
 import json
 from .models import Sueldo, Aporte
 
+@login_required
 @cache_page(300)
 def liquidacion_main(request):
 	"""
