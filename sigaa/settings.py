@@ -12,7 +12,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Seguridad
-SECRET_KEY = config("SECRET_KEY", default="django-insecure-demo-key-change-in-production-immediately")
+SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,app-sigaa-demo.onrender.com").split(",")
 
